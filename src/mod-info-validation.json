@@ -1,0 +1,583 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+        "impl-arrows": {
+            "properties": {
+                "arrows": {
+                    "type": "boolean",
+                    "description": "Enable arrow controls for incrementing / decrementing the value.",
+                    "default": true
+                },
+                "arrow-step": {
+                    "type": "integer",
+                    "description": "How much the arrow controls should increment / decrement.",
+                    "default": 1
+                },
+                "big-arrows": {
+                    "type": "boolean",
+                    "description": "Enable arrow controls for larger increments / decrements of the value.",
+                    "default": false
+                },
+                "big-arrow-step": {
+                    "type": "integer",
+                    "description": "How much the big arrow controls should increment / decrement.",
+                    "default": 5
+                }
+            }
+        },
+        "impl-input": {
+            "properties": {
+                "input": {
+                    "type": "boolean",
+                    "description": "Enable input for typing in the value.",
+                    "default": true
+                }
+            }
+        },
+        "impl-slider-int": {
+            "properties": {
+                "slider": {
+                    "type": "boolean",
+                    "description": "Enable slider for adjusting the value.",
+                    "default": true
+                },
+                "slider-step": {
+                    "type": ["integer", "null"],
+                    "description": "The step size of the slider.",
+                    "default": null
+                }
+            }
+        },
+        "impl-slider-float": {
+            "properties": {
+                "slider": {
+                    "type": "boolean",
+                    "description": "Enable slider for adjusting the value.",
+                    "default": true
+                },
+                "slider-step": {
+                    "type": ["number", "null"],
+                    "description": "The step size of the slider.",
+                    "default": null
+                }
+            }
+        },
+        "impl-file-filters": {
+            "properties": {
+                "filters": {
+                    "type": "array",
+                    "description": "Filter options to show in the file pick dialog. The option \"All files (*.*)\" will always be included alongside these by default.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string",
+                                "description": "Filter description."
+                            },
+                            "files": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "File wildcard to match. Can be for example '*.gmd', '*.gmd2', or 'Steve.txt'",
+                                    "markdownDescription": "File wildcard to match. Can be for example `*.gmd`, `*.gmd2`, or `Steve.txt`"
+                                },
+                                "uniqueItems": true
+                            }
+                        },
+                        "unevaluatedProperties": false
+                    }
+                }
+            }
+        }
+    },
+    "properties": {
+        "geode": {
+            "type": "string",
+            "description": "Geode version to target.",
+            "pattern": "v?([0-9]+|\\*)(\\.([0-9]+|\\*)){0,2}"
+        },
+        "version": {
+            "type": "string",
+            "description": "Version of the mod.",
+            "pattern": "v?([0-9]+)(\\.([0-9]+)){0,2}"
+        },
+        "id": {
+            "type": "string",
+            "description": "ID of the mod. Recommended to be formatted as \"developer.mod-name\".",
+            "pattern": "[a-zA-Z0-9-_\\.]+"
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the mod. May be anything, but do note that GD usually has limits on what characters it can render."
+        },
+        "developer": {
+            "type": "string",
+            "description": "Name of the mod developer. If the mod has multiple developers, use a group name like \"Geode Team\""
+        },
+        "description": {
+            "type": "string",
+            "description": "Short, free-form description of the mod."
+        },
+        "repository": {
+            "type": "string",
+            "description": "URL of the mod's Git repository, or other equivalent homepage."
+        },
+        "dependencies": {
+            "type": [ "array", "null" ],
+            "description": "List of mods this mod depends on.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "ID of the dependency.",
+                        "pattern": "[a-zA-Z0-9-_\\.]+"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version of the dependency. May use wildcards (*) if a specific version is not required.",
+                        "pattern": "v?([0-9]+|\\*)(\\.([0-9]+|\\*)){0,2}"
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "description": "Whether the dependency is required in order to load this mod.",
+                        "default": true
+                    }
+                },
+                "required": [ "id", "version" ]
+            }
+        },
+        "binary": {
+            "type": [ "string", "object" ],
+            "description": "Name of the mod's binary file (DLL on Windows, Dylib on Mac, etc.). May either be a single string for all platforms, or may specify one for each platform separately.",
+            "deprecated": true,
+            "properties": {
+                "*": {
+                    "type": "string",
+                    "description": "Default binary name to use on all platforms."
+                },
+                "auto": {
+                    "type": "boolean",
+                    "description": "Whether to automatically append the platform-specific extension (.dll, .dylib, .so...) on the binary name if it's not specified.",
+                    "default": true
+                },
+                "windows": {
+                    "type": "string",
+                    "description": "Binary name to use on Windows. Note that you need to set \"binary.auto\" to false if the binary's extension is not .dll."
+                },
+                "macos": {
+                    "type": "string",
+                    "description": "Binary name to use on Mac. Note that you need to set \"binary.auto\" to false if the binary's extension is not .dylib."
+                },
+                "ios": {
+                    "type": "string",
+                    "description": "Binary name to use on iOS. Note that you need to set \"binary.auto\" to false if the binary's extension is not .dylib."
+                },
+                "android": {
+                    "type": "string",
+                    "description": "Binary name to use on Android. Note that you need to set \"binary.auto\" to false if the binary's extension is not .so."
+                }
+            }
+        },
+        "datastore": {
+            "type": [ "object", "null" ],
+            "description": "The mod's save data. May be anything."
+        },
+        "resources": {
+            "type": [ "object", "null" ],
+            "description": "The mod's resources. Used in conjuction with Geode CLI to automatically process & package resources for the mod.",
+            "properties": {
+                "fonts": {
+                    "type": [ "object", "null" ],
+                    "description": "Fonts to include with the mod. Provided format should be TTF / OTF. Fonts will be converted automatically into GD-compatible BM fonts by Geode CLI before packaging. List the names of the fonts as keys.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Path to the font's TTF / OTF file (relative to mod root folder)."
+                            },
+                            "size": {
+                                "type": "integer",
+                                "description": "Font size.",
+                                "minimum": 0
+                            },
+                            "charset": {
+                                "type": "string",
+                                "description": "List of characters to include in the generated BM font. Default is \"32-126,8226\"",
+                                "pattern": "[0-9]+(\\-[0-9]+)?(\\,([0-9]+(\\-[0-9]+)?))*",
+                                "default": "32-126,8226"
+                            },
+                            "outline": {
+                                "type": "integer",
+                                "description": "If specified, will generate a black outline of the provided size around the font's characters.",
+                                "minimum": 0
+                            }
+                        },
+                        "required": [ "path", "size" ]
+                    }
+                },
+                "files": {
+                    "type": [ "array", "null" ],
+                    "description": "Files to include with the mod. Things like sounds, binaries, etc.",
+                    "items": {
+                        "type": "string",
+                        "description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sounds/*.png\"."
+                    }
+                },
+                "sprites": {
+                    "type": [ "array", "null" ],
+                    "description": "Sprites to include with the mod. The sprites will automatically have UHD, HD and SD versions created of them.",
+                    "items": {
+                        "type": "string",
+                        "description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sprites/*.png\"."
+                    }
+                },
+                "spritesheets": {
+                    "type": [ "object", "null" ],
+                    "description": "The mod's sprite sheets. Sprite sheets are better optimized than using individual image files, so using them for the majority of the sprites in your mod is recommended. List the names of the mod's spritesheets as keys, and as their values a list of files to include in the sheet.",
+                    "additionalProperties": {
+                        "type": "array",
+                        "description": "A list of files to include in this spritesheet.",
+                        "items": {
+                            "type": "string",
+                            "description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sprites/*.png\"."
+                        }
+                    }
+                }
+            }
+        },
+        "settings": {
+            "type": "object",
+            "description": "The mod's settings. These are editable by the user in-game, and are referenced by their ID.",
+            "additionalProperties": {
+                "type": "object",
+                "description": "A setting. The key is the ID used to reference the setting in code.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "Type of the setting.",
+                        "enum": [
+                            "bool", "int", "float", "string",
+                            "rgb", "color", "rgba", "path", "file",
+                            "custom"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Human-readable name for the setting. Used in the UI. If not present, the ID of the setting will be used instead."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description for the setting."
+                    }
+                },
+                "oneOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "const": "int" }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": "integer",
+                                    "description": "Default value."
+                                },
+                                "min": {
+                                    "type": "integer",
+                                    "description": "Minimum value."
+                                },
+                                "max": {
+                                    "type": "integer",
+                                    "description": "Maximum value."
+                                },
+                                "one-of": {
+                                    "type": "array",
+                                    "description": "Setting value must be one of these.",
+                                    "items": {
+                                        "type": "integer"
+                                    },
+                                    "minItems": 1
+                                },
+                                "control": {
+                                    "type": "object",
+                                    "description": "Customize the UI for this setting.",
+                                    "allOf": [
+                                        { "$ref": "#/$defs/impl-arrows" },
+                                        { "$ref": "#/$defs/impl-slider-int" },
+                                        { "$ref": "#/$defs/impl-input" }
+                                    ],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "const": "float" }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": "number",
+                                    "description": "Default value."
+                                },
+                                "min": {
+                                    "type": "number",
+                                    "description": "Minimum value."
+                                },
+                                "max": {
+                                    "type": "number",
+                                    "description": "Maximum value."
+                                },
+                                "one-of": {
+                                    "type": "array",
+                                    "description": "Setting value must be one of these.",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 1
+                                },
+                                "control": {
+                                    "type": "object",
+                                    "description": "Customize the UI for this setting.",
+                                    "allOf": [
+                                        { "$ref": "#/$defs/impl-arrows" },
+                                        { "$ref": "#/$defs/impl-slider-float" },
+                                        { "$ref": "#/$defs/impl-input" }
+                                    ],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "const": "string" }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": "string",
+                                    "description": "Default value."
+                                },
+                                "match": {
+                                    "type": "string",
+                                    "description": "A regex the string must match."
+                                },
+                                "one-of": {
+                                    "type": "array",
+                                    "description": "Setting value must be one of these.",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minItems": 1
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "const": "bool" }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": "boolean",
+                                    "description": "Default value."
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "enum": ["color", "rgb"] }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": ["string", "array", "object"],
+                                    "description": "Default value.",
+                                    "pattern": "^#?[A-Z0-9a-z]{0,6}$",
+                                    "prefixItems": [
+                                        { "type": "integer", "minimum": 0, "maximum": 255 },
+                                        { "type": "integer", "minimum": 0, "maximum": 255 },
+                                        { "type": "integer", "minimum": 0, "maximum": 255 }
+                                    ],
+                                    "items": false,
+                                    "properties": {
+                                        "r": {
+                                            "type": "integer",
+                                            "description": "Red component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        },
+                                        "g": {
+                                            "type": "integer",
+                                            "description": "Green component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        },
+                                        "b": {
+                                            "type": "integer",
+                                            "description": "Blue component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        }
+                                    }
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "const": "rgba" }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": ["string", "array", "object"],
+                                    "description": "Default value.",
+                                    "pattern": "^#?[A-Z0-9a-z]{0,8}$",
+                                    "prefixItems": [
+                                        {
+                                            "type": "integer",
+                                            "description": "Red component of the color.",
+                                            "minimum": 0, "maximum": 255
+                                        },
+                                        {
+                                            "type": "integer",
+                                            "description": "Green component of the color.",
+                                            "minimum": 0, "maximum": 255
+                                        },
+                                        {
+                                            "type": "integer",
+                                            "description": "Blue component of the color.",
+                                            "minimum": 0, "maximum": 255 
+                                        },
+                                        {
+                                            "type": "integer",
+                                            "description": "Alpha component of the color.",
+                                            "minimum": 0, "maximum": 255
+                                        }
+                                    ],
+                                    "items": false,
+                                    "properties": {
+                                        "r": {
+                                            "type": "integer",
+                                            "description": "Red component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        },
+                                        "g": {
+                                            "type": "integer",
+                                            "description": "Green component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        },
+                                        "b": {
+                                            "type": "integer",
+                                            "description": "Blue component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        },
+                                        "a": {
+                                            "type": "integer",
+                                            "description": "Alpha component of the color.",
+                                            "minimum": 0,
+                                            "maximum": 255
+                                        }
+                                    }
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "type": { "enum": ["path", "file"] }
+                            },
+                            "required": ["type"]
+                        },
+                        "then": {
+                            "properties": {
+                                "default": {
+                                    "type": "string",
+                                    "description": "Default value."
+                                },
+                                "control": {
+                                    "type": "object",
+                                    "description": "Customize the UI for this setting.",
+                                    "allOf": [
+                                        { "$ref": "#/$defs/impl-file-filters" }
+                                    ],
+                                    "unevaluatedProperties": false
+                                }
+                            },
+                            "required": ["default"]
+                        },
+                        "else": false
+                    }
+                ],
+                "unevaluatedProperties": false,
+                "required": [ "type", "default" ]
+            }
+        },
+        "issues": {
+            "type": "object",
+            "description": "Info about where and how to report bugs and other issues regarding the mod.",
+            "properties": {
+                "info": {
+                    "type": "string",
+                    "description": "Free-form info about where and how to report issues. Supports markdown."
+                },
+                "url": {
+                    "type": "string",
+                    "description": "URL to open for posting issues. Usually the GitHub issues page."
+                }
+            }
+        },
+        "toggleable": {
+            "type": "boolean",
+            "description": "Whether the mod can be disabled at runtime or not.",
+            "default": true
+        },
+        "unloadable": {
+            "type": "boolean",
+            "description": "Whether the mod can be safely unloaded at runtime or not.",
+            "default": false
+        }
+    },
+    "additionalProperties": false,
+    "required": [ "geode", "version", "id", "name", "developer" ]
+}

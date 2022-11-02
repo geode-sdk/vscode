@@ -1,0 +1,160 @@
+
+import { execSync } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+import { ConfigurationTarget } from 'vscode';
+import { getExtConfig, getOutputChannel } from '../config';
+import { Option, None, Some, Result, Future, Err, Ok } from '../utils/monads';
+import * as semver from 'semver';
+
+export namespace cli {
+    export const MINIMUM_CLI_VERSION = 'v1.1.0';
+    let INSTALLED_VERSION: string;
+    let CONFIG: Config;
+
+    export interface Profile {
+        name: string,
+        gdPath: string,
+    }
+
+    export interface Config {
+        currentProfile: string,
+        profiles: Profile[],
+        defaultDeveloper?: string,
+        sdkNightly?: boolean,
+    }
+
+    function cliPlatformName(): string {
+        if (process.platform === "win32") {
+            return "geode.exe";
+        } else {
+            return "geode";
+        }
+    }
+
+    function configPlatformPath(): string {
+        if (process.platform === "win32") {
+            return join(process.env['LOCALAPPDATA'] as string, 'Geode');
+        } else {
+            return '/Users/Shared/Geode';
+        }
+    }
+
+    function autoDetectCLI(): Option<string> {
+        const PATH = process.env['PATH'];
+        if (!PATH) {
+            return None;
+        }
+        for (let path of PATH.split(';')) {
+            const cliPath = join(path, cliPlatformName());
+            if (existsSync(cliPath)) {
+                return Some(cliPath);
+            }
+        }
+        return None;
+    }
+
+    function verifyVersion(): Result<undefined, string> {
+        const versionRes = runCLICmd('--version');
+        if (versionRes.isError()) {
+            getOutputChannel().appendLine(`Error ${versionRes.unwrapErr()}`);
+            return Err(versionRes.unwrapErr());
+        }
+        const version = semver.clean(versionRes.unwrap().replace('geode', '')) ?? '';
+        if (!semver.gte(version, MINIMUM_CLI_VERSION)) {
+            return Err(
+                `CLI Version '${version}' is too old, ` + 
+                `Geode extension requires at least '${MINIMUM_CLI_VERSION}'`
+            );
+        }
+        INSTALLED_VERSION = version;
+
+        return Ok();
+    }
+
+    function loadConfig(): Result<undefined, string> {
+        const configFile = join(configPlatformPath(), 'config.json');
+        if (!existsSync(configFile)) {
+            return Err('Unable to find CLI config.json!');
+        }
+        CONFIG = JSON.parse(readFileSync(configFile).toString(), (key, value) => {
+            if (value && typeof value === 'object') {
+                for (const k in value) {
+                    const camelKey = k.replace(/-./g, c => c.toUpperCase().substring(1));
+                    if (camelKey !== k) {
+                        value[camelKey] = value[k];
+                        delete value[k];
+                    }
+                }
+            }
+            return value;
+        });
+        return Ok();
+    }
+
+    export function getConfig(): Config {
+        return CONFIG;
+    }
+
+    export function getCurrentProfile(): Option<Profile> {
+        return Some(CONFIG.profiles.find(
+            p => p.name === CONFIG.currentProfile
+        ));
+    }
+
+    export function getVersion(): string {
+        return INSTALLED_VERSION;
+    }
+
+    export function runCLICmd(cmd: string): Result<string, string> {
+        try {
+            return Ok(execSync(`${getCLIPath()} ${cmd}`, { encoding: 'utf-8' }));
+        } catch(e) {
+            return Err((e as Error).message);
+        }
+    }
+
+    export function hasCLI(): boolean {
+        const path = getExtConfig().get<string>('geodeCliPath');
+        return path ? existsSync(path) : false;
+    }
+
+    export function getCLIPath(): string {
+        return getExtConfig().get<string>('geodeCliPath', ) ?? '';
+    }
+
+    export async function setup(): Future<undefined, string> {
+        // auto-find Geode CLI
+        if (!hasCLI()) {
+            getOutputChannel().appendLine('Detecting CLI path');
+            const path = autoDetectCLI();
+            if (path.isSome()) {
+                await getExtConfig().update(
+                    'geodeCliPath', path.unwrap(),
+                    ConfigurationTarget.Global
+                );
+            } else {
+                return Err(
+                    'Unable to automatically detect Geode CLI path! ' + 
+                    'Please set the path in Geode settings.'
+                );
+            }
+        }
+
+        const verify = verifyVersion();
+        if (verify.isError()) {
+            return verify;
+        }
+
+        const conf = loadConfig();
+        if (conf.isError()) {
+            return conf;
+        }
+
+        getOutputChannel().appendLine(
+            `Found CLI: ${getExtConfig().get('geodeCliPath')} v${INSTALLED_VERSION}`
+        );
+
+        return Ok();
+    }
+}
