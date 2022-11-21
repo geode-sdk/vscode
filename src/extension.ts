@@ -1,7 +1,8 @@
 
-import { window, ExtensionContext, commands } from 'vscode';
-import { setupConfig } from './config';
+import { window, ExtensionContext, commands, SnippetString } from 'vscode';
+import { loadData, saveData, setupConfig } from './config';
 import * as geode from './geode/geode';
+import { browser } from './browser/browser';
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel('Geode');
@@ -9,9 +10,26 @@ export async function activate(context: ExtensionContext) {
 	// store globals
 	setupConfig(context, channel);
 
+	// load save data
+	const res0 = loadData();
+	if (res0.isError()) {
+		window.showErrorMessage(
+			`Geode: Unable to load Geode extension data: ${res0.unwrapErr()}`
+		);
+	}
+
 	// setup geode
 	const res = await geode.setup();
 	if (res.isError()) {
+		window.showErrorMessage(
+			`Geode: Unable to setup Geode extension: ${res.unwrapErr()}`
+		);
+		return;
+	}
+
+	// setup sprite browser
+	const res2 = browser.setup();
+	if (res2.isError()) {
 		window.showErrorMessage(
 			`Geode: Unable to setup Geode extension: ${res.unwrapErr()}`
 		);
@@ -26,6 +44,22 @@ export async function activate(context: ExtensionContext) {
 			window.showErrorMessage(`Unable to launch GD: ${res.unwrapErr()}`);
 		}
 	}));
+
+	context.subscriptions.push(commands.registerCommand('geode.openSpriteBrowser', async () => {
+		browser.open();
+	}));
+
+	context.subscriptions.push(commands.registerCommand('what', async () => {
+		window.activeTextEditor?.insertSnippet(new SnippetString('what'));
+	}));
 }
 
-export async function deactivate() {}
+export async function deactivate() {
+	// save extension data
+	const res0 = saveData();
+	if (res0.isError()) {
+		window.showErrorMessage(
+			`Geode: Unable to save Geode extension data: ${res0.unwrapErr()}`
+		);
+	}
+}

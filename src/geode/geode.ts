@@ -7,7 +7,7 @@ import { cli } from './cli';
 import { sdk } from './sdk';
 import { Future, Err, Ok } from '../utils/monads';
 
-export async function setup(): Future<undefined, string> {
+export async function setup(): Future {
     // auto-find Geode CLI
     const cliRes = await cli.setup();
     if (cliRes.isError()) {

@@ -54,7 +54,7 @@ export namespace cli {
         return None;
     }
 
-    function verifyVersion(): Result<undefined, string> {
+    function verifyVersion(): Result {
         const versionRes = runCLICmd('--version');
         if (versionRes.isError()) {
             getOutputChannel().appendLine(`Error ${versionRes.unwrapErr()}`);
@@ -72,12 +72,12 @@ export namespace cli {
         return Ok();
     }
 
-    function loadConfig(): Result<undefined, string> {
+    function loadConfig(): Result {
         const configFile = join(configPlatformPath(), 'config.json');
         if (!existsSync(configFile)) {
             return Err('Unable to find CLI config.json!');
         }
-        CONFIG = JSON.parse(readFileSync(configFile).toString(), (key, value) => {
+        CONFIG = JSON.parse(readFileSync(configFile).toString(), (_, value) => {
             if (value && typeof value === 'object') {
                 for (const k in value) {
                     const camelKey = k.replace(/-./g, c => c.toUpperCase().substring(1));
@@ -106,7 +106,7 @@ export namespace cli {
         return INSTALLED_VERSION;
     }
 
-    export function runCLICmd(cmd: string): Result<string, string> {
+    export function runCLICmd(cmd: string): Result<string> {
         try {
             return Ok(execSync(`${getCLIPath()} ${cmd}`, { encoding: 'utf-8' }));
         } catch(e) {
@@ -123,14 +123,14 @@ export namespace cli {
         return getExtConfig().get<string>('geodeCliPath', ) ?? '';
     }
 
-    export async function setup(): Future<undefined, string> {
+    export async function setup(): Future {
         // auto-find Geode CLI
         if (!hasCLI()) {
             getOutputChannel().appendLine('Detecting CLI path');
             const path = autoDetectCLI();
-            if (path.isSome()) {
+            if (path) {
                 await getExtConfig().update(
-                    'geodeCliPath', path.unwrap(),
+                    'geodeCliPath', path,
                     ConfigurationTarget.Global
                 );
             } else {

@@ -1,90 +1,91 @@
 
-export class Option<T> {
-    value: T | undefined;
+export type Option<T> = T | undefined;
 
-    constructor(value: T | undefined) {
-        this.value = value;
-    }
-
-    unwrap(): T | never {
-        if (!this.value) {
-            throw new ReferenceError('unwrap() called on a None Option');
-        }
-        return this.value;
-    }
-    unwrapOr(value: T): T {
-        return this.value ?? value;
-    }
-    isSome(): boolean {
-        return this.value !== undefined;
-    }
-    isNone(): boolean {
-        return this.value === undefined;
-    }
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export function Some<T>(value: T): Option<T> {
+    return value;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Some<T>(value: T | undefined): Option<T> {
-    return new Option<T>(value);
-}
+export const None = undefined;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const None = new Option<any>(undefined);
-
-export class Result<T, E> {
-    private isValue_: boolean;
-    private value: T | E;
+export class Result<T = undefined, E = string> {
+    #isValue: boolean;
+    #value: T | E;
 
     private constructor(value: T | E, isValue: boolean) {
-        this.isValue_ = isValue;
-        this.value = value;
+        this.#isValue = isValue;
+        this.#value = value;
     }
 
     static ok<T>(value: T) {
-        return new Result<T, any>(value, true);
+        return new Result<T, never>(value, true);
     }
 
     static err<E>(error: E) {
-        return new Result<any, E>(error, false);
+        return new Result<never, E>(error, false);
     }
 
     unwrap(): T | never {
-        if (!this.isValue) {
+        if (!this.#isValue) {
             throw new ReferenceError('unwrap() called on an Err Result');
         }
-        return this.value as T;
+        return this.#value as T;
     }
 
     unwrapErr(): E | never {
-        if (this.isValue_) {
+        if (this.#isValue) {
             throw new ReferenceError('unwrapErr() called on an Ok Result');
         }
-        return this.value as E;
+        return this.#value as E;
+    }
+
+    try(): T | never {
+        if (!this.#isValue) {
+            throw new ReferenceError((this.#value as E extends string ? E : never));
+        }
+        return this.#value as T;
     }
 
     isValue(): boolean {
-        return this.isValue_;
+        return this.#isValue;
     }
 
     isError(): boolean {
-        return !this.isValue_;
+        return !this.#isValue;
+    }
+
+    map<T2>(mapper: (value: T) => T2): Result<T2, E> {
+        if (this.#isValue) {
+            return Result.ok(mapper(this.#value as T));
+        } else {
+            return this as unknown as Result<T2, E>;
+        }
+    }
+
+    async awaitMap<T2, P extends Promise<T2>>(mapper: (value: T) => P): Future<T2, E> {
+        if (this.#isValue) {
+            return Result.ok(await mapper(this.#value as T));
+        } else {
+            return this as unknown as Result<T2, E>;
+        }
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Ok<T>(value: T): Result<T, any>;
+export function Ok<T>(value: T): Result<T, never>;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Ok(): Result<undefined, any>;
+export function Ok(): Result<undefined, never>;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Ok(...args: any[]): Result<any, any> {
+export function Ok<T>(...args: T[]): Result<T, never> {
     return Result.ok(args[0]);
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function Err<E>(error: E): Result<any, E> {
+export function Err<E>(error: E): Result<never, E> {
     return Result.err(error);
 }
 
-export type Future<T, E> = Promise<Result<T, E>>;
+export type Future<T = undefined, E = string> = Promise<Result<T, E>>;

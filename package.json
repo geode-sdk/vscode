@@ -6,20 +6,41 @@
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
+  	"author": {
+  	  	"name": "Geode Team",
+  	  	"url": "https://github.com/geode-sdk"
+  	},
+  	"publisher": "geode-sdk",
   	"categories": [
   	  	"Other"
   	],
+  	"repository": {
+  	  	"url": "https://github.com/geode-sdk/vscode"
+  	},
   	"activationEvents": [
+  	  	"onCommand:geode.launchGD",
+  	  	"onCommand:geode.openSpriteBrowser",
+  	  	"onLanguage:cpp",
   	  	"*"
   	],
   	"main": "./dist/extension.js",
   	"contributes": {
   	  	"commands": [
-			{
-				"title": "Geode: Launch Geometry Dash",
-				"command": "geode.launchGD"
-			}
-		],
+  	  	  	{
+  	  	  	  	"title": "Geode: Launch Geometry Dash",
+  	  	  	  	"command": "geode.launchGD"
+  	  	  	},
+  	  	  	{
+  	  	  	  	"title": "Geode: Open Sprite Browser",
+  	  	  	  	"command": "geode.openSpriteBrowser"
+  	  	  	}
+  	  	],
+  	  	"keybindings": [
+  	  	  	{
+  	  	  	  	"command": "geode.openSpriteBrowser",
+  	  	  	  	"key": "Ctrl+Alt+B"
+  	  	  	}
+  	  	],
   	  	"configuration": {
   	  	  	"title": "Geode",
   	  	  	"properties": {
@@ -32,16 +53,37 @@
   	  	  	  	  	"type": "string",
   	  	  	  	  	"default": "",
   	  	  	  	  	"description": "Path to the Geode SDK"
+  	  	  	  	},
+  	  	  	  	"geode.textureQuality": {
+  	  	  	  	  	"type": "string",
+  	  	  	  	  	"enum": [
+  	  	  	  	  	  	"High",
+  	  	  	  	  	  	"Medium",
+  	  	  	  	  	  	"Low"
+  	  	  	  	  	],
+  	  	  	  	  	"default": "Medium",
+  	  	  	  	  	"description": "Quality of the graphics to show on the Sprite Browser"
+  	  	  	  	},
+  	  	  	  	"geode.defaultSpriteShowCount": {
+  	  	  	  	  	"type": "integer",
+  	  	  	  	  	"default": 350,
+  	  	  	  	  	"description": "How many items to show in the Sprite Browser at once by default"
+  	  	  	  	},
+  	  	  	  	"geode.showCountIncrement": {
+  	  	  	  	  	"type": "integer",
+  	  	  	  	  	"default": 250,
+  	  	  	  	  	"description": "How many items to add in the Sprite Browser when you click 'Load More'"
   	  	  	  	}
   	  	  	}
   	  	},
   	  	"jsonValidation": [
   	  	  	{
   	  	  	  	"fileMatch": "mod.json",
-  	  	  	  	"url": "./src/mod-info-validation.json"
+  	  	  	  	"url": "./assets/mod-info-validation.json"
   	  	  	}
   	  	]
   	},
+  	"icon": "./assets/geode-circle-no-gradient.png",
   	"scripts": {
   	  	"vscode:prepublish": "npm run package",
   	  	"compile": "webpack",
@@ -53,10 +95,14 @@
   	  	"lint": "eslint src --ext ts"
   	},
   	"devDependencies": {
+  	  	"@types/camelcase": "^5.2.0",
   	  	"@types/glob": "^7.2.0",
   	  	"@types/mocha": "^9.1.1",
   	  	"@types/node": "16.x",
+  	  	"@types/object-hash": "^2.2.1",
+  	  	"@types/plist": "^3.0.2",
   	  	"@types/semver": "^7.3.13",
+  	  	"@types/sharp": "^0.31.0",
   	  	"@types/vscode": "^1.72.0",
   	  	"@typescript-eslint/eslint-plugin": "^5.27.0",
   	  	"@typescript-eslint/parser": "^5.27.0",
@@ -70,6 +116,12 @@
   	  	"webpack-cli": "^4.9.2"
   	},
   	"dependencies": {
-  	  	"semver": "^7.3.8"
+  	  	"@vscode/codicons": "^0.0.32",
+  	  	"@vscode/webview-ui-toolkit": "^1.1.0",
+  	  	"camelcase": "^7.0.0",
+  	  	"object-hash": "^3.0.0",
+  	  	"plist": "^3.0.6",
+  	  	"semver": "^7.3.8",
+  	  	"sharp": "^0.31.2"
   	}
 }

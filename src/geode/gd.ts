@@ -29,11 +29,11 @@ export namespace gd {
         return exes;
     }
 
-    export async function launchGD(): Future<undefined, string> {
-        if (cli.getCurrentProfile().isNone()) {
+    export async function launchGD(): Future {
+        const profile = cli.getCurrentProfile();
+        if (!profile) {
             return Err('No profile selected!');
         }
-        const profile = cli.getCurrentProfile().unwrap();
         const exes = findExecutablesInDir(profile.gdPath);
         if (!exes.length) {
             return Err(

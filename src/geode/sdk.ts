@@ -14,7 +14,7 @@ export namespace sdk {
         return Some(process.env['GEODE_SDK']);
     }
 
-    function verifyVersion(): Result<undefined, string> {
+    function verifyVersion(): Result {
         try {
             const sdkVersion = readFileSync(join(getSDKPath(), 'VERSION')).toString();
             if (!semver.gte(sdkVersion, MINIMUM_SDK_VERSION)) {
@@ -44,14 +44,14 @@ export namespace sdk {
         return getExtConfig().get<string>('geodeSdkPath', ) ?? '';
     }
 
-    export async function setup(): Future<undefined, string> {
+    export async function setup(): Future {
         if (!hasSDK()) {
             getOutputChannel().appendLine('Detecting SDK path');
             const path = autoDetectSDK();
-            if (path.isSome()) {
-                getOutputChannel().appendLine(`Found SDK: ${path.unwrap()}`);
+            if (path) {
+                getOutputChannel().appendLine(`Found SDK: ${path}`);
                 await getExtConfig().update(
-                    'geodeSdkPath', path.unwrap(),
+                    'geodeSdkPath', path,
                     ConfigurationTarget.Global
                 );
             } else {
