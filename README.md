@@ -8,9 +8,9 @@ This is a rewrite of the previous `geode-support` extension.
 
  * Launch GD (`Geode: Launch Geometry Dash` command).
  * Validation for `mod.json`
+ * Sprite browser (Use the `Ctrl + Alt + B` shortcut to launch, or `Geode: Open Sprite Browser`)
 
 ## To-do
 
- * Sprite browser
  * Generate classes
  * Possibly some sort of Clippy feature?
