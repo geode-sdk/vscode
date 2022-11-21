@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.0.0",
+  	"version": "1.0.1",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
@@ -20,7 +20,8 @@
   	"activationEvents": [
   	  	"onCommand:geode.launchGD",
   	  	"onCommand:geode.openSpriteBrowser",
-  	  	"onLanguage:cpp"
+  	  	"onLanguage:cpp",
+		"workspaceContains:**/mod.json"
   	],
   	"main": "./dist/extension.js",
   	"contributes": {

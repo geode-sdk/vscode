@@ -1,8 +1,10 @@
 # Geode for VS Code
 
-Support for the [Geode](https://geode-sdk.github.io/docs/) [Geometry Dash](https://store.steampowered.com/app/322170/Geometry_Dash/) modding framework.
+Support for [Geode](https://geode-sdk.github.io/docs/), the [Geometry Dash](https://store.steampowered.com/app/322170/Geometry_Dash/) modding framework. Features useful utilities for developing Geometry Dash mods.
 
-This is a rewrite of the previous `geode-support` extension.
+Requires the [Geode SDK](https://github.com/geode-sdk/geode) and [Geode CLI](https://github.com/geode-sdk/cli) to be installed.
+
+This is a rewrite and enhancement of the previous `geode-support` extension, which was never released due to development issues.
 
 ## Features
 
@@ -13,4 +15,5 @@ This is a rewrite of the previous `geode-support` extension.
 ## To-do
 
  * Generate classes
- * Possibly some sort of Clippy feature?
+ * UI designer
+ * Possibly some sort of Clippy feature? (Linter)
