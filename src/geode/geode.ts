@@ -1,6 +1,7 @@
 
 export * from './cli';
 export * from './sdk';
+export * from './ipc';
 export * from './gd';
 
 import { cli } from './cli';

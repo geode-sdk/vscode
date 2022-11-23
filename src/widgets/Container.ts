@@ -1,5 +1,5 @@
 
-import { Widget, ScriptPackage, AttrMode } from "./Widget";
+import { Widget, ScriptPackage, AttrMode, WidgetProps } from "./Widget";
 
 export enum Alignment {
     start,
@@ -20,6 +20,30 @@ export class Div extends Widget {
     static scripts: ScriptPackage = {
         id: 'Div',
     };
+
+    build(): string {
+        return /*html*/ `
+            <div ${this.buildAttrs()}>
+                ${super.build()}
+            </div>
+        `;
+    }
+}
+
+export class PaddedDiv extends Widget {
+    static scripts: ScriptPackage = {
+        id: 'PaddedDiv',
+        css: /*css*/ `
+            .padded-div {
+                padding: 1rem;
+            }
+        `
+    };
+
+    constructor(props?: WidgetProps) {
+        super(props);
+        this.attr('class', 'padded-div', AttrMode.add);
+    }
 
     build(): string {
         return /*html*/ `

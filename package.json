@@ -20,9 +20,14 @@
   	"activationEvents": [
   	  	"onCommand:geode.launchGD",
   	  	"onCommand:geode.openSpriteBrowser",
+  	  	"onCommand:geode.openDevTools",
   	  	"onLanguage:cpp",
 		"workspaceContains:**/mod.json"
   	],
+	"galleryBanner": {
+		"theme": "dark",
+		"color": "#24222B"
+	},
   	"main": "./dist/extension.js",
   	"contributes": {
   	  	"commands": [
@@ -33,7 +38,11 @@
   	  	  	{
   	  	  	  	"title": "Geode: Open Sprite Browser",
   	  	  	  	"command": "geode.openSpriteBrowser"
-  	  	  	}
+  	  	  	},
+			{
+				"title": "Geode: Open Dev Tools",
+				"command": "geode.openDevTools"
+			}
   	  	],
   	  	"keybindings": [
   	  	  	{

@@ -1,25 +1,27 @@
 
-import { Widget, ScriptPackage } from "./Widget";
+import { Widget, ScriptPackage, WidgetProps } from "./Widget";
 import { sha1 } from 'object-hash';
 
 export class Head extends Widget {
     #text: string;
+    #size: number;
 
     static scripts: ScriptPackage = {
         id: 'Head'
     };
     
-    constructor(text: string) {
+    constructor(text: string, size?: 1 | 2 | 3 | 4 | 5 | 6) {
         super();
         this.#text = text;
+        this.#size = size ?? 1;
     }
 
     build(): string {
         return /*html*/ `
-            <h1 ${this.buildAttrs()}>
+            <h${this.#size} ${this.buildAttrs()}>
                 ${this.#text}
                 ${super.build()}
-            </h1>
+            </h${this.#size}>
         `;
     }
 }
@@ -132,6 +134,24 @@ export class Image extends Widget {
     }
 }
 
+export class Separator extends Widget {
+    static scripts: ScriptPackage = {
+        id: 'Separator',
+    };
+
+    constructor(props?: WidgetProps) {
+        super(props);
+    }
+
+    build(): string {
+        return /*html*/ `
+            <hr ${this.buildAttrs()}>
+                ${super.build()}
+            </hr>
+        `;
+    }
+}
+
 export class Spacer extends Widget {
     static scripts: ScriptPackage = {
         id: 'Spacer',
@@ -194,6 +214,64 @@ export class Badge extends Widget {
                 ${this.#count}
                 ${super.build()}
             </vscode-badge>
+        `;
+    }
+}
+
+export class DataGridCell extends Widget {
+    #text: string;
+
+    static scripts: ScriptPackage = {
+        id: 'DataGridCell',
+    };
+
+    constructor(text: string, props?: WidgetProps) {
+        super(props);
+        this.#text = text;
+    }
+
+    build(): string {
+        return /*html*/ `
+            <vscode-data-grid-cell ${this.buildAttrs()}>
+                ${this.#text}
+                ${super.build()}
+            </vscode-data-grid-cell>
+        `;
+    }
+}
+
+export class DataGridRow extends Widget {
+    static scripts: ScriptPackage = {
+        id: 'DataGridRow',
+    };
+
+    constructor(props?: WidgetProps) {
+        super(props);
+    }
+
+    build(): string {
+        return /*html*/ `
+            <vscode-data-grid-row ${this.buildAttrs()}>
+                ${super.build()}
+            </vscode-data-grid-row>
+        `;
+    }
+}
+
+export class DataGrid extends Widget {
+    static scripts: ScriptPackage = {
+        id: 'DataGrid',
+    };
+
+    constructor(props?: WidgetProps) {
+        super(props);
+    }
+
+    build(): string {
+        return /*html*/ `
+            <vscode-data-grid ${this.buildAttrs()}>
+                ${super.build()}
+            </vscode-data-grid>
         `;
     }
 }

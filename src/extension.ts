@@ -3,6 +3,7 @@ import { window, ExtensionContext, commands, SnippetString } from 'vscode';
 import { loadData, saveData, setupConfig } from './config';
 import * as geode from './geode/geode';
 import { browser } from './browser/browser';
+import { DevToolsPanel } from './devtools/DevToolsPanel';
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel('Geode');
@@ -49,8 +50,8 @@ export async function activate(context: ExtensionContext) {
 		browser.open();
 	}));
 
-	context.subscriptions.push(commands.registerCommand('what', async () => {
-		window.activeTextEditor?.insertSnippet(new SnippetString('what'));
+	context.subscriptions.push(commands.registerCommand('geode.openDevTools', async () => {
+		DevToolsPanel.show();
 	}));
 }
 

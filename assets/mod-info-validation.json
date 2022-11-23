@@ -181,7 +181,8 @@
         },
         "datastore": {
             "type": [ "object", "null" ],
-            "description": "The mod's save data. May be anything."
+            "description": "The mod's save data. May be anything.",
+            "deprecated": true
         },
         "resources": {
             "type": [ "object", "null" ],
@@ -447,7 +448,8 @@
                                             "minimum": 0,
                                             "maximum": 255
                                         }
-                                    }
+                                    },
+                                    "required": ["r", "g", "b"]
                                 }
                             },
                             "required": ["default"]
@@ -515,7 +517,8 @@
                                             "minimum": 0,
                                             "maximum": 255
                                         }
-                                    }
+                                    },
+                                    "required": ["r", "g", "b", "a"]
                                 }
                             },
                             "required": ["default"]
@@ -565,7 +568,8 @@
                     "type": "string",
                     "description": "URL to open for posting issues. Usually the GitHub issues page."
                 }
-            }
+            },
+            "required": ["info"]
         },
         "toggleable": {
             "type": "boolean",

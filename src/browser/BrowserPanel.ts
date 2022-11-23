@@ -278,8 +278,6 @@ export class ItemWidget extends Widget {
 
 export class BrowserPanel extends Panel {
     static #current?: BrowserPanel;
-    // can't access real private members through base class, so making this 
-    // #statsLabel would make it not work in init
     #content: Grid;
     #source: Select;
     #collection: Tabs;
