@@ -7,7 +7,7 @@ import { Option, Some, Result, Future, Err, Ok } from '../utils/monads';
 import * as semver from 'semver';
 
 export namespace sdk {
-    export const MINIMUM_SDK_VERSION = 'v0.6.0';
+    export const MINIMUM_SDK_VERSION = 'v1.0.0-beta.5';
     let INSTALLED_VERSION: string;
 
     function autoDetectSDK(): Option<string> {
@@ -25,7 +25,10 @@ export namespace sdk {
             }
             INSTALLED_VERSION = sdkVersion;
         } catch(e) {
-            return Err(`Unable to query SDK version: ${(e as Error)}`);
+            return Err(
+                `Unable to query SDK version: ${(e as Error)}. ` + 
+                'Try manually specifying SDK path in extension settings'
+            );
         }
 
         return Ok();

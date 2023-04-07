@@ -8,7 +8,7 @@ import { Option, None, Some, Result, Future, Err, Ok } from '../utils/monads';
 import * as semver from 'semver';
 
 export namespace cli {
-    export const MINIMUM_CLI_VERSION = 'v1.1.0';
+    export const MINIMUM_CLI_VERSION = 'v2.2.0';
     let INSTALLED_VERSION: string;
     let CONFIG: Config;
 
