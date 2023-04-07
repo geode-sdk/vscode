@@ -208,6 +208,11 @@ export class Badge extends Widget {
         return this.#count;
     }
 
+    setCount(count: number) {
+        this.#count = count;
+        this.rebuild();
+    }
+
     build(): string {
         return /*html*/ `
             <vscode-badge ${this.buildAttrs()}>

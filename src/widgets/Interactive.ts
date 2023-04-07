@@ -406,6 +406,7 @@ export class Input extends Widget {
         this.addHandlerClass('input');
         this.addHandler('input-{id}', (_, args) => {
             this.#value = args.value;
+            this.attr('value', args.value);
             if (onChange) {
                 onChange(this, args.value);
             }
@@ -414,6 +415,11 @@ export class Input extends Widget {
 
     getValue(): Option<string> {
         return this.#value;
+    }
+
+    setLabel(value: string) {
+        this.#label = value;
+        this.rebuild();
     }
 
     build(): string {

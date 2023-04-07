@@ -22,12 +22,12 @@
   	  	"onCommand:geode.openSpriteBrowser",
   	  	"onCommand:geode.openDevTools",
   	  	"onLanguage:cpp",
-		"workspaceContains:**/mod.json"
+  	  	"workspaceContains:**/mod.json"
   	],
-	"galleryBanner": {
-		"theme": "dark",
-		"color": "#24222B"
-	},
+  	"galleryBanner": {
+  	  	"theme": "dark",
+  	  	"color": "#24222B"
+  	},
   	"main": "./dist/extension.js",
   	"contributes": {
   	  	"commands": [
@@ -39,10 +39,10 @@
   	  	  	  	"title": "Geode: Open Sprite Browser",
   	  	  	  	"command": "geode.openSpriteBrowser"
   	  	  	},
-			{
-				"title": "Geode: Open Dev Tools",
-				"command": "geode.openDevTools"
-			}
+  	  	  	{
+  	  	  	  	"title": "Geode: Open Dev Tools",
+  	  	  	  	"command": "geode.openDevTools"
+  	  	  	}
   	  	],
   	  	"keybindings": [
   	  	  	{
@@ -128,6 +128,7 @@
   	  	"@vscode/codicons": "^0.0.32",
   	  	"@vscode/webview-ui-toolkit": "^1.1.0",
   	  	"camelcase": "^7.0.0",
+  	  	"fuse.js": "^6.6.2",
   	  	"object-hash": "^3.0.0",
   	  	"plist": "^3.0.6",
   	  	"semver": "^7.3.8",

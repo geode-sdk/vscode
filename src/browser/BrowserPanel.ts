@@ -12,6 +12,7 @@ import { browser } from "./browser";
 import { fetchItemImage, getSnippetOptions, Item, ItemType, itemTypeID, SheetItem, sourceID, useItem } from "./item";
 import { insertSnippet } from "../project/source";
 import { env } from "vscode";
+import Fuse from "fuse.js";
 
 export class ItemWidget extends Widget {
     #item: Item<ItemType>;
@@ -284,6 +285,7 @@ export class BrowserPanel extends Panel {
     #sorting: Select;
     #quality: Select;
     #search: Input;
+    #searchResults?: Text;
     #contentObserver: scripts.Observer;
     #searchTimeout?: NodeJS.Timeout;
     #showCount: number = 0;
@@ -503,15 +505,31 @@ export class BrowserPanel extends Panel {
         const col = browser.getDatabase().getCollectionById(
             this.#source.getSelected() ?? 'all'
         );
-        this.#currentItemList = col?.get(this.#collection.getSelected() ?? 'all')
-            .filter(item => !query || item.name.toLowerCase().includes(query))
-            .sort((a, b) => {
+        const list = col?.get(this.#collection.getSelected() ?? 'all') ?? [];
+        if (query.length) {
+            const fuse = new Fuse(list, {
+                keys: ['name']
+            });
+            this.#currentItemList = fuse.search(query).map(t => t.item);
+            const count = `Found ${this.#currentItemList.length} results`;
+            if (this.#searchResults) {
+                this.#searchResults?.setText(count);
+            }
+            else {
+                this.add(this.#searchResults = new Text(count));
+            }
+        }
+        else{
+            this.#currentItemList = list.sort((a, b) => {
                 switch (this.#sorting.getSelected()) {
                     case 'a-z':  return a.name.localeCompare(b.name);
                     case 'z-a':  return b.name.localeCompare(a.name);
                 }
                 return 0;
-            }) ?? [];
+            });
+            this.remove(this.#searchResults);
+            this.#searchResults = undefined;
+        }
 
         this.#showCount = getExtConfig().get<number>('defaultSpriteShowCount') ?? 350;
         this.showItems(0, this.#showCount);
