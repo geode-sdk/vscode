@@ -18,8 +18,8 @@ export namespace ipc {
         data: any,
     }
 
-    function isReply<T>(reply: T | Reply): reply is Reply {
-        return 'reply' in reply && 'data' in reply;
+    function isReply<T extends object>(reply: T | Reply): reply is Reply {
+        return 'data' in reply;
     }
 
     export async function post(modID: string, msgID: string, data?: any): Promise<any> {
@@ -39,11 +39,7 @@ export namespace ipc {
                     .on('data', data => {
                         try {
                             const obj = JSON.parse(data.toString());
-                            if (isReply(obj)) {
-                                resolve(obj.data);
-                            } else {
-                                reject('Received non-reply');
-                            }
+                            resolve(obj.data);
                         } catch {
                             reject('Received non-JSON IPC message');
                         }

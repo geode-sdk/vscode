@@ -18,9 +18,6 @@
   	  	"url": "https://github.com/geode-sdk/vscode"
   	},
   	"activationEvents": [
-  	  	"onCommand:geode.launchGD",
-  	  	"onCommand:geode.openSpriteBrowser",
-  	  	"onCommand:geode.openDevTools",
   	  	"onLanguage:cpp",
   	  	"workspaceContains:**/mod.json"
   	],
@@ -38,10 +35,6 @@
   	  	  	{
   	  	  	  	"title": "Geode: Open Sprite Browser",
   	  	  	  	"command": "geode.openSpriteBrowser"
-  	  	  	},
-  	  	  	{
-  	  	  	  	"title": "Geode: Open Dev Tools",
-  	  	  	  	"command": "geode.openDevTools"
   	  	  	}
   	  	],
   	  	"keybindings": [
