@@ -94,17 +94,17 @@
         "geode": {
             "type": "string",
             "description": "Geode version to target.",
-            "pattern": "v?([0-9]+|\\*)(\\.([0-9]+|\\*)){0,2}"
+            "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
         },
         "version": {
             "type": "string",
             "description": "Version of the mod.",
-            "pattern": "v?([0-9]+)(\\.([0-9]+)){0,2}"
+            "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
         },
         "id": {
             "type": "string",
             "description": "ID of the mod. Recommended to be formatted as \"developer.mod-name\".",
-            "pattern": "[a-zA-Z0-9-_\\.]+"
+            "pattern": "[a-z0-9-_\\.]+"
         },
         "name": {
             "type": "string",
@@ -136,7 +136,7 @@
                     "version": {
                         "type": "string",
                         "description": "Version of the dependency. May use wildcards (*) if a specific version is not required.",
-                        "pattern": "v?([0-9]+|\\*)(\\.([0-9]+|\\*)){0,2}"
+                        "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
                     },
                     "required": {
                         "type": "boolean",
@@ -146,43 +146,6 @@
                 },
                 "required": [ "id", "version" ]
             }
-        },
-        "binary": {
-            "type": [ "string", "object" ],
-            "description": "Name of the mod's binary file (DLL on Windows, Dylib on Mac, etc.). May either be a single string for all platforms, or may specify one for each platform separately.",
-            "deprecated": true,
-            "properties": {
-                "*": {
-                    "type": "string",
-                    "description": "Default binary name to use on all platforms."
-                },
-                "auto": {
-                    "type": "boolean",
-                    "description": "Whether to automatically append the platform-specific extension (.dll, .dylib, .so...) on the binary name if it's not specified.",
-                    "default": true
-                },
-                "windows": {
-                    "type": "string",
-                    "description": "Binary name to use on Windows. Note that you need to set \"binary.auto\" to false if the binary's extension is not .dll."
-                },
-                "macos": {
-                    "type": "string",
-                    "description": "Binary name to use on Mac. Note that you need to set \"binary.auto\" to false if the binary's extension is not .dylib."
-                },
-                "ios": {
-                    "type": "string",
-                    "description": "Binary name to use on iOS. Note that you need to set \"binary.auto\" to false if the binary's extension is not .dylib."
-                },
-                "android": {
-                    "type": "string",
-                    "description": "Binary name to use on Android. Note that you need to set \"binary.auto\" to false if the binary's extension is not .so."
-                }
-            }
-        },
-        "datastore": {
-            "type": [ "object", "null" ],
-            "description": "The mod's save data. May be anything.",
-            "deprecated": true
         },
         "resources": {
             "type": [ "object", "null" ],
@@ -571,15 +534,25 @@
             },
             "required": ["info"]
         },
-        "toggleable": {
+        "early-load": {
             "type": "boolean",
-            "description": "Whether the mod can be disabled at runtime or not.",
-            "default": true
-        },
-        "unloadable": {
-            "type": "boolean",
-            "description": "Whether the mod can be safely unloaded at runtime or not.",
+            "description": "Whether the mod should always be loaded before the loading screen or not.",
             "default": false
+        },
+        "api": {
+            "type": "object",
+            "description": "Define that this mod should be used as a dependency. If this key is present, the .lib file is automatically included in the .geode package.",
+            "properties": {
+                "headers": {
+                    "type": [ "array" ],
+                    "description": "Headers to include with the mod. Supports globbing.",
+                    "items": {
+                        "type": "string",
+                        "description": "Path to the header(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include all headers using \"include/*.hpp\"."
+                    }
+                }
+            },
+            "required": ["headers"]
         }
     },
     "additionalProperties": false,
