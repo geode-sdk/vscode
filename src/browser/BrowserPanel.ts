@@ -285,7 +285,7 @@ export class BrowserPanel extends Panel {
     #sorting: Select;
     #quality: Select;
     #search: Input;
-    #searchResults?: Text;
+    #searchResults: Text;
     #contentObserver: scripts.Observer;
     #searchTimeout?: NodeJS.Timeout;
     #showCount: number = 0;
@@ -438,6 +438,7 @@ export class BrowserPanel extends Panel {
             ))
         );
         this.add(this.#content = new Element('main'));
+        this.add(this.#searchResults = new Text('Loading...'));
 
         this.#contentObserver = scripts.observer.createObserver(
             this, this.#content, (w, visible) => {
@@ -502,22 +503,20 @@ export class BrowserPanel extends Panel {
 
         const query = this.#search.getValue()?.toLowerCase() ?? '';
 
+        this.#showCount = getExtConfig().get<number>('defaultSpriteShowCount') ?? 350;
+
         const col = browser.getDatabase().getCollectionById(
             this.#source.getSelected() ?? 'all'
         );
         const list = col?.get(this.#collection.getSelected() ?? 'all') ?? [];
         if (query.length) {
             const fuse = new Fuse(list, {
-                keys: ['name']
+                keys: ['name'],
+                threshold: 0.2
             });
             this.#currentItemList = fuse.search(query).map(t => t.item);
             const count = `Found ${this.#currentItemList.length} results`;
-            if (this.#searchResults) {
-                this.#searchResults?.setText(count);
-            }
-            else {
-                this.add(this.#searchResults = new Text(count));
-            }
+            this.#searchResults?.setText(count);
         }
         else{
             this.#currentItemList = list.sort((a, b) => {
@@ -527,11 +526,9 @@ export class BrowserPanel extends Panel {
                 }
                 return 0;
             });
-            this.remove(this.#searchResults);
-            this.#searchResults = undefined;
+            this.#searchResults?.setText(`Showing ${this.#showCount} items`);
         }
 
-        this.#showCount = getExtConfig().get<number>('defaultSpriteShowCount') ?? 350;
         this.showItems(0, this.#showCount);
 
         // todo: update count to reflect search results
