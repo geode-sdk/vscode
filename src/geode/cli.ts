@@ -6,6 +6,7 @@ import { ConfigurationTarget } from 'vscode';
 import { getExtConfig, getOutputChannel } from '../config';
 import { Option, None, Some, Result, Future, Err, Ok } from '../utils/monads';
 import * as semver from 'semver';
+import { getActiveProject } from '../project/project';
 
 export namespace cli {
     export const MINIMUM_CLI_VERSION = 'v2.2.0';
@@ -108,7 +109,24 @@ export namespace cli {
 
     export function runCLICmd(cmd: string): Result<string> {
         try {
+            getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
             return Ok(execSync(`${getCLIPath()} ${cmd}`, { encoding: 'utf-8' }));
+        } catch(e) {
+            return Err((e as Error).message);
+        }
+    }
+
+    export function runCLICmdInProject(cmd: string): Result<string> {
+        try {
+            getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
+            const project = getActiveProject();
+            if (!project) {
+                return Err('No mod project is open - running this command requires you to be in a mod project!');
+            }
+            return Ok(execSync(`${getCLIPath()} ${cmd}`, {
+                encoding: 'utf-8',
+                cwd: project.path
+            }));
         } catch(e) {
             return Err((e as Error).message);
         }

@@ -3,6 +3,7 @@ import { join } from "path";
 import { TextEditor, window, workspace } from "vscode";
 import { None, Option, Some } from "../utils/monads";
 import { ModJson } from "./mod";
+import { getOutputChannel } from "../config";
 
 export interface Project {
     path: string,
@@ -18,11 +19,9 @@ function projectFromFolder(path: string): Option<Project> {
     if (!existsSync(join(path, 'mod.json'))) {
         return None;
     }
-
     return Some({
         path: path,
         modJson: JSON.parse(readFileSync(join(path, 'mod.json')).toString()),
-
         hasResources(): boolean {
             return this.modJson.resources !== undefined;
         }
@@ -59,11 +58,18 @@ export function getActiveProject(): Option<Project> {
     if (!workspace.workspaceFolders?.length) {
         return None;
     }
-    const uri = window.activeTextEditor?.document.uri;
-    if (uri) {
-        const w = workspace.getWorkspaceFolder(uri);
-        if (w) {
-            return projectFromFolder(w.uri.fsPath);
+    if (window.activeTextEditor) {
+        const uri = window.activeTextEditor.document.uri;
+        if (uri) {
+            const w = workspace.getWorkspaceFolder(uri);
+            if (w) {
+                return projectFromFolder(w.uri.fsPath);
+            }
+        }
+    }
+    else {
+        if (workspace.workspaceFolders.length === 1) {
+            return projectFromFolder(workspace.workspaceFolders[0].uri.fsPath);
         }
     }
     return None;

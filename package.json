@@ -35,6 +35,10 @@
   	  	  	{
   	  	  	  	"title": "Geode: Open Sprite Browser",
   	  	  	  	"command": "geode.openSpriteBrowser"
+  	  	  	},
+  	  	  	{
+  	  	  	  	"title": "Geode: Publish Mod",
+  	  	  	  	"command": "geode.publishMod"
   	  	  	}
   	  	],
   	  	"keybindings": [

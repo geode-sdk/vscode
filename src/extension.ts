@@ -1,9 +1,13 @@
 
 import { window, ExtensionContext, commands, SnippetString } from 'vscode';
-import { loadData, saveData, setupConfig } from './config';
+import { getOutputChannel, loadData, saveData, setupConfig } from './config';
 import * as geode from './geode/geode';
 import { browser } from './browser/browser';
 import { DevToolsPanel } from './devtools/DevToolsPanel';
+import { execSync } from 'child_process';
+import { getActiveProject } from './project/project';
+import { env } from 'vscode';
+import { Uri } from 'vscode';
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel('Geode');
@@ -50,9 +54,49 @@ export async function activate(context: ExtensionContext) {
 		browser.open();
 	}));
 
-	context.subscriptions.push(commands.registerCommand('geode.openDevTools', async () => {
-		DevToolsPanel.show();
+	context.subscriptions.push(commands.registerCommand('geode.publishMod', async () => {
+		const res = geode.cli.runCLICmdInProject(`project publish`);
+		if (res.isError()) {
+			window.showErrorMessage(`Unable to publish mod: ${res.unwrapErr()}`);
+			return;
+		}
+		const value = res.unwrap();
+		getOutputChannel().append(value);
+		// Check if unable to automatically push
+		let pushCmd = value.match(/`git.*`/g)?.[0];
+		pushCmd = pushCmd?.substring(1, pushCmd.length - 1);
+		if (pushCmd) {
+			try {
+				getOutputChannel().appendLine(`Running ${pushCmd}`);
+				execSync(pushCmd, {
+					encoding: 'utf-8',
+					cwd: getActiveProject()?.path
+				});
+			}
+			catch(err) {
+				window.showErrorMessage(`Syncing publish failed: ${err}`);
+			}
+		}
+		let prURL = value.match(/https:\/\/.*?\.\.\.[a-zA-Z0-9]+/g)?.[0];
+		if (!prURL) {
+			window.showErrorMessage(`Unable to find Github pull request URL from command output - see output panel for details`);
+			getOutputChannel().append(value);
+			getOutputChannel().show();
+			return;
+		}
+		window.showInformationMessage(
+			`To complete the publish, please open a Pull Request in your indexer: ${prURL}`,
+			'Open URL'
+		).then(btn => {
+			if (btn === 'Open URL' && prURL) {
+				env.openExternal(Uri.parse(prURL));
+			}
+		});
 	}));
+
+	// context.subscriptions.push(commands.registerCommand('geode.openDevTools', async () => {
+	// 	DevToolsPanel.show();
+	// }));
 }
 
 export async function deactivate() {
