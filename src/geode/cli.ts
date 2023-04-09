@@ -110,7 +110,7 @@ export namespace cli {
     export function runCLICmd(cmd: string): Result<string> {
         try {
             getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
-            return Ok(execSync(`${getCLIPath()} ${cmd}`, { encoding: 'utf-8' }));
+            return Ok(execSync(`"${getCLIPath()}" ${cmd}`, { encoding: 'utf-8' }));
         } catch(e) {
             return Err((e as Error).message);
         }
@@ -123,7 +123,7 @@ export namespace cli {
             if (!project) {
                 return Err('No mod project is open - running this command requires you to be in a mod project!');
             }
-            return Ok(execSync(`${getCLIPath()} ${cmd}`, {
+            return Ok(execSync(`"${getCLIPath()}" ${cmd}`, {
                 encoding: 'utf-8',
                 cwd: project.path
             }));

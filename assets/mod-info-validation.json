@@ -543,7 +543,7 @@
             "type": "object",
             "description": "Define that this mod should be used as a dependency. If this key is present, the .lib file is automatically included in the .geode package.",
             "properties": {
-                "headers": {
+                "include": {
                     "type": [ "array" ],
                     "description": "Headers to include with the mod. Supports globbing.",
                     "items": {
@@ -552,7 +552,7 @@
                     }
                 }
             },
-            "required": ["headers"]
+            "required": ["include"]
         }
     },
     "additionalProperties": false,
