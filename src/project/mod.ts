@@ -14,7 +14,13 @@ export interface Resources {
     spritesheets?: { [name: string]: string[] } | null
 }
 
-export type Version = `v${number}.${number}.${number}` | `${number}.${number}.${number}`;
+export type Version
+    = `${number}.${number}.${number}`
+    | `${number}.${number}.${number}-${string}`
+    | `${number}.${number}.${number}-${string}${number}`
+    | `v${number}.${number}.${number}`
+    | `v${number}.${number}.${number}-${string}`
+    | `v${number}.${number}.${number}-${string}${number}`;
 
 export type SettingType =
     'bool' | 'int' | 'float' | 'string' |
@@ -120,14 +126,8 @@ export interface Dependency {
     required?: boolean,
 }
 
-export interface Binary {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    '*': string,
-    auto: boolean,
-    windows: string,
-    macos: string,
-    ios: string,
-    android: string,
+export interface Api {
+    include: string[],
 }
 
 export interface ModJson {
@@ -139,13 +139,11 @@ export interface ModJson {
     description?: string,
     repository?: string,
     dependencies?: Dependency[] | null,
-    binary?: string | Binary,
-    datastore?: any | null,
     resources?: Resources | null,
     settings?: Settings,
     issues?: Issues,
-    toggleable?: boolean,
-    unloadable?: boolean,
+    'early-load'?: boolean,
+    api?: Api,
 }
 
 // Mod runtime info, queried through loader IPC

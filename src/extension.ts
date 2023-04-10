@@ -9,7 +9,7 @@ import { getActiveProject, getOpenedProjects } from './project/project';
 import { env } from 'vscode';
 import { Uri } from 'vscode';
 import { CCColorProvider } from './project/color';
-import { SpriteHoverPreview } from './project/sprite';
+import { SettingHover, SpriteHoverPreview } from './project/hover';
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel('Geode');
@@ -98,6 +98,7 @@ export async function activate(context: ExtensionContext) {
 
 	context.subscriptions.push(languages.registerColorProvider({ language: "cpp" }, new CCColorProvider()));
 	context.subscriptions.push(languages.registerHoverProvider({ language: "cpp" }, new SpriteHoverPreview()));
+	context.subscriptions.push(languages.registerHoverProvider({ language: "cpp" }, new SettingHover()));
 
 	getOutputChannel().appendLine(`Open Geode projects: ${getOpenedProjects().map(p => p.modJson.id).join(", ")}`);
 
