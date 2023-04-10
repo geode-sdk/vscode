@@ -2,6 +2,7 @@
 
 ## [v1.4.0]
  - Preview sprite on hover
+ - View setting info by hovering
  - Fix sprites from the current mod not showing up in Sprite Browser
 
 ## [v1.3.0]

@@ -12,6 +12,15 @@ This is a rewrite and enhancement of the previous `geode-support` extension, whi
  * Validation for `mod.json`
  * Sprite browser (Use the `Ctrl + Alt + B` shortcut to launch, or `Geode: Open Sprite Browser`)
  * Colorization for `FLAlertLayer` tags
+ * Inline color hints for `ccColor3B` and `ccColor4B`
+ * Preview sprites on hover
+ * View mod setting info on hover
+
+![](./assets/color-hover.png)
+
+![](./assets/setting-hover.png)
+
+![](./assets/sprite-hover.png)
 
 ## To-do
 
