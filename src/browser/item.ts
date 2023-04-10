@@ -9,7 +9,8 @@ import { Err, Future, None, Ok, Option, Some } from "../utils/monads";
 import { removeFromArray } from "../utils/utils";
 import { getBMFontDatabase } from "./BMFontDatabase";
 import { browser } from "./browser";
-import { getSheetDatabase } from "./SheetDatabase";
+import { createCoverImage, getSheetDatabase } from "./SheetDatabase";
+import * as sharp from 'sharp';
 
 export enum ItemType {
     sprite,
@@ -79,7 +80,7 @@ export interface SheetSpriteItem extends Item<ItemType.sheetSprite> {
 }
 
 export interface SheetItem extends Item<ItemType.sheet> {
-    items: SheetSpriteItem[]
+    items: Item<ItemType>[]
 }
 
 export async function fetchItemImage<T extends ItemType>(item: Item<T>): Future<string> {
@@ -103,11 +104,23 @@ export async function fetchItemImage<T extends ItemType>(item: Item<T>): Future<
         }
 
         case ItemType.sheet: {
-            const sheet = await getSheetDatabase().loadSheet(item.path);
-            if (sheet.isError()) {
-                return Err(sheet.unwrapErr());
+            if (typeIsProject(item.src)) {
+                const sheet = (item as unknown as SheetItem);
+                const frameCount = sheet.items.length;
+                return await createCoverImage([
+                    0,
+                    Math.floor(frameCount / 3),
+                    Math.floor(frameCount / 2),
+                    Math.floor(frameCount / 1.5),
+                ].map(i => sharp(sheet.items[i].path)));
             }
-            return await sheet.unwrap().coverImage();
+            else {
+                const sheet = await getSheetDatabase().loadSheet(item.path);
+                if (sheet.isError()) {
+                    return Err(sheet.unwrapErr());
+                }
+                return await sheet.unwrap().coverImage();
+            }
         }
 
         case ItemType.font: {
@@ -217,8 +230,20 @@ export class Collection {
                 } catch {
                     return None;
                 }
-            } break;
+            }
         }
+    }
+
+    findByName(name: string): Option<Item<ItemType>> {
+        for (const sheet of this.sheets) {
+            const item = sheet.items.find(i => i.name === name);
+            if (item) {
+                return item;
+            }
+        }
+        return this.sprites.find(i => i.name === name) ??
+            this.fonts.find(i => i.name === name) ??
+            this.audio.find(i => i.name === name);
     }
 
     add(item: Item<ItemType>) {

@@ -89,7 +89,7 @@ export class Database {
                                 path: sheetPath,
                                 src,
                                 sheet: sheetName
-                            });
+                            } as Item<ItemType.sheetSprite>);
                         }
                     }
                 });
@@ -188,7 +188,7 @@ export class Database {
                     return {
                         name: basename(file),
                         path: file,
-                        type: ItemType.sheetSprite,
+                        type: ItemType.sprite,
                         src: mod,
                         sheet
                     };
@@ -212,9 +212,11 @@ export class Database {
         for (const path of this.getSearchPaths()) {
             if (typeof(path) === 'string') {
                 this.addSpritesFromDir(path, path);
-            } else if (typeIsProject(path)) {
+            }
+            else if (typeIsProject(path)) {
                 this.addSpritesFromMod(path);
-            } else {
+            }
+            else {
                 this.addSpritesFromDir(path, join(path.gdPath, 'Resources'));
             }
         }
@@ -282,5 +284,15 @@ export class Database {
             return fav;
         }
         return this.collections.find(c => c.id === id);
+    }
+
+    findItemByName(name: string): Option<Item<ItemType>> {
+        for (const c of this.collections) {
+            const item = c.findByName(name);
+            if (item) {
+                return item;
+            }
+        }
+        return undefined;
     }
 }

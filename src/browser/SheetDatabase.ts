@@ -42,6 +42,34 @@ function textureFromFrame(frame: SpriteFrame): SpriteTexture {
     };
 }
 
+export async function createCoverImage(sprites: sharp.Sharp[]): Future<string> {
+    const images = await Promise.all(
+        sprites.map(async (image, ix) => {
+            return {
+                input: await sharp((await image.toBuffer()))
+                    .resize(50, 50, { fit: 'inside' })
+                    .toBuffer(),
+                left: ix % 2 * 50,
+                top: ix > 1 ? 50 : 0
+            };
+        })
+    );
+    return Ok(
+        await sharp({
+            create: {
+                width: 100,
+                height: 100,
+                channels: 4,
+                background: { r: 0, g: 0, b: 0, alpha: 0, },
+            },
+        })
+        .png()
+        .composite(images)
+        .toBuffer()
+        .then(b => b.toString('base64'))
+    );
+}
+
 export class Sheet {
     #data: SpriteSheetPlist;
     #path: string;
@@ -100,31 +128,8 @@ export class Sheet {
                 ]
                 .map(async img => await this.extractImage(Object.keys(this.#data.frames)[img]))
                 .map(async img => (await img).try())
-                .map(async (image, ix) => {
-                    return {
-                        input: await sharp((await (await image).toBuffer()))
-                            .resize(50, 50, { fit: 'inside' })
-                            .toBuffer(),
-                        left: ix % 2 * 50,
-                        top: ix > 1 ? 50 : 0
-                    };
-                })
             );
-
-            return Ok(
-                await sharp({
-                    create: {
-                        width: 100,
-                        height: 100,
-                        channels: 4,
-                        background: { r: 0, g: 0, b: 0, alpha: 0, },
-                    },
-                })
-                .png()
-                .composite(images)
-                .toBuffer()
-                .then(b => b.toString('base64'))
-            );
+            return await createCoverImage(images);
         } catch(err: any) {
             return Err(err.toString());
         }

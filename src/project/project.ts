@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { TextEditor, window, workspace } from "vscode";
+import { TextDocument, TextEditor, window, workspace } from "vscode";
 import { None, Option, Some } from "../utils/monads";
 import { ModJson } from "./mod";
 import { getOutputChannel } from "../config";
@@ -46,7 +46,7 @@ export function getOpenedProjects(): Project[] {
     }
     const projects: Project[] = [];
     for (const folder of workspace.workspaceFolders) {
-        const project = projectFromFolder(folder.uri.path);
+        const project = projectFromFolder(folder.uri.fsPath);
         if (project) {
             projects.push(project);
         }
@@ -54,18 +54,23 @@ export function getOpenedProjects(): Project[] {
     return projects;
 }
 
+export function getProjectFromDocument(document: TextDocument): Option<Project> {
+    const uri = document.uri;
+    if (uri) {
+        const w = workspace.getWorkspaceFolder(uri);
+        if (w) {
+            return projectFromFolder(w.uri.fsPath);
+        }
+    }
+    return undefined;
+}
+
 export function getActiveProject(): Option<Project> {
     if (!workspace.workspaceFolders?.length) {
         return None;
     }
     if (window.activeTextEditor) {
-        const uri = window.activeTextEditor.document.uri;
-        if (uri) {
-            const w = workspace.getWorkspaceFolder(uri);
-            if (w) {
-                return projectFromFolder(w.uri.fsPath);
-            }
-        }
+        return getProjectFromDocument(window.activeTextEditor.document);
     }
     else {
         if (workspace.workspaceFolders.length === 1) {

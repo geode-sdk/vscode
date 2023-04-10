@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.4.0]
+ - Preview sprite on hover
+ - Fix sprites from the current mod not showing up in Sprite Browser
+
 ## [v1.3.0]
  - Colorization for color literals in code
 
