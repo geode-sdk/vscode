@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.3.0]
+ - Colorization for color literals in code
+
 ## [v1.2.0]
  - Colorization for `FLAlertLayer` tags inside string literals
 

@@ -1,5 +1,5 @@
 
-import { window, ExtensionContext, commands, SnippetString } from 'vscode';
+import { window, ExtensionContext, commands, SnippetString, languages } from 'vscode';
 import { getOutputChannel, loadData, saveData, setupConfig } from './config';
 import * as geode from './geode/geode';
 import { browser } from './browser/browser';
@@ -8,6 +8,7 @@ import { execSync } from 'child_process';
 import { getActiveProject } from './project/project';
 import { env } from 'vscode';
 import { Uri } from 'vscode';
+import { CCColorProvider } from './project/color';
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel('Geode');
@@ -93,6 +94,8 @@ export async function activate(context: ExtensionContext) {
 			}
 		});
 	}));
+
+	context.subscriptions.push(languages.registerColorProvider({ language: "cpp" }, new CCColorProvider()));
 
 	// context.subscriptions.push(commands.registerCommand('geode.openDevTools', async () => {
 	// 	DevToolsPanel.show();
