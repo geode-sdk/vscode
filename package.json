@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.1.1",
+  	"version": "1.2.0",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
@@ -47,6 +47,56 @@
   	  	  	  	"key": "Ctrl+Alt+B"
   	  	  	}
   	  	],
+		"grammars": [
+			{
+				"injectTo": [
+					"source.cpp",
+					"source.hpp",
+					"source.c",
+					"source.h"
+				],
+				"scopeName": "source.geode-flalert-literal",
+				"path": "./assets/flalert-colors.json"
+			}
+		],
+		"configurationDefaults": {
+			"editor.tokenColorCustomizations": {
+				"textMateRules": [
+					{
+						"scope": "geode.flalert.blue",
+						"settings": { "foreground": "#4a52e1" }
+					},
+					{
+						"scope": "geode.flalert.green",
+						"settings": { "foreground": "#40e348" }
+					},
+					{
+						"scope": "geode.flalert.aqua",
+						"settings": { "foreground": "#60abef" }
+					},
+					{
+						"scope": "geode.flalert.cyan",
+						"settings": { "foreground": "#32c8ff" }
+					},
+					{
+						"scope": "geode.flalert.yellow",
+						"settings": { "foreground": "#ffff00" }
+					},
+					{
+						"scope": "geode.flalert.orange",
+						"settings": { "foreground": "#ffa54b" }
+					},
+					{
+						"scope": "geode.flalert.red",
+						"settings": { "foreground": "#ff5a5a" }
+					},
+					{
+						"scope": "geode.flalert.pink",
+						"settings": { "foreground": "#ff00ff" }
+					}
+				]
+			}
+		},
   	  	"configuration": {
   	  	  	"title": "Geode",
   	  	  	"properties": {
