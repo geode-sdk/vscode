@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.4.1",
+  	"version": "1.5.0",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
@@ -47,6 +47,12 @@
   	  	  	  	"key": "Ctrl+Alt+B"
   	  	  	}
   	  	],
+		"languages": [{
+			"id": "bro",
+			"aliases": ["Bro"],
+			"extensions": [".bro"],
+			"configuration": "./src/broma/language-configuration.json"
+		}],
 		"grammars": [
 			{
 				"injectTo": [
@@ -57,6 +63,18 @@
 				],
 				"scopeName": "source.geode-flalert-literal",
 				"path": "./assets/flalert-colors.json"
+			},
+			{
+				"language": "bro",
+				"scopeName": "source.bro",
+				"path": "./src/broma/bro.tmLanguage.json"
+			},
+			{
+				"injectTo": [
+					"source.bro"
+				],
+				"scopeName": "source.bro-extra",
+				"path": "./src/broma/bro.inject.json"
 			}
 		],
 		"configurationDefaults": {
