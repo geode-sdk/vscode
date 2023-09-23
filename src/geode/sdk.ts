@@ -39,12 +39,12 @@ export namespace sdk {
     }
 
     export function hasSDK(): boolean {
-        const path = getExtConfig().get<string>('geodeCliPath');
+        const path = getExtConfig().get<string>('geodeSdkPath');
         return path ? existsSync(path) : false;
     }
 
     export function getSDKPath(): string {
-        return getExtConfig().get<string>('geodeSdkPath', ) ?? '';
+        return getExtConfig().get<string>('geodeSdkPath') ?? '';
     }
 
     export async function setup(): Future {
