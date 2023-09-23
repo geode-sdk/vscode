@@ -1,7 +1,7 @@
 
 import { execSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { ConfigurationTarget } from 'vscode';
 import { getExtConfig, getOutputChannel } from '../config';
 import { Option, None, Some, Result, Future, Err, Ok } from '../utils/monads';
@@ -9,13 +9,14 @@ import * as semver from 'semver';
 import { getActiveProject } from '../project/project';
 
 export namespace cli {
-    export const MINIMUM_CLI_VERSION = 'v2.2.0';
+    export const MINIMUM_CLI_VERSION = 'v2.5.0';
     let INSTALLED_VERSION: string;
     let CONFIG: Config;
 
     export interface Profile {
         name: string,
         gdPath: string,
+        gdExecutablePath: string,
     }
 
     export interface Config {
@@ -90,6 +91,12 @@ export namespace cli {
             }
             return value;
         });
+        // Since CLI 2.5.0, gd-path points to the gd executable instead of the gd folder.
+        CONFIG.profiles = CONFIG.profiles.map(prof => ({
+            name: prof.name,
+            gdExecutablePath: prof.gdPath,
+            gdPath: dirname(prof.gdPath),
+        }));
         return Ok();
     }
 
