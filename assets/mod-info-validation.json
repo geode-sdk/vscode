@@ -104,7 +104,7 @@
         "id": {
             "type": "string",
             "description": "ID of the mod. Recommended to be formatted as \"developer.mod-name\".",
-            "pattern": "[a-z0-9-_\\.]+"
+            "pattern": "[a-z0-9-_.]+"
         },
         "name": {
             "type": "string",
@@ -131,17 +131,73 @@
                     "id": {
                         "type": "string",
                         "description": "ID of the dependency.",
-                        "pattern": "[a-zA-Z0-9-_\\.]+"
+                        "pattern": "[a-zA-Z0-9-_.]+"
                     },
                     "version": {
                         "type": "string",
                         "description": "Version of the dependency. May use wildcards (*) if a specific version is not required.",
-                        "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+                        "pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
                     },
                     "required": {
                         "type": "boolean",
                         "description": "Whether the dependency is required in order to load this mod.",
-                        "default": true
+                        "default": true,
+                        "deprecated": true
+                    },
+                    "importance": {
+                        "type": "string",
+                        "description": "How important the dependency is.",
+                        "default": "required",
+                        "oneOf": [
+                            {
+                                "const": "required",
+                                "title": "The dependency is required for the mod to load. Will show an error."
+                            },
+                            {
+                                "const": "recommended",
+                                "title": "The dependency is not required but is recommended for a better experience. Will show a recommendation."
+                            },
+                            {
+                                "const": "suggested",
+                                "title": "The dependency is not required but the mod can integrate with it if the dependency is installed. Will show a suggestion."
+                            }
+                        ]
+                    }
+                },
+                "required": [ "id", "version" ],
+                "unevaluatedProperties": false
+            }
+        },
+        "incompatibilities": {
+            "type": [ "array", "null" ],
+            "description": "List of mods this mod is incompatible with.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "ID of the incompatibility.",
+                        "pattern": "[a-zA-Z0-9-_.]+"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Version of the incompatibility. May use wildcards (*) if a specific version is not required.",
+                        "pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
+                    },
+                    "importance": {
+                        "type": "string",
+                        "description": "How important the incompatibility is.",
+                        "default": "breaking",
+                        "oneOf": [
+                            {
+                                "const": "breaking",
+                                "title": "The mod will not work at all or will have major bugs with the incompatibility installed."
+                            },
+                            {
+                                "const": "conflicting",
+                                "title": "The mod will work but can have minor bugs or issues with the incompatibility installed."
+                            }
+                        ]
                     }
                 },
                 "required": [ "id", "version" ]
@@ -149,7 +205,7 @@
         },
         "resources": {
             "type": [ "object", "null" ],
-            "description": "The mod's resources. Used in conjuction with Geode CLI to automatically process & package resources for the mod.",
+            "description": "The mod's resources. Used in conjunction with Geode CLI to automatically process & package resources for the mod.",
             "properties": {
                 "fonts": {
                     "type": [ "object", "null" ],
@@ -169,7 +225,7 @@
                             "charset": {
                                 "type": "string",
                                 "description": "List of characters to include in the generated BM font. Default is \"32-126,8226\"",
-                                "pattern": "[0-9]+(\\-[0-9]+)?(\\,([0-9]+(\\-[0-9]+)?))*",
+                                "pattern": "[0-9]+(-[0-9]+)?(,([0-9]+(-[0-9]+)?))*",
                                 "default": "32-126,8226"
                             },
                             "outline": {
@@ -236,13 +292,12 @@
                         "description": "Description for the setting."
                     }
                 },
-                "oneOf": [
+                "allOf": [
                     {
                         "if": {
                             "properties": {
                                 "type": { "const": "int" }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -257,14 +312,6 @@
                                 "max": {
                                     "type": "integer",
                                     "description": "Maximum value."
-                                },
-                                "one-of": {
-                                    "type": "array",
-                                    "description": "Setting value must be one of these.",
-                                    "items": {
-                                        "type": "integer"
-                                    },
-                                    "minItems": 1
                                 },
                                 "control": {
                                     "type": "object",
@@ -278,15 +325,13 @@
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     },
                     {
                         "if": {
                             "properties": {
                                 "type": { "const": "float" }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -302,14 +347,6 @@
                                     "type": "number",
                                     "description": "Maximum value."
                                 },
-                                "one-of": {
-                                    "type": "array",
-                                    "description": "Setting value must be one of these.",
-                                    "items": {
-                                        "type": "number"
-                                    },
-                                    "minItems": 1
-                                },
                                 "control": {
                                     "type": "object",
                                     "description": "Customize the UI for this setting.",
@@ -322,15 +359,13 @@
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     },
                     {
                         "if": {
                             "properties": {
                                 "type": { "const": "string" }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -341,26 +376,16 @@
                                 "match": {
                                     "type": "string",
                                     "description": "A regex the string must match."
-                                },
-                                "one-of": {
-                                    "type": "array",
-                                    "description": "Setting value must be one of these.",
-                                    "items": {
-                                        "type": "string"
-                                    },
-                                    "minItems": 1
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     },
                     {
                         "if": {
                             "properties": {
                                 "type": { "const": "bool" }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -370,15 +395,13 @@
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     },
                     {
                         "if": {
                             "properties": {
                                 "type": { "enum": ["color", "rgb"] }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -416,15 +439,13 @@
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     },
                     {
                         "if": {
                             "properties": {
                                 "type": { "const": "rgba" }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -446,7 +467,7 @@
                                         {
                                             "type": "integer",
                                             "description": "Blue component of the color.",
-                                            "minimum": 0, "maximum": 255 
+                                            "minimum": 0, "maximum": 255
                                         },
                                         {
                                             "type": "integer",
@@ -485,15 +506,13 @@
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     },
                     {
                         "if": {
                             "properties": {
                                 "type": { "enum": ["path", "file"] }
-                            },
-                            "required": ["type"]
+                            }
                         },
                         "then": {
                             "properties": {
@@ -511,12 +530,11 @@
                                 }
                             },
                             "required": ["default"]
-                        },
-                        "else": false
+                        }
                     }
                 ],
                 "unevaluatedProperties": false,
-                "required": [ "type", "default" ]
+                "required": [ "type" ]
             }
         },
         "issues": {
@@ -533,6 +551,12 @@
                 }
             },
             "required": ["info"]
+        },
+        "tags": {
+            "type": [ "array", "null" ],
+            "items": {
+                "type": "string"
+            }
         },
         "early-load": {
             "type": "boolean",
