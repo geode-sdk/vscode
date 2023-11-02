@@ -37,6 +37,8 @@ export namespace cli {
     function configPlatformPath(): string {
         if (process.platform === "win32") {
             return join(process.env['LOCALAPPDATA'] as string, 'Geode');
+        } else if (process.platform === "linux") {
+            return join(process.env.HOME as string, '.local/share/Geode');
         } else {
             return '/Users/Shared/Geode';
         }
