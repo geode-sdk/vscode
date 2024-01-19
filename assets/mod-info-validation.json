@@ -101,6 +101,48 @@
             "description": "Version of the mod.",
             "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
         },
+        "gd": {
+            "type": [ "string", "object" ],
+            "description": "What version of Geometry Dash this mod targets. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+            "oneOf": [
+                { "pattern": "[0-9]+\\.[0-9]+" },
+                { "const": "*" }
+            ],
+            "properties": {
+                "win": {
+                    "type": "string",
+                    "description": "What version of Geometry Dash this mod targets on Windows. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+                    "oneOf": [
+                        { "pattern": "[0-9]+\\.[0-9]+" },
+                        { "const": "*" }
+                    ]
+                },
+                "mac": {
+                    "type": "string",
+                    "description": "What version of Geometry Dash this mod targets on MacOS. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+                    "oneOf": [
+                        { "pattern": "[0-9]+\\.[0-9]+" },
+                        { "const": "*" }
+                    ]
+                },
+                "android": {
+                    "type": "string",
+                    "description": "What version of Geometry Dash this mod targets on Android. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+                    "oneOf": [
+                        { "pattern": "[0-9]+\\.[0-9]+" },
+                        { "const": "*" }
+                    ]
+                },
+                "ios": {
+                    "type": "string",
+                    "description": "What version of Geometry Dash this mod targets on iOS. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+                    "oneOf": [
+                        { "pattern": "[0-9]+\\.[0-9]+" },
+                        { "const": "*" }
+                    ]
+                }
+            }
+        },
         "id": {
             "type": "string",
             "description": "ID of the mod. Recommended to be formatted as \"developer.mod-name\".",
@@ -580,5 +622,5 @@
         }
     },
     "additionalProperties": false,
-    "required": [ "geode", "version", "id", "name", "developer" ]
+    "required": [ "geode", "gd", "version", "id", "name", "developer" ]
 }
