@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.6.0",
+  	"version": "1.7.0",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},

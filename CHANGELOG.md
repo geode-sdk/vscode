@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.7.0]
+ - Update `mod.json` validation to support multiple developers
+
 ## [v1.6.0]
  - Update `mod.json` validation
  - Fix Linux not being able to detect CLI path

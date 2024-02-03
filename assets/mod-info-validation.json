@@ -154,7 +154,16 @@
         },
         "developer": {
             "type": "string",
-            "description": "Name of the mod developer. If the mod has multiple developers, use a group name like \"Geode Team\""
+            "description": "Name of the mod developer. If the mod has multiple developers, use the \"developers\" key"
+        },
+        "developers": {
+            "type": "array",
+            "description": "Names of the mod's developers",
+            "items": {
+                "type": "string",
+                "description": "A developer for the mod"
+            },
+            "minItems": 1
         },
         "description": {
             "type": "string",
@@ -622,5 +631,12 @@
         }
     },
     "additionalProperties": false,
-    "required": [ "geode", "gd", "version", "id", "name", "developer" ]
+    "oneOf": [
+        {
+            "required": [ "geode", "gd", "version", "id", "name", "developer" ]
+        },
+        {
+            "required": [ "geode", "gd", "version", "id", "name", "developers" ]
+        }
+    ]
 }
