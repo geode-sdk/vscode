@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.8.0]
+ - Change `Launch Geometry Dash` command to use `geode run`
+
 ## [v1.7.0]
  - Update `mod.json` validation to support multiple developers
 
@@ -39,4 +42,4 @@
  - Update README
 
 ## [v1.0.0]
-- Initial release
+ - Initial release
