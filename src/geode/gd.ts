@@ -1,25 +1,23 @@
-
-import { spawn } from "child_process";
 import { Future, Ok, Err } from "../utils/monads";
 import { cli } from "./cli";
+import { Terminal, window } from "vscode";
+import * as semver from 'semver';
 
 export namespace gd {
+    let terminal: undefined | Terminal;
+
     export async function launchGD(): Future {
-        const profile = cli.getCurrentProfile();
-        if (!profile) {
-            return Err('No profile selected!');
+        try {
+            // close the terminal if one is already open
+            if (terminal) {
+                terminal.dispose();
+            }
+            terminal = window.createTerminal('Geometry Dash', cli.getCLIPath(),
+                semver.gte(cli.getVersion(), 'v2.10.0') ? [ 'run', '--stay' ] : [ 'run' ]);
+            terminal.show();
+            return Ok();
+        } catch(e) {
+            return Err((e as Error).message);
         }
-        const exe = profile.gdExecutablePath;
-        
-        if (!exe) {
-            return Err('No executable found for launch');
-        }
-
-        spawn(exe, {
-            cwd: profile.gdPath,
-            detached: true,
-        });
-
-        return Ok();
     }
 }
