@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.8.0",
+  	"version": "1.8.1",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
@@ -47,74 +47,96 @@
   	  	  	  	"key": "Ctrl+Alt+B"
   	  	  	}
   	  	],
-		"languages": [{
-			"id": "bro",
-			"aliases": ["Bro"],
-			"extensions": [".bro"],
-			"configuration": "./src/broma/language-configuration.json"
-		}],
-		"grammars": [
-			{
-				"injectTo": [
-					"source.cpp",
-					"source.hpp",
-					"source.c",
-					"source.h"
-				],
-				"scopeName": "source.geode-flalert-literal",
-				"path": "./assets/flalert-colors.json"
-			},
-			{
-				"language": "bro",
-				"scopeName": "source.bro",
-				"path": "./src/broma/bro.tmLanguage.json"
-			},
-			{
-				"injectTo": [
-					"source.bro"
-				],
-				"scopeName": "source.bro-extra",
-				"path": "./src/broma/bro.inject.json"
-			}
-		],
-		"configurationDefaults": {
-			"editor.tokenColorCustomizations": {
-				"textMateRules": [
-					{
-						"scope": "geode.flalert.blue",
-						"settings": { "foreground": "#4a52e1" }
-					},
-					{
-						"scope": "geode.flalert.green",
-						"settings": { "foreground": "#40e348" }
-					},
-					{
-						"scope": "geode.flalert.aqua",
-						"settings": { "foreground": "#60abef" }
-					},
-					{
-						"scope": "geode.flalert.cyan",
-						"settings": { "foreground": "#32c8ff" }
-					},
-					{
-						"scope": "geode.flalert.yellow",
-						"settings": { "foreground": "#ffff00" }
-					},
-					{
-						"scope": "geode.flalert.orange",
-						"settings": { "foreground": "#ffa54b" }
-					},
-					{
-						"scope": "geode.flalert.red",
-						"settings": { "foreground": "#ff5a5a" }
-					},
-					{
-						"scope": "geode.flalert.pink",
-						"settings": { "foreground": "#ff00ff" }
-					}
-				]
-			}
-		},
+  	  	"languages": [
+  	  	  	{
+  	  	  	  	"id": "bro",
+  	  	  	  	"aliases": [
+  	  	  	  	  	"Bro"
+  	  	  	  	],
+  	  	  	  	"extensions": [
+  	  	  	  	  	".bro"
+  	  	  	  	],
+  	  	  	  	"configuration": "./src/broma/language-configuration.json"
+  	  	  	}
+  	  	],
+  	  	"grammars": [
+  	  	  	{
+  	  	  	  	"injectTo": [
+  	  	  	  	  	"source.cpp",
+  	  	  	  	  	"source.hpp",
+  	  	  	  	  	"source.c",
+  	  	  	  	  	"source.h"
+  	  	  	  	],
+  	  	  	  	"scopeName": "source.geode-flalert-literal",
+  	  	  	  	"path": "./assets/flalert-colors.json"
+  	  	  	},
+  	  	  	{
+  	  	  	  	"language": "bro",
+  	  	  	  	"scopeName": "source.bro",
+  	  	  	  	"path": "./src/broma/bro.tmLanguage.json"
+  	  	  	},
+  	  	  	{
+  	  	  	  	"injectTo": [
+  	  	  	  	  	"source.bro"
+  	  	  	  	],
+  	  	  	  	"scopeName": "source.bro-extra",
+  	  	  	  	"path": "./src/broma/bro.inject.json"
+  	  	  	}
+  	  	],
+  	  	"configurationDefaults": {
+  	  	  	"editor.tokenColorCustomizations": {
+  	  	  	  	"textMateRules": [
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.blue",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#4a52e1"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.green",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#40e348"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.aqua",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#60abef"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.cyan",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#32c8ff"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.yellow",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#ffff00"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.orange",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#ffa54b"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.red",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#ff5a5a"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.pink",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#ff00ff"
+  	  	  	  	  	  	}
+  	  	  	  	  	}
+  	  	  	  	]
+  	  	  	}
+  	  	},
   	  	"configuration": {
   	  	  	"title": "Geode",
   	  	  	"properties": {
@@ -195,7 +217,8 @@
   	  	"fuse.js": "^6.6.2",
   	  	"object-hash": "^3.0.0",
   	  	"plist": "^3.0.6",
-  	  	"semver": "^7.3.8",
-  	  	"sharp": "^0.33.2"
+  	  	"semver": "^7.5.4",
+  	  	"sharp": "^0.33.2",
+		"@img/sharp-win32-x64": "^0.33.2"
   	}
 }

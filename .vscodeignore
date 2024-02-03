@@ -5,8 +5,6 @@ node_modules/**
 !node_modules/@vscode/webview-ui-toolkit
 !node_modules/@vscode/codicons
 
-# this is all for sharp
-!node_modules/sharp/build
 !node_modules/sharp/lib
 !node_modules/sharp/LICENSE
 !node_modules/sharp/package.json
@@ -23,6 +21,9 @@ node_modules/**
 !node_modules/node-addon-api
 !node_modules/simple-swizzle
 !node_modules/is-arrayish
+!node_modules/lru-cache
+!node_modules/yallist
+!node_modules/@img
 
 !assets
 src/**
