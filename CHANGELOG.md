@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.9.0]
+ - Update `mod.json` validation to support platform-specific dependencies
+
 ## [v1.8.0]
  - Change `Launch Geometry Dash` command to use `geode run`
 

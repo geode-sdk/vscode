@@ -213,6 +213,19 @@
                                 "title": "The dependency is not required but the mod can integrate with it if the dependency is installed. Will show a suggestion."
                             }
                         ]
+                    },
+                    "platforms": {
+                        "type": "array",
+                        "description": "If this dependency should only be used on certain platforms, specify this property; by default, Geode assumes dependencies are used on all platforms",
+                        "items": {
+                            "type": "string",
+                            "oneOf": [
+                                { "const": "windows" },
+                                { "const": "macos" },
+                                { "const": "android32" },
+                                { "const": "android64" }
+                            ]
+                        }
                     }
                 },
                 "required": [ "id", "version" ],
