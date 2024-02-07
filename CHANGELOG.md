@@ -3,6 +3,12 @@
 ## [v1.9.0]
  - Update `mod.json` validation to support platform-specific dependencies
 
+## [v1.8.2]
+ - Include Sharp binaries on all platforms
+
+## [v1.8.1]
+ - Include Sharp binaries on Windows
+
 ## [v1.8.0]
  - Change `Launch Geometry Dash` command to use `geode run`
 
