@@ -88,6 +88,94 @@
                     }
                 }
             }
+        },
+        "rgb-value": {
+            "type": ["string", "array", "object"],
+            "pattern": "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+            "prefixItems": [
+                { "type": "integer", "minimum": 0, "maximum": 255 },
+                { "type": "integer", "minimum": 0, "maximum": 255 },
+                { "type": "integer", "minimum": 0, "maximum": 255 }
+            ],
+            "minItems": 3,
+            "items": false,
+            "properties": {
+                "r": {
+                    "type": "integer",
+                    "description": "Red component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "g": {
+                    "type": "integer",
+                    "description": "Green component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "b": {
+                    "type": "integer",
+                    "description": "Blue component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                }
+            },
+            "required": ["r", "g", "b"]
+        },
+        "rgba-value": {
+            "type": ["string", "array", "object"],
+            "description": "Default value.",
+            "pattern": "^#?([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$",
+            "prefixItems": [
+                {
+                    "type": "integer",
+                    "description": "Red component of the color.",
+                    "minimum": 0, "maximum": 255
+                },
+                {
+                    "type": "integer",
+                    "description": "Green component of the color.",
+                    "minimum": 0, "maximum": 255
+                },
+                {
+                    "type": "integer",
+                    "description": "Blue component of the color.",
+                    "minimum": 0, "maximum": 255
+                },
+                {
+                    "type": "integer",
+                    "description": "Alpha component of the color.",
+                    "minimum": 0, "maximum": 255
+                }
+            ],
+            "minItems": 4,
+            "items": false,
+            "properties": {
+                "r": {
+                    "type": "integer",
+                    "description": "Red component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "g": {
+                    "type": "integer",
+                    "description": "Green component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "b": {
+                    "type": "integer",
+                    "description": "Blue component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "a": {
+                    "type": "integer",
+                    "description": "Alpha component of the color.",
+                    "minimum": 0,
+                    "maximum": 255
+                }
+            },
+            "required": ["r", "g", "b", "a"]
         }
     },
     "properties": {
@@ -356,245 +444,243 @@
                         "description": "Description for the setting."
                     }
                 },
-                "allOf": [
+                "oneOf": [
                     {
-                        "if": {
-                            "properties": {
-                                "type": { "const": "int" }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": "integer",
-                                    "description": "Default value."
-                                },
-                                "min": {
-                                    "type": "integer",
-                                    "description": "Minimum value."
-                                },
-                                "max": {
-                                    "type": "integer",
-                                    "description": "Maximum value."
-                                },
-                                "control": {
-                                    "type": "object",
-                                    "description": "Customize the UI for this setting.",
-                                    "allOf": [
-                                        { "$ref": "#/$defs/impl-arrows" },
-                                        { "$ref": "#/$defs/impl-slider-int" },
-                                        { "$ref": "#/$defs/impl-input" }
-                                    ],
-                                    "unevaluatedProperties": false
-                                }
-                            },
-                            "required": ["default"]
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": {
-                                "type": { "const": "float" }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": "number",
-                                    "description": "Default value."
-                                },
-                                "min": {
-                                    "type": "number",
-                                    "description": "Minimum value."
-                                },
-                                "max": {
-                                    "type": "number",
-                                    "description": "Maximum value."
-                                },
-                                "control": {
-                                    "type": "object",
-                                    "description": "Customize the UI for this setting.",
-                                    "allOf": [
-                                        { "$ref": "#/$defs/impl-arrows" },
-                                        { "$ref": "#/$defs/impl-slider-float" },
-                                        { "$ref": "#/$defs/impl-input" }
-                                    ],
-                                    "unevaluatedProperties": false
-                                }
-                            },
-                            "required": ["default"]
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": {
-                                "type": { "const": "string" }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": "string",
-                                    "description": "Default value."
-                                },
-                                "match": {
-                                    "type": "string",
-                                    "description": "A regex the string must match."
-                                }
-                            },
-                            "required": ["default"]
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": {
-                                "type": { "const": "bool" }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": "boolean",
-                                    "description": "Default value."
-                                }
-                            },
-                            "required": ["default"]
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": {
-                                "type": { "enum": ["color", "rgb"] }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": ["string", "array", "object"],
-                                    "description": "Default value.",
-                                    "pattern": "^#?[A-Z0-9a-z]{0,6}$",
-                                    "prefixItems": [
-                                        { "type": "integer", "minimum": 0, "maximum": 255 },
-                                        { "type": "integer", "minimum": 0, "maximum": 255 },
-                                        { "type": "integer", "minimum": 0, "maximum": 255 }
-                                    ],
-                                    "items": false,
-                                    "properties": {
-                                        "r": {
-                                            "type": "integer",
-                                            "description": "Red component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        },
-                                        "g": {
-                                            "type": "integer",
-                                            "description": "Green component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        },
-                                        "b": {
-                                            "type": "integer",
-                                            "description": "Blue component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        }
+                        "properties": {
+                            "type": { "const": "int" },
+                            "default": {
+                                "type": ["integer", "object"],
+                                "description": "Default value.",
+                                "properties": {
+                                    "win": {
+                                        "type": "integer",
+                                        "description": "Default value on Windows."
                                     },
-                                    "required": ["r", "g", "b"]
-                                }
-                            },
-                            "required": ["default"]
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": {
-                                "type": { "const": "rgba" }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": ["string", "array", "object"],
-                                    "description": "Default value.",
-                                    "pattern": "^#?[A-Z0-9a-z]{0,8}$",
-                                    "prefixItems": [
-                                        {
-                                            "type": "integer",
-                                            "description": "Red component of the color.",
-                                            "minimum": 0, "maximum": 255
-                                        },
-                                        {
-                                            "type": "integer",
-                                            "description": "Green component of the color.",
-                                            "minimum": 0, "maximum": 255
-                                        },
-                                        {
-                                            "type": "integer",
-                                            "description": "Blue component of the color.",
-                                            "minimum": 0, "maximum": 255
-                                        },
-                                        {
-                                            "type": "integer",
-                                            "description": "Alpha component of the color.",
-                                            "minimum": 0, "maximum": 255
-                                        }
-                                    ],
-                                    "items": false,
-                                    "properties": {
-                                        "r": {
-                                            "type": "integer",
-                                            "description": "Red component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        },
-                                        "g": {
-                                            "type": "integer",
-                                            "description": "Green component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        },
-                                        "b": {
-                                            "type": "integer",
-                                            "description": "Blue component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        },
-                                        "a": {
-                                            "type": "integer",
-                                            "description": "Alpha component of the color.",
-                                            "minimum": 0,
-                                            "maximum": 255
-                                        }
+                                    "mac": {
+                                        "type": "integer",
+                                        "description": "Default value on MacOS."
                                     },
-                                    "required": ["r", "g", "b", "a"]
-                                }
+                                    "android": {
+                                        "type": "integer",
+                                        "description": "Default value on Android."
+                                    }
+                                },
+                                "required": ["win", "mac", "android"]
                             },
-                            "required": ["default"]
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": {
-                                "type": { "enum": ["path", "file"] }
+                            "min": {
+                                "type": "integer",
+                                "description": "Minimum value."
+                            },
+                            "max": {
+                                "type": "integer",
+                                "description": "Maximum value."
+                            },
+                            "control": {
+                                "type": "object",
+                                "description": "Customize the UI for this setting.",
+                                "allOf": [
+                                    { "$ref": "#/$defs/impl-arrows" },
+                                    { "$ref": "#/$defs/impl-slider-int" },
+                                    { "$ref": "#/$defs/impl-input" }
+                                ],
+                                "unevaluatedProperties": false
                             }
                         },
-                        "then": {
-                            "properties": {
-                                "default": {
-                                    "type": "string",
-                                    "description": "Default value."
+                        "required": ["type", "default"]
+                    },
+                    {
+                        "properties": {
+                            "type": { "const": "float" },
+                            "default": {
+                                "type": ["number", "object"],
+                                "description": "Default value.",
+                                "properties": {
+                                    "win": {
+                                        "type": "number",
+                                        "description": "Default value on Windows."
+                                    },
+                                    "mac": {
+                                        "type": "number",
+                                        "description": "Default value on MacOS."
+                                    },
+                                    "android": {
+                                        "type": "number",
+                                        "description": "Default value on Android."
+                                    }
                                 },
-                                "control": {
-                                    "type": "object",
-                                    "description": "Customize the UI for this setting.",
-                                    "allOf": [
-                                        { "$ref": "#/$defs/impl-file-filters" }
-                                    ],
-                                    "unevaluatedProperties": false
-                                }
+                                "required": ["win", "mac", "android"]
                             },
-                            "required": ["default"]
-                        }
+                            "min": {
+                                "type": "number",
+                                "description": "Minimum value."
+                            },
+                            "max": {
+                                "type": "number",
+                                "description": "Maximum value."
+                            },
+                            "control": {
+                                "type": "object",
+                                "description": "Customize the UI for this setting.",
+                                "allOf": [
+                                    { "$ref": "#/$defs/impl-arrows" },
+                                    { "$ref": "#/$defs/impl-slider-float" },
+                                    { "$ref": "#/$defs/impl-input" }
+                                ],
+                                "unevaluatedProperties": false
+                            }
+                        },
+                        "required": ["type", "default"]
+                    },
+                    {
+                        "properties": {
+                            "type": { "const": "string" },
+                            "default": {
+                                "type": ["string", "object"],
+                                "description": "Default value.",
+                                "properties": {
+                                    "win": {
+                                        "type": "string",
+                                        "description": "Default value on Windows."
+                                    },
+                                    "mac": {
+                                        "type": "string",
+                                        "description": "Default value on MacOS."
+                                    },
+                                    "android": {
+                                        "type": "string",
+                                        "description": "Default value on Android."
+                                    }
+                                },
+                                "required": ["win", "mac", "android"]
+                            },
+                            "match": {
+                                "type": "string",
+                                "description": "A regex the string must match."
+                            }
+                        },
+                        "required": ["type", "default"]
+                    },
+                    {
+                        "properties": {
+                            "type": { "const": "bool" },
+                            "default": {
+                                "type": ["boolean", "object"],
+                                "description": "Default value.",
+                                "properties": {
+                                    "win": {
+                                        "type": "boolean",
+                                        "description": "Default value on Windows."
+                                    },
+                                    "mac": {
+                                        "type": "boolean",
+                                        "description": "Default value on MacOS."
+                                    },
+                                    "android": {
+                                        "type": "boolean",
+                                        "description": "Default value on Android."
+                                    }
+                                },
+                                "required": ["win", "mac", "android"]
+                            }
+                        },
+                        "required": ["type", "default"]
+                    },
+                    {
+                        "properties": {
+                            "type": { "enum": ["color", "rgb"] },
+                            "default": {
+                                "description": "Default value.",
+                                "oneOf": [
+                                    { "$ref": "#/$defs/rgb-value" },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "win": {
+                                                "$ref": "#/$defs/rgb-value",
+                                                "description": "Default value on Windows."
+                                            },
+                                            "mac": {
+                                                "$ref": "#/$defs/rgb-value",
+                                                "description": "Default value on MacOS."
+                                            },
+                                            "android": {
+                                                "$ref": "#/$defs/rgb-value",
+                                                "description": "Default value on Android."
+                                            }
+                                        },
+                                        "required": ["win", "mac", "android"]
+                                    }
+                                ]
+                            }
+                        },
+                        "required": ["type", "default"]
+                    },
+                    {
+                        "properties": {
+                            "type": { "const": "rgba" },
+                            "default": {
+                                "description": "Default value.",
+                                "oneOf": [
+                                    { "$ref": "#/$defs/rgba-value" },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "win": {
+                                                "$ref": "#/$defs/rgba-value",
+                                                "description": "Default value on Windows."
+                                            },
+                                            "mac": {
+                                                "$ref": "#/$defs/rgba-value",
+                                                "description": "Default value on MacOS."
+                                            },
+                                            "android": {
+                                                "$ref": "#/$defs/rgba-value",
+                                                "description": "Default value on Android."
+                                            }
+                                        },
+                                        "required": ["win", "mac", "android"]
+                                    }
+                                ]
+                            }
+                        },
+                        "required": ["type", "default"]
+                    },
+                    {
+                        "properties": {
+                            "type": { "enum": ["path", "file"] },
+                            "default": {
+                                "type": ["string", "object"],
+                                "description": "Default value.",
+                                "properties": {
+                                    "win": {
+                                        "type": "string",
+                                        "description": "Default value on Windows."
+                                    },
+                                    "mac": {
+                                        "type": "string",
+                                        "description": "Default value on MacOS."
+                                    },
+                                    "android": {
+                                        "type": "string",
+                                        "description": "Default value on Android."
+                                    }
+                                },
+                                "required": ["win", "mac", "android"]
+                            },
+                            "match": {
+                                "type": "string",
+                                "description": "A regex the string must match."
+                            },
+                            "control": {
+                                "type": "object",
+                                "description": "Customize the UI for this setting.",
+                                "allOf": [
+                                    { "$ref": "#/$defs/impl-file-filters" }
+                                ],
+                                "unevaluatedProperties": false
+                            }
+                        },
+                        "required": ["type", "default"]
                     }
                 ],
                 "unevaluatedProperties": false,

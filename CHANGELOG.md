@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.10.0]
+ - Update `mod.json` validation to support platform-specific setting default values
+ - Fix hex color validation in `mod.json`
+
 ## [v1.9.0]
  - Update `mod.json` validation to support platform-specific dependencies
 
