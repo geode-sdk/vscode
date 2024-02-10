@@ -442,6 +442,19 @@
                     "description": {
                         "type": "string",
                         "description": "Description for the setting."
+                    },
+                    "platforms": {
+                        "type": "array",
+                        "description": "If this setting should only be used on certain platforms, specify this property; by default, Geode assumes settings are used on all platforms",
+                        "items": {
+                            "type": "string",
+                            "oneOf": [
+                                { "const": "windows" },
+                                { "const": "macos" },
+                                { "const": "android32" },
+                                { "const": "android64" }
+                            ]
+                        }
                     }
                 },
                 "oneOf": [
