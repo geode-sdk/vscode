@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.11.0",
+  	"version": "1.12.0",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
@@ -132,6 +132,12 @@
   	  	  	  	  	  	"scope": "geode.flalert.pink",
   	  	  	  	  	  	"settings": {
   	  	  	  	  	  	  	"foreground": "#ff00ff"
+  	  	  	  	  	  	}
+  	  	  	  	  	},
+  	  	  	  	  	{
+  	  	  	  	  	  	"scope": "geode.flalert.purple",
+  	  	  	  	  	  	"settings": {
+  	  	  	  	  	  	  	"foreground": "#9632ff"
   	  	  	  	  	  	}
   	  	  	  	  	}
   	  	  	  	]

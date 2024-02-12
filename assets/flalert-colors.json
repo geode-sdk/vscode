@@ -35,6 +35,10 @@
         {
             "match": "<cp>((.*?<\/c>)|(.*)(?=\"))",
             "name": "geode.flalert.pink"
+        },
+        {
+            "match": "<ca>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.purple"
         }
     ]
 }

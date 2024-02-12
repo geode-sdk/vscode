@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.12.0]
+ - Add support for colorizing the `<ca>` color tag in `FLAlertLayer`s
+
 ## [v1.11.0]
  - Update `mod.json` validation to support platform-specific settings
 
