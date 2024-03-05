@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.13.0]
+ - Add support for `links` property in `mod.json`
+ - Improve color editor support; `ccc3` and `ccc4` calls are now colorized as well as some other changes
+
 ## [v1.12.0]
  - Add support for colorizing the `<ca>` color tag in `FLAlertLayer`s
 

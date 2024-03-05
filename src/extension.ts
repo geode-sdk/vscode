@@ -8,7 +8,7 @@ import { execSync } from 'child_process';
 import { getActiveProject, getOpenedProjects } from './project/project';
 import { env } from 'vscode';
 import { Uri } from 'vscode';
-import { CCColorProvider } from './project/color';
+import { CCColor3bProvider, CCColor4bProvider } from './project/color';
 import { SettingHover, SpriteHoverPreview } from './project/hover';
 
 export async function activate(context: ExtensionContext) {
@@ -96,7 +96,8 @@ export async function activate(context: ExtensionContext) {
 		});
 	}));
 
-	context.subscriptions.push(languages.registerColorProvider({ language: "cpp" }, new CCColorProvider()));
+	context.subscriptions.push(languages.registerColorProvider({ language: "cpp" }, new CCColor3bProvider()));
+	context.subscriptions.push(languages.registerColorProvider({ language: "cpp" }, new CCColor4bProvider()));
 	context.subscriptions.push(languages.registerHoverProvider({ language: "cpp" }, new SpriteHoverPreview()));
 	context.subscriptions.push(languages.registerHoverProvider({ language: "cpp" }, new SettingHover()));
 

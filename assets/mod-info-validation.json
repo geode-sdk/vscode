@@ -259,7 +259,26 @@
         },
         "repository": {
             "type": "string",
-            "description": "URL of the mod's Git repository, or other equivalent homepage."
+            "description": "URL of the mod's Git repository, or other equivalent homepage. Use the \"links\" key instead",
+            "deprecated": true
+        },
+        "links": {
+            "type": "object",
+            "description": "Links to websites related to the mod",
+            "properties": {
+                "homepage": {
+                    "type": "string",
+                    "description": "URL of the mod's home website"
+                },
+                "source": {
+                    "type": "string",
+                    "description": "URL of the mod's Git repository, or wherever the mod's source code is available"
+                },
+                "community": {
+                    "type": "string",
+                    "description": "A discussion community for the mod, like a Discord server"
+                }
+            }
         },
         "dependencies": {
             "type": [ "array", "null" ],
