@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.13.1]
+ - Undeprecate `repository` in `mod.json` since `links` isn't implemented client-side yet
+
 ## [v1.13.0]
  - Add support for `links` property in `mod.json`
  - Improve color editor support; `ccc3` and `ccc4` calls are now colorized as well as some other changes

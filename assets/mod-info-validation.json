@@ -259,8 +259,7 @@
         },
         "repository": {
             "type": "string",
-            "description": "URL of the mod's Git repository, or other equivalent homepage. Use the \"links\" key instead",
-            "deprecated": true
+            "description": "URL of the mod's Git repository, or other equivalent homepage. Use the \"links\" key instead"
         },
         "links": {
             "type": "object",
