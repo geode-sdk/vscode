@@ -736,7 +736,24 @@
         "tags": {
             "type": [ "array", "null" ],
             "items": {
-                "type": "string"
+                "type": "string",
+                "oneOf": [
+                    { "const": "universal" },
+                    { "const": "gameplay" },
+                    { "const": "editor" },
+                    { "const": "offline" },
+                    { "const": "online" },
+                    { "const": "enhancement" },
+                    { "const": "music" },
+                    { "const": "interface" },
+                    { "const": "bugfix" },
+                    { "const": "utility" },
+                    { "const": "performance" },
+                    { "const": "customization" },
+                    { "const": "content" },
+                    { "const": "developer" },
+                    { "const": "cheats" }
+                ]
             }
         },
         "early-load": {
