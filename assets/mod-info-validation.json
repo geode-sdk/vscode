@@ -366,6 +366,10 @@
                             {
                                 "const": "conflicting",
                                 "title": "The mod will work but can have minor bugs or issues with the incompatibility installed."
+                            },
+                            {
+                                "const": "superseded",
+                                "title": "The mod will replace the incompatibility, if installed."
                             }
                         ]
                     }
