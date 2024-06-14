@@ -369,7 +369,7 @@
                             },
                             {
                                 "const": "superseded",
-                                "title": "The mod will replace another mod in the index."
+                                "title": "The mod will replace the incompatibility, if installed."
                             }
                         ]
                     }
