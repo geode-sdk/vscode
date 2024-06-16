@@ -199,6 +199,7 @@
 		"build": "NODE_ENV=production tsup",
 		"dev": "NODE_ENV=production tsup --watch",
 		"vscode:prepublish": "nr build",
+		"test": "vitest",
 		"publish": "vsce publish --no-dependencies",
 		"pack": "vsce package --no-dependencies",
 		"typecheck": "tsc --noEmit",
@@ -235,6 +236,8 @@
 		"fs-extra": "^11.2.0",
 		"tsup": "^8.1.0",
 		"tsx": "^4.15.5",
-		"typescript": "^5.4.5"
+		"typescript": "^5.4.5",
+		"vite": "^5.3.1",
+		"vitest": "^1.6.0"
 	}
 }
