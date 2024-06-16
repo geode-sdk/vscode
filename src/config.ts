@@ -78,7 +78,7 @@ export function getAsset(name?: string): string {
 			name = name.replace('{theme}', window.activeColorTheme.kind === ColorThemeKind.Dark ? 'dark' : 'light',
 			);
 
-		return join(getExtContext().extension.extensionPath, `assets/${name}`);
+		return join(getExtContext().extension.extensionPath, `res/${name}`);
 	}
 	else {
 		return '';

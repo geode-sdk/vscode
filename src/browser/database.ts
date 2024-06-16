@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { globSync } from 'glob';
+import { globSync } from 'fast-glob';
 import { getExtConfig } from '../config';
 import { cli } from '../geode/cli';
 import type { Project } from '../project/project';

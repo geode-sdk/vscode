@@ -1,7 +1,6 @@
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import process from 'node:process';
 import { ConfigurationTarget } from 'vscode';
 import * as semver from 'semver';
 import { getExtConfig, getOutputChannel } from '../config';

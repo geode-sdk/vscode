@@ -1,3 +1,4 @@
+import { unindent } from '@flowr/utils';
 import type { Option } from '../utils/monads';
 import type { Panel, ScriptPackage, WidgetProps } from './Widget';
 import { Widget } from './Widget';
@@ -23,7 +24,7 @@ export class Button extends Widget {
 
 	static scripts: ScriptPackage = {
 		id: 'Button',
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
             onRegister('button', w => {
                 w.addEventListener('click', e => {
                     post(
@@ -94,7 +95,7 @@ export class Select extends Widget {
 
 	static scripts: ScriptPackage = {
 		id: 'Select',
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
             onRegister('select', w => {
                 w.addEventListener('change', e => {
                     post(
@@ -255,7 +256,7 @@ export class Tabs extends Widget {
 
 	static scripts: ScriptPackage = {
 		id: 'Tabs',
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
             onRegister('tabs', w => {
                 w.addEventListener('change', e => {
                     post(
@@ -375,7 +376,7 @@ export class Input extends Widget {
 
 	static scripts: ScriptPackage = {
 		id: 'Input',
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
             onRegister('input', w => {
                 w.addEventListener('input', e => {
                     post(

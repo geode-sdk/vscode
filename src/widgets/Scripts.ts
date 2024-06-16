@@ -1,3 +1,4 @@
+import { unindent } from '@flowr/utils';
 import type { Option } from '../utils/monads';
 import { None, Some } from '../utils/monads';
 import type { Panel, Widget } from './Widget';
@@ -54,7 +55,7 @@ export namespace scripts {
 
 	export const observer = {
 		id: '_scrollToView',
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
 			const intersectionObservers = {};
 
 			onMessage('create-observer', args => {
@@ -129,7 +130,7 @@ export namespace scripts {
 
 	export const globalClickListener = {
 		id: '_globalClickListener',
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
 			const globalClickListeners = [];
 
 			function onGlobalClick(callback) {

@@ -1,3 +1,4 @@
+import { unindent } from '@flowr/utils';
 import type { DivProps } from './Container';
 import { Column } from './Container';
 import type { ButtonProps } from './Interactive';
@@ -12,7 +13,7 @@ export interface MenuItemProps extends ButtonProps {
 export class MenuItem extends Button {
 	static scripts: ScriptPackage = {
 		id: 'MenuItem',
-		css: /* css */ `
+		css: /* css */ unindent`
             .menu-item {
                 background-color: transparent;
                 border: 1px solid transparent;
@@ -41,7 +42,7 @@ export class Menu extends Column {
 	static scripts: ScriptPackage = {
 		id: 'Menu',
 		requires: ['_globalClickListener'],
-		css: /* css */ `
+		css: /* css */ unindent`
             .menu {
                 position: absolute;
                 background: var(--vscode-menu-background);
@@ -51,7 +52,7 @@ export class Menu extends Column {
                 box-shadow: 0 0 1rem var(--vscode-widget-shadow);
             }
         `,
-		js: /* javascript */ `
+		js: /* javascript */ unindent`
             let lastClickedX = 0;
             let lastClickedY = 0;
 

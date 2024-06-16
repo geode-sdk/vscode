@@ -2,6 +2,8 @@
 .vscode-test/**
 out/**
 node_modules/**
+.github/**
+playground/**
 !node_modules/@vscode/webview-ui-toolkit
 !node_modules/@vscode/codicons
 
@@ -25,11 +27,13 @@ node_modules/**
 !node_modules/lru-cache
 !node_modules/yallist
 
-!assets
+!res
 src/**
 .gitignore
 .yarnrc
-webpack.config.js
+scripts/**
+eslint.config.js
+tsup.config.ts
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json

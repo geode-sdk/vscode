@@ -1,6 +1,7 @@
 import type { TextEditor, Uri } from 'vscode';
 import { ViewColumn, env, window } from 'vscode';
 import Fuse from 'fuse.js';
+import { unindent } from '@flowr/utils';
 import { Menu, MenuItem } from '../widgets/Menu';
 import { getExtConfig } from '../config';
 import type { Option } from '../utils/monads';
@@ -27,7 +28,7 @@ export class ItemWidget extends Widget {
 
 	static scripts: ScriptPackage = {
 		id: 'ItemWidget',
-		css: /* css */ `
+		css: /* css */ unindent`
             .item {
                 padding: .1rem;
                 display: flex;
@@ -313,7 +314,7 @@ export class BrowserPanel extends Panel {
 
 	static scripts: ScriptPackage = {
 		id: 'BrowserPanel',
-		css: /* css */ `
+		css: /* css */ unindent`
             :root {
                 --item-width:   minmax(13rem, 1fr);
                 --item-height:  15rem;

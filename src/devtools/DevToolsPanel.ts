@@ -1,4 +1,5 @@
 import { ViewColumn, window } from 'vscode';
+import { unindent } from '@flowr/utils';
 import { DataGrid, Head, Label, Separator, Text } from '../widgets/Basic';
 import { Column, PaddedDiv, Row } from '../widgets/Container';
 import { Button, Tabs } from '../widgets/Interactive';
@@ -11,7 +12,7 @@ export class DevToolsPanel extends Panel {
 
 	static scripts: ScriptPackage = {
 		id: 'DevToolsPanel',
-		css: /* css */ `
+		css: /* css */ unindent`
             body {
                 padding: 1rem;
             }

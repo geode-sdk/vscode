@@ -1,6 +1,5 @@
 /* eslint-disable unused-imports/no-unused-vars -- Message and isReply are unused experimentally */
 import * as net from 'node:net';
-import process from 'node:process';
 
 // eslint-disable-next-line ts/no-namespace -- todo
 export namespace ipc {

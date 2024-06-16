@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import process from 'node:process';
 import { ConfigurationTarget } from 'vscode';
 import * as semver from 'semver';
 import { getExtConfig, getOutputChannel } from '../config';
@@ -20,18 +19,12 @@ export namespace sdk {
 		try {
 			const sdkVersion = readFileSync(join(getSDKPath(), 'VERSION')).toString();
 			if (!semver.gte(sdkVersion, MINIMUM_SDK_VERSION))
-				return Err(
-                    `SDK Version '${sdkVersion}' is too old, `
-                    + `Geode extension requires at least '${MINIMUM_SDK_VERSION}'`,
-				);
+				return Err(`SDK Version '${sdkVersion}' is too old, Geode extension requires at least '${MINIMUM_SDK_VERSION}'`);
 
 			INSTALLED_VERSION = sdkVersion;
 		}
 		catch (e) {
-			return Err(
-                `Unable to query SDK version: ${(e as Error)}. `
-                + 'Try manually specifying SDK path in extension settings',
-			);
+			return Err(`Unable to query SDK version: ${(e as Error)}. Try manually specifying SDK path in extension settings`);
 		}
 
 		return Ok();
@@ -74,9 +67,7 @@ export namespace sdk {
 		if (verify.isError())
 			return verify;
 
-		getOutputChannel().appendLine(
-            `Found SDK: ${getExtConfig().get('geodeSdkPath')} v${getVersion()}`,
-		);
+		getOutputChannel().appendLine(`Found SDK: ${getExtConfig().get('geodeSdkPath')} v${getVersion()}`);
 
 		return Ok();
 	}

@@ -1,3 +1,4 @@
+import { unindent } from '@flowr/utils';
 import type { ScriptPackage, WidgetProps } from './Widget';
 import { AttrMode, Widget } from './Widget';
 
@@ -33,7 +34,7 @@ export class Div extends Widget {
 export class PaddedDiv extends Widget {
 	static scripts: ScriptPackage = {
 		id: 'PaddedDiv',
-		css: /* css */ `
+		css: /* css */ unindent`
             .padded-div {
                 padding: 1rem;
             }
@@ -57,7 +58,7 @@ export class PaddedDiv extends Widget {
 export class Column extends Widget {
 	static scripts: ScriptPackage = {
 		id: 'Column',
-		css: /* css */ `
+		css: /* css */ unindent`
             .column {
                 display: flex;
                 flex-direction: column;
@@ -105,7 +106,7 @@ export class Column extends Widget {
 export class Row extends Widget {
 	static scripts: ScriptPackage = {
 		id: 'Row',
-		css: /* css */ `
+		css: /* css */ unindent`
             .row {
                 display: flex;
                 flex-direction: row;
@@ -157,7 +158,7 @@ export class Row extends Widget {
 export class Grid extends Widget {
 	static scripts: ScriptPackage = {
 		id: 'Grid',
-		css: /* css */ `
+		css: /* css */ unindent`
             .grid {
                 display: grid;
                 gap: .5rem;
