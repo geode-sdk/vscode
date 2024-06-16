@@ -1,44 +1,44 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-    "injectionSelector": "L:string.quoted.double.cpp",
-    "fileTypes": ["cpp", "hpp", "c", "h"],
-    "scopeName": "source.geode-flalert-literal",
-    "patterns": [
-        {
-            "match": "<cb>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.blue"
-        },
-        {
-            "match": "<cg>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.green"
-        },
-        {
-            "match": "<cl>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.aqua"
-        },
-        {
-            "match": "<cj>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.cyan"
-        },
-        {
-            "match": "<cy>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.yellow"
-        },
-        {
-            "match": "<co>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.orange"
-        },
-        {
-            "match": "<cr>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.red"
-        },
-        {
-            "match": "<cp>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.pink"
-        },
-        {
-            "match": "<ca>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.purple"
-        }
-    ]
+	"injectionSelector": "L:string.quoted.double.cpp",
+	"fileTypes": ["cpp", "hpp", "c", "h"],
+	"scopeName": "source.geode-flalert-literal",
+	"patterns": [
+		{
+			"match": "<cb>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.blue"
+		},
+		{
+			"match": "<cg>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.green"
+		},
+		{
+			"match": "<cl>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.aqua"
+		},
+		{
+			"match": "<cj>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.cyan"
+		},
+		{
+			"match": "<cy>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.yellow"
+		},
+		{
+			"match": "<co>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.orange"
+		},
+		{
+			"match": "<cr>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.red"
+		},
+		{
+			"match": "<cp>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.pink"
+		},
+		{
+			"match": "<ca>((.*?</c>)|(.*)(?=\"))",
+			"name": "geode.flalert.purple"
+		}
+	]
 }

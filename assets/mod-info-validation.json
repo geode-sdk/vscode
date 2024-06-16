@@ -1,793 +1,804 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$defs": {
-        "impl-arrows": {
-            "properties": {
-                "arrows": {
-                    "type": "boolean",
-                    "description": "Enable arrow controls for incrementing / decrementing the value.",
-                    "default": true
-                },
-                "arrow-step": {
-                    "type": "integer",
-                    "description": "How much the arrow controls should increment / decrement.",
-                    "default": 1
-                },
-                "big-arrows": {
-                    "type": "boolean",
-                    "description": "Enable arrow controls for larger increments / decrements of the value.",
-                    "default": false
-                },
-                "big-arrow-step": {
-                    "type": "integer",
-                    "description": "How much the big arrow controls should increment / decrement.",
-                    "default": 5
-                }
-            }
-        },
-        "impl-input": {
-            "properties": {
-                "input": {
-                    "type": "boolean",
-                    "description": "Enable input for typing in the value.",
-                    "default": true
-                }
-            }
-        },
-        "impl-slider-int": {
-            "properties": {
-                "slider": {
-                    "type": "boolean",
-                    "description": "Enable slider for adjusting the value.",
-                    "default": true
-                },
-                "slider-step": {
-                    "type": ["integer", "null"],
-                    "description": "The step size of the slider.",
-                    "default": null
-                }
-            }
-        },
-        "impl-slider-float": {
-            "properties": {
-                "slider": {
-                    "type": "boolean",
-                    "description": "Enable slider for adjusting the value.",
-                    "default": true
-                },
-                "slider-step": {
-                    "type": ["number", "null"],
-                    "description": "The step size of the slider.",
-                    "default": null
-                }
-            }
-        },
-        "impl-file-filters": {
-            "properties": {
-                "filters": {
-                    "type": "array",
-                    "description": "Filter options to show in the file pick dialog. The option \"All files (*.*)\" will always be included alongside these by default.",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "description": {
-                                "type": "string",
-                                "description": "Filter description."
-                            },
-                            "files": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    "description": "File wildcard to match. Can be for example '*.gmd', '*.gmd2', or 'Steve.txt'",
-                                    "markdownDescription": "File wildcard to match. Can be for example `*.gmd`, `*.gmd2`, or `Steve.txt`"
-                                },
-                                "uniqueItems": true
-                            }
-                        },
-                        "unevaluatedProperties": false
-                    }
-                }
-            }
-        },
-        "rgb-value": {
-            "type": ["string", "array", "object"],
-            "pattern": "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
-            "prefixItems": [
-                { "type": "integer", "minimum": 0, "maximum": 255 },
-                { "type": "integer", "minimum": 0, "maximum": 255 },
-                { "type": "integer", "minimum": 0, "maximum": 255 }
-            ],
-            "minItems": 3,
-            "items": false,
-            "properties": {
-                "r": {
-                    "type": "integer",
-                    "description": "Red component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                },
-                "g": {
-                    "type": "integer",
-                    "description": "Green component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                },
-                "b": {
-                    "type": "integer",
-                    "description": "Blue component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                }
-            },
-            "required": ["r", "g", "b"]
-        },
-        "rgba-value": {
-            "type": ["string", "array", "object"],
-            "description": "Default value.",
-            "pattern": "^#?([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$",
-            "prefixItems": [
-                {
-                    "type": "integer",
-                    "description": "Red component of the color.",
-                    "minimum": 0, "maximum": 255
-                },
-                {
-                    "type": "integer",
-                    "description": "Green component of the color.",
-                    "minimum": 0, "maximum": 255
-                },
-                {
-                    "type": "integer",
-                    "description": "Blue component of the color.",
-                    "minimum": 0, "maximum": 255
-                },
-                {
-                    "type": "integer",
-                    "description": "Alpha component of the color.",
-                    "minimum": 0, "maximum": 255
-                }
-            ],
-            "minItems": 4,
-            "items": false,
-            "properties": {
-                "r": {
-                    "type": "integer",
-                    "description": "Red component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                },
-                "g": {
-                    "type": "integer",
-                    "description": "Green component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                },
-                "b": {
-                    "type": "integer",
-                    "description": "Blue component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                },
-                "a": {
-                    "type": "integer",
-                    "description": "Alpha component of the color.",
-                    "minimum": 0,
-                    "maximum": 255
-                }
-            },
-            "required": ["r", "g", "b", "a"]
-        }
-    },
-    "properties": {
-        "geode": {
-            "type": "string",
-            "description": "Geode version to target.",
-            "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
-        },
-        "version": {
-            "type": "string",
-            "description": "Version of the mod.",
-            "pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
-        },
-        "gd": {
-            "type": [ "string", "object" ],
-            "description": "What version of Geometry Dash this mod targets. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
-            "oneOf": [
-                { "pattern": "[0-9]+\\.[0-9]+" },
-                { "const": "*" }
-            ],
-            "properties": {
-                "win": {
-                    "type": "string",
-                    "description": "What version of Geometry Dash this mod targets on Windows. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
-                    "oneOf": [
-                        { "pattern": "[0-9]+\\.[0-9]+" },
-                        { "const": "*" }
-                    ]
-                },
-                "mac": {
-                    "type": "string",
-                    "description": "What version of Geometry Dash this mod targets on MacOS. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
-                    "oneOf": [
-                        { "pattern": "[0-9]+\\.[0-9]+" },
-                        { "const": "*" }
-                    ]
-                },
-                "android": {
-                    "type": "string",
-                    "description": "What version of Geometry Dash this mod targets on Android. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
-                    "oneOf": [
-                        { "pattern": "[0-9]+\\.[0-9]+" },
-                        { "const": "*" }
-                    ]
-                },
-                "ios": {
-                    "type": "string",
-                    "description": "What version of Geometry Dash this mod targets on iOS. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
-                    "oneOf": [
-                        { "pattern": "[0-9]+\\.[0-9]+" },
-                        { "const": "*" }
-                    ]
-                }
-            }
-        },
-        "id": {
-            "type": "string",
-            "description": "ID of the mod. Recommended to be formatted as \"developer.mod-name\".",
-            "pattern": "[a-z0-9-_.]+"
-        },
-        "name": {
-            "type": "string",
-            "description": "Name of the mod. May be anything, but do note that GD usually has limits on what characters it can render."
-        },
-        "developer": {
-            "type": "string",
-            "description": "Name of the mod developer. If the mod has multiple developers, use the \"developers\" key"
-        },
-        "developers": {
-            "type": "array",
-            "description": "Names of the mod's developers",
-            "items": {
-                "type": "string",
-                "description": "A developer for the mod"
-            },
-            "minItems": 1
-        },
-        "description": {
-            "type": "string",
-            "description": "Short, free-form description of the mod."
-        },
-        "repository": {
-            "type": "string",
-            "description": "URL of the mod's Git repository, or other equivalent homepage. Use the \"links\" key instead"
-        },
-        "links": {
-            "type": "object",
-            "description": "Links to websites related to the mod",
-            "properties": {
-                "homepage": {
-                    "type": "string",
-                    "description": "URL of the mod's home website"
-                },
-                "source": {
-                    "type": "string",
-                    "description": "URL of the mod's Git repository, or wherever the mod's source code is available"
-                },
-                "community": {
-                    "type": "string",
-                    "description": "A discussion community for the mod, like a Discord server"
-                }
-            }
-        },
-        "dependencies": {
-            "type": [ "array", "null" ],
-            "description": "List of mods this mod depends on.",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "description": "ID of the dependency.",
-                        "pattern": "[a-zA-Z0-9-_.]+"
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version of the dependency. May use wildcards (*) if a specific version is not required.",
-                        "pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
-                    },
-                    "required": {
-                        "type": "boolean",
-                        "description": "Whether the dependency is required in order to load this mod.",
-                        "default": true,
-                        "deprecated": true
-                    },
-                    "importance": {
-                        "type": "string",
-                        "description": "How important the dependency is.",
-                        "default": "required",
-                        "oneOf": [
-                            {
-                                "const": "required",
-                                "title": "The dependency is required for the mod to load. Will show an error."
-                            },
-                            {
-                                "const": "recommended",
-                                "title": "The dependency is not required but is recommended for a better experience. Will show a recommendation."
-                            },
-                            {
-                                "const": "suggested",
-                                "title": "The dependency is not required but the mod can integrate with it if the dependency is installed. Will show a suggestion."
-                            }
-                        ]
-                    },
-                    "platforms": {
-                        "type": "array",
-                        "description": "If this dependency should only be used on certain platforms, specify this property; by default, Geode assumes dependencies are used on all platforms",
-                        "items": {
-                            "type": "string",
-                            "oneOf": [
-                                { "const": "windows" },
-                                { "const": "macos" },
-                                { "const": "android32" },
-                                { "const": "android64" }
-                            ]
-                        }
-                    }
-                },
-                "required": [ "id", "version" ],
-                "unevaluatedProperties": false
-            }
-        },
-        "incompatibilities": {
-            "type": [ "array", "null" ],
-            "description": "List of mods this mod is incompatible with.",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "description": "ID of the incompatibility.",
-                        "pattern": "[a-zA-Z0-9-_.]+"
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "Version of the incompatibility. May use wildcards (*) if a specific version is not required.",
-                        "pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
-                    },
-                    "importance": {
-                        "type": "string",
-                        "description": "How important the incompatibility is.",
-                        "default": "breaking",
-                        "oneOf": [
-                            {
-                                "const": "breaking",
-                                "title": "The mod will not work at all or will have major bugs with the incompatibility installed."
-                            },
-                            {
-                                "const": "conflicting",
-                                "title": "The mod will work but can have minor bugs or issues with the incompatibility installed."
-                            },
-                            {
-                                "const": "superseded",
-                                "title": "The mod will replace the incompatibility, if installed."
-                            }
-                        ]
-                    }
-                },
-                "required": [ "id", "version" ]
-            }
-        },
-        "resources": {
-            "type": [ "object", "null" ],
-            "description": "The mod's resources. Used in conjunction with Geode CLI to automatically process & package resources for the mod.",
-            "properties": {
-                "fonts": {
-                    "type": [ "object", "null" ],
-                    "description": "Fonts to include with the mod. Provided format should be TTF / OTF. Fonts will be converted automatically into GD-compatible BM fonts by Geode CLI before packaging. List the names of the fonts as keys.",
-                    "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Path to the font's TTF / OTF file (relative to mod root folder)."
-                            },
-                            "size": {
-                                "type": "integer",
-                                "description": "Font size.",
-                                "minimum": 0
-                            },
-                            "charset": {
-                                "type": "string",
-                                "description": "List of characters to include in the generated BM font. Default is \"32-126,8226\"",
-                                "pattern": "[0-9]+(-[0-9]+)?(,([0-9]+(-[0-9]+)?))*",
-                                "default": "32-126,8226"
-                            },
-                            "outline": {
-                                "type": "integer",
-                                "description": "If specified, will generate a black outline of the provided size around the font's characters.",
-                                "minimum": 0
-                            }
-                        },
-                        "required": [ "path", "size" ]
-                    }
-                },
-                "files": {
-                    "type": [ "array", "null" ],
-                    "description": "Files to include with the mod. Things like sounds, binaries, etc.",
-                    "items": {
-                        "type": "string",
-                        "description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sounds/*.png\"."
-                    }
-                },
-                "sprites": {
-                    "type": [ "array", "null" ],
-                    "description": "Sprites to include with the mod. The sprites will automatically have UHD, HD and SD versions created of them.",
-                    "items": {
-                        "type": "string",
-                        "description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sprites/*.png\"."
-                    }
-                },
-                "spritesheets": {
-                    "type": [ "object", "null" ],
-                    "description": "The mod's sprite sheets. Sprite sheets are better optimized than using individual image files, so using them for the majority of the sprites in your mod is recommended. List the names of the mod's spritesheets as keys, and as their values a list of files to include in the sheet.",
-                    "additionalProperties": {
-                        "type": "array",
-                        "description": "A list of files to include in this spritesheet.",
-                        "items": {
-                            "type": "string",
-                            "description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sprites/*.png\"."
-                        }
-                    }
-                }
-            }
-        },
-        "settings": {
-            "type": "object",
-            "description": "The mod's settings. These are editable by the user in-game, and are referenced by their ID.",
-            "additionalProperties": {
-                "type": "object",
-                "description": "A setting. The key is the ID used to reference the setting in code.",
-                "properties": {
-                    "type": {
-                        "type": "string",
-                        "description": "Type of the setting.",
-                        "enum": [
-                            "bool", "int", "float", "string",
-                            "rgb", "color", "rgba", "path", "file",
-                            "custom"
-                        ]
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "Human-readable name for the setting. Used in the UI. If not present, the ID of the setting will be used instead."
-                    },
-                    "description": {
-                        "type": "string",
-                        "description": "Description for the setting."
-                    },
-                    "platforms": {
-                        "type": "array",
-                        "description": "If this setting should only be used on certain platforms, specify this property; by default, Geode assumes settings are used on all platforms",
-                        "items": {
-                            "type": "string",
-                            "oneOf": [
-                                { "const": "windows" },
-                                { "const": "macos" },
-                                { "const": "android32" },
-                                { "const": "android64" }
-                            ]
-                        }
-                    }
-                },
-                "oneOf": [
-                    {
-                        "properties": {
-                            "type": { "const": "int" },
-                            "default": {
-                                "type": ["integer", "object"],
-                                "description": "Default value.",
-                                "properties": {
-                                    "win": {
-                                        "type": "integer",
-                                        "description": "Default value on Windows."
-                                    },
-                                    "mac": {
-                                        "type": "integer",
-                                        "description": "Default value on MacOS."
-                                    },
-                                    "android": {
-                                        "type": "integer",
-                                        "description": "Default value on Android."
-                                    }
-                                },
-                                "required": ["win", "mac", "android"]
-                            },
-                            "min": {
-                                "type": "integer",
-                                "description": "Minimum value."
-                            },
-                            "max": {
-                                "type": "integer",
-                                "description": "Maximum value."
-                            },
-                            "control": {
-                                "type": "object",
-                                "description": "Customize the UI for this setting.",
-                                "allOf": [
-                                    { "$ref": "#/$defs/impl-arrows" },
-                                    { "$ref": "#/$defs/impl-slider-int" },
-                                    { "$ref": "#/$defs/impl-input" }
-                                ],
-                                "unevaluatedProperties": false
-                            }
-                        },
-                        "required": ["type", "default"]
-                    },
-                    {
-                        "properties": {
-                            "type": { "const": "float" },
-                            "default": {
-                                "type": ["number", "object"],
-                                "description": "Default value.",
-                                "properties": {
-                                    "win": {
-                                        "type": "number",
-                                        "description": "Default value on Windows."
-                                    },
-                                    "mac": {
-                                        "type": "number",
-                                        "description": "Default value on MacOS."
-                                    },
-                                    "android": {
-                                        "type": "number",
-                                        "description": "Default value on Android."
-                                    }
-                                },
-                                "required": ["win", "mac", "android"]
-                            },
-                            "min": {
-                                "type": "number",
-                                "description": "Minimum value."
-                            },
-                            "max": {
-                                "type": "number",
-                                "description": "Maximum value."
-                            },
-                            "control": {
-                                "type": "object",
-                                "description": "Customize the UI for this setting.",
-                                "allOf": [
-                                    { "$ref": "#/$defs/impl-arrows" },
-                                    { "$ref": "#/$defs/impl-slider-float" },
-                                    { "$ref": "#/$defs/impl-input" }
-                                ],
-                                "unevaluatedProperties": false
-                            }
-                        },
-                        "required": ["type", "default"]
-                    },
-                    {
-                        "properties": {
-                            "type": { "const": "string" },
-                            "default": {
-                                "type": ["string", "object"],
-                                "description": "Default value.",
-                                "properties": {
-                                    "win": {
-                                        "type": "string",
-                                        "description": "Default value on Windows."
-                                    },
-                                    "mac": {
-                                        "type": "string",
-                                        "description": "Default value on MacOS."
-                                    },
-                                    "android": {
-                                        "type": "string",
-                                        "description": "Default value on Android."
-                                    }
-                                },
-                                "required": ["win", "mac", "android"]
-                            },
-                            "match": {
-                                "type": "string",
-                                "description": "A regex the string must match."
-                            }
-                        },
-                        "required": ["type", "default"]
-                    },
-                    {
-                        "properties": {
-                            "type": { "const": "bool" },
-                            "default": {
-                                "type": ["boolean", "object"],
-                                "description": "Default value.",
-                                "properties": {
-                                    "win": {
-                                        "type": "boolean",
-                                        "description": "Default value on Windows."
-                                    },
-                                    "mac": {
-                                        "type": "boolean",
-                                        "description": "Default value on MacOS."
-                                    },
-                                    "android": {
-                                        "type": "boolean",
-                                        "description": "Default value on Android."
-                                    }
-                                },
-                                "required": ["win", "mac", "android"]
-                            }
-                        },
-                        "required": ["type", "default"]
-                    },
-                    {
-                        "properties": {
-                            "type": { "enum": ["color", "rgb"] },
-                            "default": {
-                                "description": "Default value.",
-                                "oneOf": [
-                                    { "$ref": "#/$defs/rgb-value" },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "win": {
-                                                "$ref": "#/$defs/rgb-value",
-                                                "description": "Default value on Windows."
-                                            },
-                                            "mac": {
-                                                "$ref": "#/$defs/rgb-value",
-                                                "description": "Default value on MacOS."
-                                            },
-                                            "android": {
-                                                "$ref": "#/$defs/rgb-value",
-                                                "description": "Default value on Android."
-                                            }
-                                        },
-                                        "required": ["win", "mac", "android"]
-                                    }
-                                ]
-                            }
-                        },
-                        "required": ["type", "default"]
-                    },
-                    {
-                        "properties": {
-                            "type": { "const": "rgba" },
-                            "default": {
-                                "description": "Default value.",
-                                "oneOf": [
-                                    { "$ref": "#/$defs/rgba-value" },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "win": {
-                                                "$ref": "#/$defs/rgba-value",
-                                                "description": "Default value on Windows."
-                                            },
-                                            "mac": {
-                                                "$ref": "#/$defs/rgba-value",
-                                                "description": "Default value on MacOS."
-                                            },
-                                            "android": {
-                                                "$ref": "#/$defs/rgba-value",
-                                                "description": "Default value on Android."
-                                            }
-                                        },
-                                        "required": ["win", "mac", "android"]
-                                    }
-                                ]
-                            }
-                        },
-                        "required": ["type", "default"]
-                    },
-                    {
-                        "properties": {
-                            "type": { "enum": ["path", "file"] },
-                            "default": {
-                                "type": ["string", "object"],
-                                "description": "Default value.",
-                                "properties": {
-                                    "win": {
-                                        "type": "string",
-                                        "description": "Default value on Windows."
-                                    },
-                                    "mac": {
-                                        "type": "string",
-                                        "description": "Default value on MacOS."
-                                    },
-                                    "android": {
-                                        "type": "string",
-                                        "description": "Default value on Android."
-                                    }
-                                },
-                                "required": ["win", "mac", "android"]
-                            },
-                            "match": {
-                                "type": "string",
-                                "description": "A regex the string must match."
-                            },
-                            "control": {
-                                "type": "object",
-                                "description": "Customize the UI for this setting.",
-                                "allOf": [
-                                    { "$ref": "#/$defs/impl-file-filters" }
-                                ],
-                                "unevaluatedProperties": false
-                            }
-                        },
-                        "required": ["type", "default"]
-                    }
-                ],
-                "unevaluatedProperties": false,
-                "required": [ "type" ]
-            }
-        },
-        "issues": {
-            "type": "object",
-            "description": "Info about where and how to report bugs and other issues regarding the mod.",
-            "properties": {
-                "info": {
-                    "type": "string",
-                    "description": "Free-form info about where and how to report issues. Supports markdown."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "URL to open for posting issues. Usually the GitHub issues page."
-                }
-            },
-            "required": ["info"]
-        },
-        "tags": {
-            "type": [ "array", "null" ],
-            "items": {
-                "type": "string",
-                "oneOf": [
-                    { "const": "universal" },
-                    { "const": "gameplay" },
-                    { "const": "editor" },
-                    { "const": "offline" },
-                    { "const": "online" },
-                    { "const": "enhancement" },
-                    { "const": "music" },
-                    { "const": "interface" },
-                    { "const": "bugfix" },
-                    { "const": "utility" },
-                    { "const": "performance" },
-                    { "const": "customization" },
-                    { "const": "content" },
-                    { "const": "developer" },
-                    { "const": "cheats" }
-                ]
-            }
-        },
-        "early-load": {
-            "type": "boolean",
-            "description": "Whether the mod should always be loaded before the loading screen or not.",
-            "default": false
-        },
-        "api": {
-            "type": "object",
-            "description": "Define that this mod should be used as a dependency. If this key is present, the .lib file is automatically included in the .geode package.",
-            "properties": {
-                "include": {
-                    "type": [ "array" ],
-                    "description": "Headers to include with the mod. Supports globbing.",
-                    "items": {
-                        "type": "string",
-                        "description": "Path to the header(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include all headers using \"include/*.hpp\"."
-                    }
-                }
-            },
-            "required": ["include"]
-        }
-    },
-    "additionalProperties": false,
-    "oneOf": [
-        {
-            "required": [ "geode", "gd", "version", "id", "name", "developer" ]
-        },
-        {
-            "required": [ "geode", "gd", "version", "id", "name", "developers" ]
-        }
-    ]
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$defs": {
+		"impl-arrows": {
+			"properties": {
+				"arrows": {
+					"type": "boolean",
+					"description": "Enable arrow controls for incrementing / decrementing the value.",
+					"default": true
+				},
+				"arrow-step": {
+					"type": "integer",
+					"description": "How much the arrow controls should increment / decrement.",
+					"default": 1
+				},
+				"big-arrows": {
+					"type": "boolean",
+					"description": "Enable arrow controls for larger increments / decrements of the value.",
+					"default": false
+				},
+				"big-arrow-step": {
+					"type": "integer",
+					"description": "How much the big arrow controls should increment / decrement.",
+					"default": 5
+				}
+			}
+		},
+		"impl-input": {
+			"properties": {
+				"input": {
+					"type": "boolean",
+					"description": "Enable input for typing in the value.",
+					"default": true
+				}
+			}
+		},
+		"impl-slider-int": {
+			"properties": {
+				"slider": {
+					"type": "boolean",
+					"description": "Enable slider for adjusting the value.",
+					"default": true
+				},
+				"slider-step": {
+					"type": ["integer", "null"],
+					"description": "The step size of the slider.",
+					"default": null
+				}
+			}
+		},
+		"impl-slider-float": {
+			"properties": {
+				"slider": {
+					"type": "boolean",
+					"description": "Enable slider for adjusting the value.",
+					"default": true
+				},
+				"slider-step": {
+					"type": ["number", "null"],
+					"description": "The step size of the slider.",
+					"default": null
+				}
+			}
+		},
+		"impl-file-filters": {
+			"properties": {
+				"filters": {
+					"type": "array",
+					"description": "Filter options to show in the file pick dialog. The option \"All files (*.*)\" will always be included alongside these by default.",
+					"items": {
+						"type": "object",
+						"properties": {
+							"description": {
+								"type": "string",
+								"description": "Filter description."
+							},
+							"files": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"description": "File wildcard to match. Can be for example '*.gmd', '*.gmd2', or 'Steve.txt'",
+									"markdownDescription": "File wildcard to match. Can be for example `*.gmd`, `*.gmd2`, or `Steve.txt`"
+								},
+								"uniqueItems": true
+							}
+						},
+						"unevaluatedProperties": false
+					}
+				}
+			}
+		},
+		"rgb-value": {
+			"type": ["string", "array", "object"],
+			"pattern": "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+			"prefixItems": [
+				{ "type": "integer", "minimum": 0, "maximum": 255 },
+				{ "type": "integer", "minimum": 0, "maximum": 255 },
+				{ "type": "integer", "minimum": 0, "maximum": 255 }
+			],
+			"minItems": 3,
+			"items": false,
+			"properties": {
+				"r": {
+					"type": "integer",
+					"description": "Red component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				"g": {
+					"type": "integer",
+					"description": "Green component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				"b": {
+					"type": "integer",
+					"description": "Blue component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				}
+			},
+			"required": ["r", "g", "b"]
+		},
+		"rgba-value": {
+			"type": ["string", "array", "object"],
+			"description": "Default value.",
+			"pattern": "^#?([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$",
+			"prefixItems": [
+				{
+					"type": "integer",
+					"description": "Red component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				{
+					"type": "integer",
+					"description": "Green component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				{
+					"type": "integer",
+					"description": "Blue component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				{
+					"type": "integer",
+					"description": "Alpha component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				}
+			],
+			"minItems": 4,
+			"items": false,
+			"properties": {
+				"r": {
+					"type": "integer",
+					"description": "Red component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				"g": {
+					"type": "integer",
+					"description": "Green component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				"b": {
+					"type": "integer",
+					"description": "Blue component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				},
+				"a": {
+					"type": "integer",
+					"description": "Alpha component of the color.",
+					"minimum": 0,
+					"maximum": 255
+				}
+			},
+			"required": ["r", "g", "b", "a"]
+		}
+	},
+	"properties": {
+		"geode": {
+			"type": "string",
+			"description": "Geode version to target.",
+			"pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+		},
+		"version": {
+			"type": "string",
+			"description": "Version of the mod.",
+			"pattern": "^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+		},
+		"gd": {
+			"type": ["string", "object"],
+			"description": "What version of Geometry Dash this mod targets. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+			"oneOf": [
+				{ "pattern": "[0-9]+\\.[0-9]+" },
+				{ "const": "*" }
+			],
+			"properties": {
+				"win": {
+					"type": "string",
+					"description": "What version of Geometry Dash this mod targets on Windows. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+					"oneOf": [
+						{ "pattern": "[0-9]+\\.[0-9]+" },
+						{ "const": "*" }
+					]
+				},
+				"mac": {
+					"type": "string",
+					"description": "What version of Geometry Dash this mod targets on MacOS. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+					"oneOf": [
+						{ "pattern": "[0-9]+\\.[0-9]+" },
+						{ "const": "*" }
+					]
+				},
+				"android": {
+					"type": "string",
+					"description": "What version of Geometry Dash this mod targets on Android. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+					"oneOf": [
+						{ "pattern": "[0-9]+\\.[0-9]+" },
+						{ "const": "*" }
+					]
+				},
+				"ios": {
+					"type": "string",
+					"description": "What version of Geometry Dash this mod targets on iOS. Use \"*\" for any version, or specify a version. \"*\" is for mods that only interact with Cocos or other libraries, or can handle version checking themselves.",
+					"oneOf": [
+						{ "pattern": "[0-9]+\\.[0-9]+" },
+						{ "const": "*" }
+					]
+				}
+			}
+		},
+		"id": {
+			"type": "string",
+			"description": "ID of the mod. Recommended to be formatted as \"developer.mod-name\".",
+			"pattern": "[a-z0-9-_.]+"
+		},
+		"name": {
+			"type": "string",
+			"description": "Name of the mod. May be anything, but do note that GD usually has limits on what characters it can render."
+		},
+		"developer": {
+			"type": "string",
+			"description": "Name of the mod developer. If the mod has multiple developers, use the \"developers\" key"
+		},
+		"developers": {
+			"type": "array",
+			"description": "Names of the mod's developers",
+			"items": {
+				"type": "string",
+				"description": "A developer for the mod"
+			},
+			"minItems": 1
+		},
+		"description": {
+			"type": "string",
+			"description": "Short, free-form description of the mod."
+		},
+		"repository": {
+			"type": "string",
+			"description": "URL of the mod's Git repository, or other equivalent homepage. Use the \"links\" key instead"
+		},
+		"links": {
+			"type": "object",
+			"description": "Links to websites related to the mod",
+			"properties": {
+				"homepage": {
+					"type": "string",
+					"description": "URL of the mod's home website"
+				},
+				"source": {
+					"type": "string",
+					"description": "URL of the mod's Git repository, or wherever the mod's source code is available"
+				},
+				"community": {
+					"type": "string",
+					"description": "A discussion community for the mod, like a Discord server"
+				}
+			}
+		},
+		"dependencies": {
+			"type": ["array", "null"],
+			"description": "List of mods this mod depends on.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "ID of the dependency.",
+						"pattern": "[a-zA-Z0-9-_.]+"
+					},
+					"version": {
+						"type": "string",
+						"description": "Version of the dependency. May use wildcards (*) if a specific version is not required.",
+						"pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
+					},
+					"required": {
+						"type": "boolean",
+						"description": "Whether the dependency is required in order to load this mod.",
+						"default": true,
+						"deprecated": true
+					},
+					"importance": {
+						"type": "string",
+						"description": "How important the dependency is.",
+						"default": "required",
+						"oneOf": [
+							{
+								"const": "required",
+								"title": "The dependency is required for the mod to load. Will show an error."
+							},
+							{
+								"const": "recommended",
+								"title": "The dependency is not required but is recommended for a better experience. Will show a recommendation."
+							},
+							{
+								"const": "suggested",
+								"title": "The dependency is not required but the mod can integrate with it if the dependency is installed. Will show a suggestion."
+							}
+						]
+					},
+					"platforms": {
+						"type": "array",
+						"description": "If this dependency should only be used on certain platforms, specify this property; by default, Geode assumes dependencies are used on all platforms",
+						"items": {
+							"type": "string",
+							"oneOf": [
+								{ "const": "windows" },
+								{ "const": "macos" },
+								{ "const": "android32" },
+								{ "const": "android64" }
+							]
+						}
+					}
+				},
+				"required": ["id", "version"],
+				"unevaluatedProperties": false
+			}
+		},
+		"incompatibilities": {
+			"type": ["array", "null"],
+			"description": "List of mods this mod is incompatible with.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "ID of the incompatibility.",
+						"pattern": "[a-zA-Z0-9-_.]+"
+					},
+					"version": {
+						"type": "string",
+						"description": "Version of the incompatibility. May use wildcards (*) if a specific version is not required.",
+						"pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
+					},
+					"importance": {
+						"type": "string",
+						"description": "How important the incompatibility is.",
+						"default": "breaking",
+						"oneOf": [
+							{
+								"const": "breaking",
+								"title": "The mod will not work at all or will have major bugs with the incompatibility installed."
+							},
+							{
+								"const": "conflicting",
+								"title": "The mod will work but can have minor bugs or issues with the incompatibility installed."
+							},
+							{
+								"const": "superseded",
+								"title": "The mod will replace the incompatibility, if installed."
+							}
+						]
+					}
+				},
+				"required": ["id", "version"]
+			}
+		},
+		"resources": {
+			"type": ["object", "null"],
+			"description": "The mod's resources. Used in conjunction with Geode CLI to automatically process & package resources for the mod.",
+			"properties": {
+				"fonts": {
+					"type": ["object", "null"],
+					"description": "Fonts to include with the mod. Provided format should be TTF / OTF. Fonts will be converted automatically into GD-compatible BM fonts by Geode CLI before packaging. List the names of the fonts as keys.",
+					"additionalProperties": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string",
+								"description": "Path to the font's TTF / OTF file (relative to mod root folder)."
+							},
+							"size": {
+								"type": "integer",
+								"description": "Font size.",
+								"minimum": 0
+							},
+							"charset": {
+								"type": "string",
+								"description": "List of characters to include in the generated BM font. Default is \"32-126,8226\"",
+								"pattern": "[0-9]+(-[0-9]+)?(,([0-9]+(-[0-9]+)?))*",
+								"default": "32-126,8226"
+							},
+							"outline": {
+								"type": "integer",
+								"description": "If specified, will generate a black outline of the provided size around the font's characters.",
+								"minimum": 0
+							}
+						},
+						"required": ["path", "size"]
+					}
+				},
+				"files": {
+					"type": ["array", "null"],
+					"description": "Files to include with the mod. Things like sounds, binaries, etc.",
+					"items": {
+						"type": "string",
+						"description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sounds/*.png\"."
+					}
+				},
+				"sprites": {
+					"type": ["array", "null"],
+					"description": "Sprites to include with the mod. The sprites will automatically have UHD, HD and SD versions created of them.",
+					"items": {
+						"type": "string",
+						"description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sprites/*.png\"."
+					}
+				},
+				"spritesheets": {
+					"type": ["object", "null"],
+					"description": "The mod's sprite sheets. Sprite sheets are better optimized than using individual image files, so using them for the majority of the sprites in your mod is recommended. List the names of the mod's spritesheets as keys, and as their values a list of files to include in the sheet.",
+					"additionalProperties": {
+						"type": "array",
+						"description": "A list of files to include in this spritesheet.",
+						"items": {
+							"type": "string",
+							"description": "Path to the file(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include a bunch of image files using \"resources/sprites/*.png\"."
+						}
+					}
+				}
+			}
+		},
+		"settings": {
+			"type": "object",
+			"description": "The mod's settings. These are editable by the user in-game, and are referenced by their ID.",
+			"additionalProperties": {
+				"type": "object",
+				"description": "A setting. The key is the ID used to reference the setting in code.",
+				"properties": {
+					"type": {
+						"type": "string",
+						"description": "Type of the setting.",
+						"enum": [
+							"bool",
+							"int",
+							"float",
+							"string",
+							"rgb",
+							"color",
+							"rgba",
+							"path",
+							"file",
+							"custom"
+						]
+					},
+					"name": {
+						"type": "string",
+						"description": "Human-readable name for the setting. Used in the UI. If not present, the ID of the setting will be used instead."
+					},
+					"description": {
+						"type": "string",
+						"description": "Description for the setting."
+					},
+					"platforms": {
+						"type": "array",
+						"description": "If this setting should only be used on certain platforms, specify this property; by default, Geode assumes settings are used on all platforms",
+						"items": {
+							"type": "string",
+							"oneOf": [
+								{ "const": "windows" },
+								{ "const": "macos" },
+								{ "const": "android32" },
+								{ "const": "android64" }
+							]
+						}
+					}
+				},
+				"oneOf": [
+					{
+						"properties": {
+							"type": { "const": "int" },
+							"default": {
+								"type": ["integer", "object"],
+								"description": "Default value.",
+								"properties": {
+									"win": {
+										"type": "integer",
+										"description": "Default value on Windows."
+									},
+									"mac": {
+										"type": "integer",
+										"description": "Default value on MacOS."
+									},
+									"android": {
+										"type": "integer",
+										"description": "Default value on Android."
+									}
+								},
+								"required": ["win", "mac", "android"]
+							},
+							"min": {
+								"type": "integer",
+								"description": "Minimum value."
+							},
+							"max": {
+								"type": "integer",
+								"description": "Maximum value."
+							},
+							"control": {
+								"type": "object",
+								"description": "Customize the UI for this setting.",
+								"allOf": [
+									{ "$ref": "#/$defs/impl-arrows" },
+									{ "$ref": "#/$defs/impl-slider-int" },
+									{ "$ref": "#/$defs/impl-input" }
+								],
+								"unevaluatedProperties": false
+							}
+						},
+						"required": ["type", "default"]
+					},
+					{
+						"properties": {
+							"type": { "const": "float" },
+							"default": {
+								"type": ["number", "object"],
+								"description": "Default value.",
+								"properties": {
+									"win": {
+										"type": "number",
+										"description": "Default value on Windows."
+									},
+									"mac": {
+										"type": "number",
+										"description": "Default value on MacOS."
+									},
+									"android": {
+										"type": "number",
+										"description": "Default value on Android."
+									}
+								},
+								"required": ["win", "mac", "android"]
+							},
+							"min": {
+								"type": "number",
+								"description": "Minimum value."
+							},
+							"max": {
+								"type": "number",
+								"description": "Maximum value."
+							},
+							"control": {
+								"type": "object",
+								"description": "Customize the UI for this setting.",
+								"allOf": [
+									{ "$ref": "#/$defs/impl-arrows" },
+									{ "$ref": "#/$defs/impl-slider-float" },
+									{ "$ref": "#/$defs/impl-input" }
+								],
+								"unevaluatedProperties": false
+							}
+						},
+						"required": ["type", "default"]
+					},
+					{
+						"properties": {
+							"type": { "const": "string" },
+							"default": {
+								"type": ["string", "object"],
+								"description": "Default value.",
+								"properties": {
+									"win": {
+										"type": "string",
+										"description": "Default value on Windows."
+									},
+									"mac": {
+										"type": "string",
+										"description": "Default value on MacOS."
+									},
+									"android": {
+										"type": "string",
+										"description": "Default value on Android."
+									}
+								},
+								"required": ["win", "mac", "android"]
+							},
+							"match": {
+								"type": "string",
+								"description": "A regex the string must match."
+							}
+						},
+						"required": ["type", "default"]
+					},
+					{
+						"properties": {
+							"type": { "const": "bool" },
+							"default": {
+								"type": ["boolean", "object"],
+								"description": "Default value.",
+								"properties": {
+									"win": {
+										"type": "boolean",
+										"description": "Default value on Windows."
+									},
+									"mac": {
+										"type": "boolean",
+										"description": "Default value on MacOS."
+									},
+									"android": {
+										"type": "boolean",
+										"description": "Default value on Android."
+									}
+								},
+								"required": ["win", "mac", "android"]
+							}
+						},
+						"required": ["type", "default"]
+					},
+					{
+						"properties": {
+							"type": { "enum": ["color", "rgb"] },
+							"default": {
+								"description": "Default value.",
+								"oneOf": [
+									{ "$ref": "#/$defs/rgb-value" },
+									{
+										"type": "object",
+										"properties": {
+											"win": {
+												"$ref": "#/$defs/rgb-value",
+												"description": "Default value on Windows."
+											},
+											"mac": {
+												"$ref": "#/$defs/rgb-value",
+												"description": "Default value on MacOS."
+											},
+											"android": {
+												"$ref": "#/$defs/rgb-value",
+												"description": "Default value on Android."
+											}
+										},
+										"required": ["win", "mac", "android"]
+									}
+								]
+							}
+						},
+						"required": ["type", "default"]
+					},
+					{
+						"properties": {
+							"type": { "const": "rgba" },
+							"default": {
+								"description": "Default value.",
+								"oneOf": [
+									{ "$ref": "#/$defs/rgba-value" },
+									{
+										"type": "object",
+										"properties": {
+											"win": {
+												"$ref": "#/$defs/rgba-value",
+												"description": "Default value on Windows."
+											},
+											"mac": {
+												"$ref": "#/$defs/rgba-value",
+												"description": "Default value on MacOS."
+											},
+											"android": {
+												"$ref": "#/$defs/rgba-value",
+												"description": "Default value on Android."
+											}
+										},
+										"required": ["win", "mac", "android"]
+									}
+								]
+							}
+						},
+						"required": ["type", "default"]
+					},
+					{
+						"properties": {
+							"type": { "enum": ["path", "file"] },
+							"default": {
+								"type": ["string", "object"],
+								"description": "Default value.",
+								"properties": {
+									"win": {
+										"type": "string",
+										"description": "Default value on Windows."
+									},
+									"mac": {
+										"type": "string",
+										"description": "Default value on MacOS."
+									},
+									"android": {
+										"type": "string",
+										"description": "Default value on Android."
+									}
+								},
+								"required": ["win", "mac", "android"]
+							},
+							"match": {
+								"type": "string",
+								"description": "A regex the string must match."
+							},
+							"control": {
+								"type": "object",
+								"description": "Customize the UI for this setting.",
+								"allOf": [
+									{ "$ref": "#/$defs/impl-file-filters" }
+								],
+								"unevaluatedProperties": false
+							}
+						},
+						"required": ["type", "default"]
+					}
+				],
+				"unevaluatedProperties": false,
+				"required": ["type"]
+			}
+		},
+		"issues": {
+			"type": "object",
+			"description": "Info about where and how to report bugs and other issues regarding the mod.",
+			"properties": {
+				"info": {
+					"type": "string",
+					"description": "Free-form info about where and how to report issues. Supports markdown."
+				},
+				"url": {
+					"type": "string",
+					"description": "URL to open for posting issues. Usually the GitHub issues page."
+				}
+			},
+			"required": ["info"]
+		},
+		"tags": {
+			"type": ["array", "null"],
+			"items": {
+				"type": "string",
+				"oneOf": [
+					{ "const": "universal" },
+					{ "const": "gameplay" },
+					{ "const": "editor" },
+					{ "const": "offline" },
+					{ "const": "online" },
+					{ "const": "enhancement" },
+					{ "const": "music" },
+					{ "const": "interface" },
+					{ "const": "bugfix" },
+					{ "const": "utility" },
+					{ "const": "performance" },
+					{ "const": "customization" },
+					{ "const": "content" },
+					{ "const": "developer" },
+					{ "const": "cheats" }
+				]
+			}
+		},
+		"early-load": {
+			"type": "boolean",
+			"description": "Whether the mod should always be loaded before the loading screen or not.",
+			"default": false
+		},
+		"api": {
+			"type": "object",
+			"description": "Define that this mod should be used as a dependency. If this key is present, the .lib file is automatically included in the .geode package.",
+			"properties": {
+				"include": {
+					"type": ["array"],
+					"description": "Headers to include with the mod. Supports globbing.",
+					"items": {
+						"type": "string",
+						"description": "Path to the header(s) to include, relative to the mod's root folder. Paths support wildcards, so one can for example include all headers using \"include/*.hpp\"."
+					}
+				}
+			},
+			"required": ["include"]
+		}
+	},
+	"additionalProperties": false,
+	"oneOf": [
+		{
+			"required": ["geode", "gd", "version", "id", "name", "developer"]
+		},
+		{
+			"required": ["geode", "gd", "version", "id", "name", "developers"]
+		}
+	]
 }

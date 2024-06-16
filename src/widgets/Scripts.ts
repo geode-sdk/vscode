@@ -1,143 +1,144 @@
+import type { Option } from '../utils/monads';
+import { None, Some } from '../utils/monads';
+import type { Panel, Widget } from './Widget';
 
-import { None, Option, Some } from "../utils/monads";
-import { Panel, ScriptPackage, Widget } from "./Widget";
-
+// eslint-disable-next-line ts/no-namespace -- todo
 export namespace scripts {
-    export type ObserveCallback = (widget: Widget, visible: boolean) => void;
-    type ObserverID = number;
+	export type ObserveCallback = (widget: Widget, visible: boolean) => void;
+	type ObserverID = number;
 
-    export class Observer {
-        #id: ObserverID;
-        #panel: Panel;
+	const observers: Observer[] = [];
 
-        constructor(panel: Panel, root: Widget, callback: ObserveCallback) {
-            this.#panel = panel;
-            this.#id = Observer.createID();
+	export class Observer {
+		#id: ObserverID;
+		#panel: Panel;
 
-            observers.push(this);
+		constructor(panel: Panel, root: Widget, callback: ObserveCallback) {
+			this.#panel = panel;
+			this.#id = Observer.createID();
 
-            root.on('mount', _ => {
-                panel.post('create-observer', { id: this.#id, root: root.getID() });
-                panel.addHandler(
-                    `visibility-changed-${this.#id}`,
-                    (_, args) => {
-                        args.entries.forEach((entry: { id: string, visible: boolean }) => {
-                            const w = panel.getChild(entry.id, true);
-                            if (w) {
-                                callback(w, entry.visible);
-                            }
-                        });
-                    }
-                );
-            }).on('unmount', _ => {
-                panel.post('remove-observer', { id: this.#id });
-                panel.removeHandler(`visibility-changed-${this.#id}`);
-            });
-        }
-        
-        private static createID(): ObserverID {
-            let id = 0;
-            while (id in observers) {
-                id = Math.random();
-            }
-            return id;
-        }
+			observers.push(this);
 
-        remove() {
-            this.#panel.post('remove-observer', { id: this.#id });
-            if (observers.includes(this)) {
-                observers.splice(observers.indexOf(this), 1);
-            }
-        }
-    }
-    const observers: Observer[] = [];
+			root.on('mount', (_) => {
+				panel.post('create-observer', { id: this.#id, root: root.getID() });
+				panel.addHandler(
+					`visibility-changed-${this.#id}`,
+					(_, args) => {
+						args.entries.forEach((entry: { id: string; visible: boolean }) => {
+							const w = panel.getChild(entry.id, true);
+							if (w)
+								callback(w, entry.visible);
+						});
+					},
+				);
+			}).on('unmount', (_) => {
+				panel.post('remove-observer', { id: this.#id });
+				panel.removeHandler(`visibility-changed-${this.#id}`);
+			});
+		}
 
-    export const observer = {
-        id: '_scrollToView',
-        js: /*javascript*/ `
-            const intersectionObservers = {};
+		private static createID(): ObserverID {
+			let id = 0;
+			while (id in observers)
+				id = Math.random();
 
-            onMessage('create-observer', args => {
-                const root = getWidget(args.root);
-                if (root) {
-                    const observer = {
-                        int: null,
-                        mut: null,
-                    };
-                    observer.int = new IntersectionObserver(
-                        entries => {
-                            post('visibility-changed-' + args.id, {
-                                entries: entries.map(entry => {
-                                    return {
-                                        id: getWidgetID(entry.target),
-                                        visible: entry.isIntersecting
-                                    };
-                                })
-                            });
-                        }, {
-                            threshold: 0.1
-                        }
-                    );
+			return id;
+		}
 
-                    // detect when children are added to root and 
-                    // update intersectionobserver accordingly
-                    observer.mut = new MutationObserver(
-                        mutations => {
-                            mutations.forEach(mutation => {
-                                if (mutation.type === 'childList') {
-                                    mutation.addedNodes.forEach(node => observer.int.observe(node));
-                                    mutation.removedNodes.forEach(node => observer.int.unobserve(node));
-                                }
-                            });
-                        }
-                    );
-                    observer.mut.observe(root, {
-                        childList: true
-                    });
+		remove() {
+			this.#panel.post('remove-observer', { id: this.#id });
+			if (observers.includes(this))
+				observers.splice(observers.indexOf(this), 1);
+		}
+	}
 
-                    [...root.children].forEach(node => {
-                        observer.int.observe(node);
-                    });
-                    intersectionObservers[args.id] = observer;
-                } else {
-                    console.warn("Element '" + args.root + "' not found, unable to create observer!");
-                }
-            });
+	export const observer = {
+		id: '_scrollToView',
+		js: /* javascript */ `
+			const intersectionObservers = {};
 
-            onMessage('remove-observer', args => {
-                if (args.id in intersectionObservers) {
-                    intersectionObservers[args.id].mut.disconnect();
-                    intersectionObservers[args.id].int.disconnect();
-                    delete intersectionObservers[args.id];
-                }
-            });
-        `,
+			onMessage('create-observer', args => {
+			const root = getWidget(args.root);
+				if (root) {
+					const observer = {
+						int: null,
+						mut: null,
+					};
+					observer.int = new IntersectionObserver(
+							entries => {
+								post('visibility-changed-' + args.id, {
+								entries: entries.map(entry => {
+									return {
+										id: getWidgetID(entry.target),
+										visible: entry.isIntersecting
+									};
+								}),
+							});
+						}, {
+							threshold: 0.1
+						}
+					);
 
-        createObserver(panel: Panel, root: Widget, callback: ObserveCallback): Option<Observer> {
-            if (panel.isRegisteredWidgetType('_scrollToView')) {
-                return Some(new Observer(panel, root, callback));
-            } else {
-                console.warn(
-                    "createObserver called, but this panel doesn't " +
-                    "have the observer script registered"
-                );
-                return None;
-            }
-        },
-    };
+					// detect when children are added to root and 
+					// update intersectionobserver accordingly
+					observer.mut = new MutationObserver(
+						mutations => {
+							mutations.forEach(mutation => {
+								if (mutation.type === 'childList') {
+									mutation.addedNodes.forEach(node => observer.int.observe(node));
+									mutation.removedNodes.forEach(node => observer.int.unobserve(node));
+								}
+							});
+						}
+					);
+					observer.mut.observe(root, {
+						childList: true
+					});
 
-    export const globalClickListener = {
-        id: '_globalClickListener',
-        js: /*javascript*/ `
-            const globalClickListeners = [];
+					[...root.children].forEach(node => {
+						observer.int.observe(node);
+					});
+					intersectionObservers[args.id] = observer;
+				} else {
+					console.warn("Element '" + args.root + "' not found, unable to create observer!");
+				}
+			});
 
-            function onGlobalClick(callback) {
-                globalClickListeners.push(callback);
-            }
+			onMessage('remove-observer', args => {
+				if (args.id in intersectionObservers) {
+					intersectionObservers[args.id].mut.disconnect();
+					intersectionObservers[args.id].int.disconnect();
+					delete intersectionObservers[args.id];
+				}
+			});
+		`,
 
-            document.addEventListener('click', e => {
-                globalClickListeners.forEach(c => c(e));
-            });
-        `,
-    };
+		createObserver(panel: Panel, root: Widget, callback: ObserveCallback): Option<Observer> {
+			if (panel.isRegisteredWidgetType('_scrollToView')) {
+				return Some(new Observer(panel, root, callback));
+			}
+			else {
+				console.warn(
+					'createObserver called, but this panel doesn\'t '
+					+ 'have the observer script registered',
+				);
+				return None;
+			}
+		},
+	};
+
+	export const globalClickListener = {
+		id: '_globalClickListener',
+		js: /* javascript */ `
+			const globalClickListeners = [];
+
+			function onGlobalClick(callback) {
+				globalClickListeners.push(callback);
+			}
+
+			document.addEventListener('click', e => {
+				globalClickListeners.forEach(c => c(e));
+			});
+		`,
+	};
 }

@@ -1,231 +1,231 @@
 {
-  	"name": "geode",
-  	"displayName": "Geode",
+	"publisher": "GeodeSDK",
+	"name": "geode",
+	"displayName": "Geode",
+	"version": "1.13.1",
 	"private": true,
 	"packageManager": "pnpm@9.3.0",
+	"description": "Utilities for the Geode Geometry Dash modding framework",
+	"author": {
+		"name": "Geode Team",
+		"url": "https://github.com/geode-sdk"
+	},
 	"license": "MIT",
-  	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.13.1",
-  	"engines": {
-  	  	"vscode": "^1.72.0"
-  	},
-  	"author": {
-  	  	"name": "Geode Team",
-  	  	"url": "https://github.com/geode-sdk"
-  	},
-  	"publisher": "GeodeSDK",
-  	"categories": [
-  	  	"Other"
-  	],
-  	"repository": {
+	"repository": {
 		"type": "git",
-  	  	"url": "https://github.com/geode-sdk/vscode"
-  	},
+		"url": "https://github.com/geode-sdk/vscode"
+	},
 	"bugs": {
 		"url": "https://github.com/geode-sdk/vscode/issues"
 	},
-  	"activationEvents": [
-  	  	"onLanguage:cpp",
-  	  	"workspaceContains:**/mod.json"
-  	],
-  	"galleryBanner": {
-  	  	"theme": "dark",
-  	  	"color": "#24222B"
-  	},
-  	"main": "./dist/extension.js",
-  	"contributes": {
-  	  	"commands": [
-  	  	  	{
-  	  	  	  	"title": "Geode: Launch Geometry Dash",
-  	  	  	  	"command": "geode.launchGD"
-  	  	  	},
-  	  	  	{
-  	  	  	  	"title": "Geode: Open Sprite Browser",
-  	  	  	  	"command": "geode.openSpriteBrowser"
-  	  	  	},
-  	  	  	{
-  	  	  	  	"title": "Geode: Publish Mod",
-  	  	  	  	"command": "geode.publishMod"
-  	  	  	}
-  	  	],
-  	  	"keybindings": [
-  	  	  	{
-  	  	  	  	"command": "geode.openSpriteBrowser",
-  	  	  	  	"key": "Ctrl+Alt+B"
-  	  	  	}
-  	  	],
-  	  	"languages": [
-  	  	  	{
-  	  	  	  	"id": "bro",
-  	  	  	  	"aliases": [
-  	  	  	  	  	"Bro"
-  	  	  	  	],
-  	  	  	  	"extensions": [
-  	  	  	  	  	".bro"
-  	  	  	  	],
-  	  	  	  	"configuration": "./src/broma/language-configuration.json"
-  	  	  	}
-  	  	],
-  	  	"grammars": [
-  	  	  	{
-  	  	  	  	"injectTo": [
-  	  	  	  	  	"source.cpp",
-  	  	  	  	  	"source.hpp",
-  	  	  	  	  	"source.c",
-  	  	  	  	  	"source.h"
-  	  	  	  	],
-  	  	  	  	"scopeName": "source.geode-flalert-literal",
-  	  	  	  	"path": "./assets/flalert-colors.json"
-  	  	  	},
-  	  	  	{
-  	  	  	  	"language": "bro",
-  	  	  	  	"scopeName": "source.bro",
-  	  	  	  	"path": "./src/broma/bro.tmLanguage.json"
-  	  	  	},
-  	  	  	{
-  	  	  	  	"injectTo": [
-  	  	  	  	  	"source.bro"
-  	  	  	  	],
-  	  	  	  	"scopeName": "source.bro-extra",
-  	  	  	  	"path": "./src/broma/bro.inject.json"
-  	  	  	}
-  	  	],
-  	  	"configurationDefaults": {
-  	  	  	"editor.tokenColorCustomizations": {
-  	  	  	  	"textMateRules": [
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.blue",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#4a52e1"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.green",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#40e348"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.aqua",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#60abef"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.cyan",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#32c8ff"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.yellow",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#ffff00"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.orange",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#ffa54b"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.red",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#ff5a5a"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.pink",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#ff00ff"
-  	  	  	  	  	  	}
-  	  	  	  	  	},
-  	  	  	  	  	{
-  	  	  	  	  	  	"scope": "geode.flalert.purple",
-  	  	  	  	  	  	"settings": {
-  	  	  	  	  	  	  	"foreground": "#9632ff"
-  	  	  	  	  	  	}
-  	  	  	  	  	}
-  	  	  	  	]
-  	  	  	}
-  	  	},
-  	  	"configuration": {
-  	  	  	"title": "Geode",
-  	  	  	"properties": {
-  	  	  	  	"geode.geodeCliPath": {
-  	  	  	  	  	"type": "string",
-  	  	  	  	  	"default": "",
-  	  	  	  	  	"description": "Path to the Geode CLI executable"
-  	  	  	  	},
-  	  	  	  	"geode.geodeSdkPath": {
-  	  	  	  	  	"type": "string",
-  	  	  	  	  	"default": "",
-  	  	  	  	  	"description": "Path to the Geode SDK"
-  	  	  	  	},
-  	  	  	  	"geode.textureQuality": {
-  	  	  	  	  	"type": "string",
-  	  	  	  	  	"enum": [
-  	  	  	  	  	  	"High",
-  	  	  	  	  	  	"Medium",
-  	  	  	  	  	  	"Low"
-  	  	  	  	  	],
-  	  	  	  	  	"default": "Medium",
-  	  	  	  	  	"description": "Quality of the graphics to show on the Sprite Browser"
-  	  	  	  	},
-  	  	  	  	"geode.defaultSpriteShowCount": {
-  	  	  	  	  	"type": "integer",
-  	  	  	  	  	"default": 350,
-  	  	  	  	  	"description": "How many items to show in the Sprite Browser at once by default"
-  	  	  	  	},
-  	  	  	  	"geode.showCountIncrement": {
-  	  	  	  	  	"type": "integer",
-  	  	  	  	  	"default": 250,
-  	  	  	  	  	"description": "How many items to add in the Sprite Browser when you click 'Load More'"
-  	  	  	  	}
-  	  	  	}
-  	  	},
-  	  	"jsonValidation": [
-  	  	  	{
-  	  	  	  	"fileMatch": "mod.json",
-  	  	  	  	"url": "./assets/mod-info-validation.json"
-  	  	  	}
-  	  	]
-  	},
-  	"icon": "assets/geode-circle-no-gradient.png",
-  	"scripts": {
-  	  	"build": "tsx scripts/build.ts",
+	"categories": [
+		"Other"
+	],
+	"main": "./dist/extension.js",
+	"icon": "assets/geode-circle-no-gradient.png",
+	"engines": {
+		"vscode": "^1.72.0"
+	},
+	"activationEvents": [
+		"onLanguage:cpp",
+		"workspaceContains:**/mod.json"
+	],
+	"galleryBanner": {
+		"theme": "dark",
+		"color": "#24222B"
+	},
+	"contributes": {
+		"commands": [
+			{
+				"title": "Geode: Launch Geometry Dash",
+				"command": "geode.launchGD"
+			},
+			{
+				"title": "Geode: Open Sprite Browser",
+				"command": "geode.openSpriteBrowser"
+			},
+			{
+				"title": "Geode: Publish Mod",
+				"command": "geode.publishMod"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "geode.openSpriteBrowser",
+				"key": "Ctrl+Alt+B"
+			}
+		],
+		"languages": [
+			{
+				"id": "bro",
+				"aliases": [
+					"Bro"
+				],
+				"extensions": [
+					".bro"
+				],
+				"configuration": "./src/broma/language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"injectTo": [
+					"source.cpp",
+					"source.hpp",
+					"source.c",
+					"source.h"
+				],
+				"scopeName": "source.geode-flalert-literal",
+				"path": "./assets/flalert-colors.json"
+			},
+			{
+				"language": "bro",
+				"scopeName": "source.bro",
+				"path": "./src/broma/bro.tmLanguage.json"
+			},
+			{
+				"injectTo": [
+					"source.bro"
+				],
+				"scopeName": "source.bro-extra",
+				"path": "./src/broma/bro.inject.json"
+			}
+		],
+		"configurationDefaults": {
+			"editor.tokenColorCustomizations": {
+				"textMateRules": [
+					{
+						"scope": "geode.flalert.blue",
+						"settings": {
+							"foreground": "#4a52e1"
+						}
+					},
+					{
+						"scope": "geode.flalert.green",
+						"settings": {
+							"foreground": "#40e348"
+						}
+					},
+					{
+						"scope": "geode.flalert.aqua",
+						"settings": {
+							"foreground": "#60abef"
+						}
+					},
+					{
+						"scope": "geode.flalert.cyan",
+						"settings": {
+							"foreground": "#32c8ff"
+						}
+					},
+					{
+						"scope": "geode.flalert.yellow",
+						"settings": {
+							"foreground": "#ffff00"
+						}
+					},
+					{
+						"scope": "geode.flalert.orange",
+						"settings": {
+							"foreground": "#ffa54b"
+						}
+					},
+					{
+						"scope": "geode.flalert.red",
+						"settings": {
+							"foreground": "#ff5a5a"
+						}
+					},
+					{
+						"scope": "geode.flalert.pink",
+						"settings": {
+							"foreground": "#ff00ff"
+						}
+					},
+					{
+						"scope": "geode.flalert.purple",
+						"settings": {
+							"foreground": "#9632ff"
+						}
+					}
+				]
+			}
+		},
+		"configuration": {
+			"title": "Geode",
+			"properties": {
+				"geode.geodeCliPath": {
+					"type": "string",
+					"default": "",
+					"description": "Path to the Geode CLI executable"
+				},
+				"geode.geodeSdkPath": {
+					"type": "string",
+					"default": "",
+					"description": "Path to the Geode SDK"
+				},
+				"geode.textureQuality": {
+					"type": "string",
+					"enum": [
+						"High",
+						"Medium",
+						"Low"
+					],
+					"default": "Medium",
+					"description": "Quality of the graphics to show on the Sprite Browser"
+				},
+				"geode.defaultSpriteShowCount": {
+					"type": "integer",
+					"default": 350,
+					"description": "How many items to show in the Sprite Browser at once by default"
+				},
+				"geode.showCountIncrement": {
+					"type": "integer",
+					"default": 250,
+					"description": "How many items to add in the Sprite Browser when you click 'Load More'"
+				}
+			}
+		},
+		"jsonValidation": [
+			{
+				"fileMatch": "mod.json",
+				"url": "./assets/mod-info-validation.json"
+			}
+		]
+	},
+	"scripts": {
+		"build": "tsx scripts/build.ts",
 		"dev": "pnpm build -- --watch",
 		"lint": "eslint .",
 		"lint:fix": "pnpm lint --fix",
 		"release": "bumpp --tag --push --commit"
-  	},
-  	"devDependencies": {
+	},
+	"dependencies": {
+		"@img/sharp-win32-x64": "^0.33.4",
+		"@vscode/codicons": "^0.0.36",
+		"@vscode/webview-ui-toolkit": "^1.4.0",
+		"camelcase": "^8.0.0",
+		"fuse.js": "^7.0.0",
+		"object-hash": "^3.0.0",
+		"plist": "^3.1.0",
+		"semver": "^7.6.2",
+		"sharp": "^0.33.4"
+	},
+	"devDependencies": {
 		"@flowr/eslint-config": "^3.7.0",
-  	  	"@types/glob": "^8.1.0",
 		"@types/fs-extra": "^11.0.4",
-  	  	"@types/node": "^20.14.2",
-  	  	"@types/object-hash": "^3.0.6",
-  	  	"@types/plist": "^3.0.5",
-  	  	"@types/semver": "^7.5.8",
-  	  	"@types/vscode": "^1.72.0",
-  	  	"eslint": "^9.5.0",
-  	  	"glob": "^10.4.1",
-  	  	"typescript": "^5.4.5",
-		"fs-extra": "^11.2.0",
+		"@types/glob": "^8.1.0",
+		"@types/node": "^20.14.2",
+		"@types/object-hash": "^3.0.6",
+		"@types/plist": "^3.0.5",
+		"@types/semver": "^7.5.8",
+		"@types/vscode": "^1.72.0",
 		"bumpp": "^9.4.1",
+		"eslint": "^9.5.0",
+		"fs-extra": "^11.2.0",
+		"glob": "^10.4.1",
 		"tsup": "^8.1.0",
-		"tsx": "^4.15.5"
-  	},
-  	"dependencies": {
-  	  	"@vscode/codicons": "^0.0.36",
-  	  	"@vscode/webview-ui-toolkit": "^1.4.0",
-  	  	"camelcase": "^8.0.0",
-  	  	"fuse.js": "^7.0.0",
-  	  	"object-hash": "^3.0.0",
-  	  	"plist": "^3.1.0",
-  	  	"semver": "^7.6.2",
-  	  	"sharp": "^0.33.4",
-		"@img/sharp-win32-x64": "^0.33.4"
-  	}
+		"tsx": "^4.15.5",
+		"typescript": "^5.4.5"
+	}
 }

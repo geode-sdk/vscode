@@ -2,9 +2,9 @@
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "bro",
 	"patterns": [
-        {
-            "include": "source.cpp"
-        }
+		{
+			"include": "source.cpp"
+		}
 	],
 	"scopeName": "source.bro"
 }

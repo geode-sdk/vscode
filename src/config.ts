@@ -1,84 +1,86 @@
-
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
-import { ColorThemeKind, ExtensionContext, OutputChannel, window, workspace, WorkspaceConfiguration } from "vscode";
-import { browser } from "./browser/browser";
-import { ItemLocator, ItemType } from "./browser/item";
-import { Err, Ok, Result } from "./utils/monads";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type { ExtensionContext, OutputChannel, WorkspaceConfiguration } from 'vscode';
+import { ColorThemeKind, window, workspace } from 'vscode';
+import { browser } from './browser/browser';
+import type { ItemLocator } from './browser/item';
+import type { Result } from './utils/monads';
+import { Err, Ok } from './utils/monads';
 
 let EXTENSION: ExtensionContext;
 let CHANNEL: OutputChannel;
 
 interface SaveData {
-    favorites: ItemLocator[],
+	favorites: ItemLocator[];
 }
 
 export function getSaveDataPath(): string {
-    return join(EXTENSION.globalStorageUri.fsPath, 'data.json');
+	return join(EXTENSION.globalStorageUri.fsPath, 'data.json');
 }
 
 export function saveData(): Result {
-    try {
-        // create save directory if it doesn't exist yet
-        if (!existsSync(EXTENSION.globalStorageUri.fsPath)) {
-            mkdirSync(EXTENSION.globalStorageUri.fsPath);
-        }
+	try {
+		// create save directory if it doesn't exist yet
+		if (!existsSync(EXTENSION.globalStorageUri.fsPath))
+			mkdirSync(EXTENSION.globalStorageUri.fsPath);
 
-        const data: SaveData = {
-            favorites: browser.getDatabase().getFavorites(),
-        };
-        
-        // save data
-        writeFileSync(getSaveDataPath(), JSON.stringify(data));
-        return Ok();
-    } catch(err) {
-        return Err(`${err}`);
-    }
+		const data: SaveData = {
+			favorites: browser.getDatabase().getFavorites(),
+		};
+
+		// save data
+		writeFileSync(getSaveDataPath(), JSON.stringify(data));
+		return Ok();
+	}
+	catch (err) {
+		return Err(`${err}`);
+	}
 }
 
 export function loadData(): Result {
-    if (!existsSync(getSaveDataPath())) {
-        return Ok();
-    }
-    try {
-        const data = JSON.parse(
-            readFileSync(getSaveDataPath()).toString()
-        ) as SaveData;
+	if (!existsSync(getSaveDataPath()))
+		return Ok();
 
-        browser.getDatabase().loadFavorites(data.favorites);
+	try {
+		const data = JSON.parse(
+			readFileSync(getSaveDataPath()).toString(),
+		) as SaveData;
 
-        return Ok();
-    } catch(err) {
-        return Err(err as string);
-    }
+		browser.getDatabase().loadFavorites(data.favorites);
+
+		return Ok();
+	}
+	catch (err) {
+		return Err(err as string);
+	}
 }
 
 export function getExtConfig(): WorkspaceConfiguration {
-    return workspace.getConfiguration('geode');
+	return workspace.getConfiguration('geode');
 }
 
 export function getExtContext(): ExtensionContext {
-    return EXTENSION;
+	return EXTENSION;
 }
 
 export function getOutputChannel(): OutputChannel {
-    return CHANNEL;
+	return CHANNEL;
 }
 
 export function setupConfig(extension: ExtensionContext, channel: OutputChannel) {
-    EXTENSION = extension;
-    CHANNEL = channel;
+	EXTENSION = extension;
+	CHANNEL = channel;
 }
 
 export function getAsset(name?: string): string {
-    if (name) {
-        if (name.includes('{theme}')) {
-            name = name.replace('{theme}',
-                window.activeColorTheme.kind === ColorThemeKind.Dark ? 'dark' : 'light'
-            );
-        }
-        return join(getExtContext().extension.extensionPath, `assets/${name}`);
-    } else {
-        return '';
-    }
+	if (name) {
+		if (name.includes('{theme}'))
+			name = name.replace('{theme}', window.activeColorTheme.kind === ColorThemeKind.Dark ? 'dark' : 'light',
+			);
+
+		return join(getExtContext().extension.extensionPath, `assets/${name}`);
+	}
+	else {
+		return '';
+	}
 }
