@@ -326,8 +326,11 @@
                         "items": {
                             "type": "string",
                             "oneOf": [
-                                { "const": "windows" },
+                                { "const": "win" },
                                 { "const": "macos" },
+                                { "const": "mac-intel" },
+                                { "const": "mac-arm" },
+                                { "const": "android" },
                                 { "const": "android32" },
                                 { "const": "android64" }
                             ]
@@ -471,8 +474,11 @@
                         "items": {
                             "type": "string",
                             "oneOf": [
-                                { "const": "windows" },
+                                { "const": "win" },
                                 { "const": "macos" },
+                                { "const": "mac-intel" },
+                                { "const": "mac-arm" },
+                                { "const": "android" },
                                 { "const": "android32" },
                                 { "const": "android64" }
                             ]
