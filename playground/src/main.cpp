@@ -75,6 +75,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		 * your mod id followed by a slash. This is good practice for setting your own node ids.
 		*/
 		myButton->setID("my-button"_spr);
+		myButton->setColor({ 255, 25, 25 });
 
 		/**
 		 * We update the layout of the menu to ensure that our button is properly placed.

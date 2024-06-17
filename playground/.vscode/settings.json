@@ -1,7 +1,0 @@
-{
-    "geode.geodeCliPath": "/development/hhhh/geode/cli/target/release/geode",
-    "geode.geodeSdkPath": "/development/cmake/cmake/cmake/cmake/cmake/target/geode-sdk",
-    "geode.textureQuality": "High",
-    "geode.defaultSpriteShowCount": 31294302849821090,
-    "geode.showCountIncrement": 0.0000000005
-}
