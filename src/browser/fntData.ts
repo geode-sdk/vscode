@@ -82,8 +82,7 @@ function parseLine(line: string, firstSpace: number) {
 		.substring(firstSpace + 1) // skip key
 		.replace(/letter=['"]\S+['"]/gi, '') // remove "letter"
 		.split('=') // split by key-value
-		// eslint-disable-next-line regexp/no-misleading-capturing-group, regexp/no-empty-lookarounds-assertion -- idk
-		.map(str => str.trim().match(/(".*?"|[^"\s]+)+(?=\s*)/g)) // https://github.com/mattdesl/parse-bmfont-ascii/blob/master/index.js
+		.map(str => str.trim().match(/"[^"]*"|[^\s"]+/g)) // https://github.com/mattdesl/parse-bmfont-ascii/blob/master/index.js
 		.forEach((s, ix, arr) => {
 			if (s)
 				if (ix === 0) {

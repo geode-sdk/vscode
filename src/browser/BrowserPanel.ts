@@ -9,11 +9,11 @@ import { Badge, Element, Head, Image, Label, LoadingCircle, Spacer, Text } from 
 import { Column, Div, Grid, Row } from '../widgets/Container';
 import type { TabProps } from '../widgets/Interactive';
 import { Button, Input, Select, Tab, Tabs } from '../widgets/Interactive';
-import { scripts } from '../widgets/Scripts';
+import * as scripts from '../widgets/Scripts';
 import type { ScriptPackage } from '../widgets/Widget';
 import { Panel, Widget } from '../widgets/Widget';
 import { insertSnippet } from '../project/source';
-import { browser } from './browser';
+import * as browser from './browser';
 import type { Item, SheetItem } from './item';
 import { ItemType, fetchItemImage, getSnippetOptions, useItem } from './item';
 

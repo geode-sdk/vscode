@@ -3,7 +3,7 @@ import type { TextEditor } from 'vscode';
 import { SnippetString } from 'vscode';
 import sharp from 'sharp';
 import { getAsset } from '../config';
-import type { cli } from '../geode/cli';
+import type { Profile } from '../geode/cli';
 import type { Project } from '../project/project';
 import { getActiveProject, typeIsProject } from '../project/project';
 import { insertSnippet, createPlaceholder as ph, createPlaceholderName as phn, snippet } from '../project/source';
@@ -11,7 +11,7 @@ import type { Future, Option } from '../utils/monads';
 import { Err, None, Ok } from '../utils/monads';
 import { removeFromArray } from '../utils/utils';
 import { getBMFontDatabase } from './BMFontDatabase';
-import { browser } from './browser';
+import * as browser from './browser';
 import { createCoverImage, getSheetDatabase } from './SheetDatabase';
 
 export enum ItemType {
@@ -26,7 +26,7 @@ export function itemTypeID(type: ItemType) {
 	return ItemType[type];
 }
 
-export type Source = string | cli.Profile | Project;
+export type Source = string | Profile | Project;
 
 export function sourceID(src: Source): string {
 	if (typeof (src) === 'string')

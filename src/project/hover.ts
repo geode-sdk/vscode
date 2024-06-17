@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CancellationToken, HoverProvider, ProviderResult, TextDocument } from 'vscode';
 import { Hover, Position, Range } from 'vscode';
-import { browser } from '../browser/browser';
+import * as browser from '../browser/browser';
 import type { Item, SheetSpriteItem } from '../browser/item';
 import { ItemType, fetchItemImage, sourceID } from '../browser/item';
 import type { Option } from '../utils/monads';

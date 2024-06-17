@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { ExtensionContext, OutputChannel, WorkspaceConfiguration } from 'vscode';
 import { ColorThemeKind, window, workspace } from 'vscode';
-import { browser } from './browser/browser';
+import * as browser from './browser/browser';
 import type { ItemLocator } from './browser/item';
 import type { Result } from './utils/monads';
 import { Err, Ok } from './utils/monads';

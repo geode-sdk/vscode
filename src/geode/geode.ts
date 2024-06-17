@@ -1,7 +1,7 @@
 import type { Future } from '../utils/monads';
 import { Err, Ok } from '../utils/monads';
-import { cli } from './cli';
-import { sdk } from './sdk';
+import * as cli from './cli';
+import * as sdk from './sdk';
 
 export * from './cli';
 export * from './sdk';

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { globSync } from 'fast-glob';
 import { getExtConfig } from '../config';
-import { cli } from '../geode/cli';
+import * as cli from '../geode/cli';
 import type { Project } from '../project/project';
 import { getOpenedProjects, typeIsProject } from '../project/project';
 import type { Option } from '../utils/monads';

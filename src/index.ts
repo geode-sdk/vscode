@@ -3,7 +3,7 @@ import type { ExtensionContext } from 'vscode';
 import { Uri, commands, env, languages, window } from 'vscode';
 import { getOutputChannel, loadData, saveData, setupConfig } from './config';
 import * as geode from './geode/geode';
-import { browser } from './browser/browser';
+import * as browser from './browser/browser';
 import { getActiveProject, getOpenedProjects } from './project/project';
 import { CCColor3bProvider, CCColor4bProvider } from './project/color';
 import { SettingHover, SpriteHoverPreview } from './project/hover';
@@ -42,7 +42,7 @@ export async function activate(context: ExtensionContext) {
 	// register commands
 	context.subscriptions.push(commands.registerCommand('geode.launchGD', async () => {
 		channel.appendLine('Launching Geometry Dash...');
-		const res = await geode.gd.launchGD();
+		const res = await geode.launchGD();
 		if (res.isError())
 			window.showErrorMessage(`Unable to launch GD: ${res.unwrapErr()}`);
 	}));
@@ -52,7 +52,7 @@ export async function activate(context: ExtensionContext) {
 	}));
 
 	context.subscriptions.push(commands.registerCommand('geode.publishMod', async () => {
-		const res = geode.cli.runCLICmdInProject(`project publish`);
+		const res = geode.runCLICmdInProject(`project publish`);
 		if (res.isError()) {
 			window.showErrorMessage(`Unable to publish mod: ${res.unwrapErr()}`);
 			return;
