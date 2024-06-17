@@ -1,179 +1,177 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
 export interface Font {
-    path: string,
-    size: number,
-    charset: string,
-    outline: number,
+	path: string;
+	size: number;
+	charset: string;
+	outline: number;
 }
 
 export interface Resources {
-    files?: string[] | null,
-    sprites?: string[] | null,
-    fonts?: { [name: string]: Font } | null,
-    spritesheets?: { [name: string]: string[] } | null
+	files?: string[] | null;
+	sprites?: string[] | null;
+	fonts?: { [name: string]: Font } | null;
+	spritesheets?: { [name: string]: string[] } | null;
 }
 
 export type Version
-    = `${number}.${number}.${number}`
-    | `${number}.${number}.${number}-${string}`
-    | `${number}.${number}.${number}-${string}${number}`
-    | `v${number}.${number}.${number}`
-    | `v${number}.${number}.${number}-${string}`
-    | `v${number}.${number}.${number}-${string}${number}`;
+	= `${number}.${number}.${number}`
+	| `${number}.${number}.${number}-${string}`
+	| `${number}.${number}.${number}-${string}${number}`
+	| `v${number}.${number}.${number}`
+	| `v${number}.${number}.${number}-${string}`
+	| `v${number}.${number}.${number}-${string}${number}`;
 
 export type SettingType =
-    'bool' | 'int' | 'float' | 'string' |
-    'rgb' | 'color' | 'rgba' | 'path' | 'file' | 'custom';
+	'bool' | 'int' | 'float' | 'string' |
+	'rgb' | 'color' | 'rgba' | 'path' | 'file' | 'custom';
 
 export type Color =
-    string |
-    [number, number, number] |
-    { r: number, g: number, b: number };
+	string |
+	[number, number, number] |
+	{ r: number; g: number; b: number };
 
 export type ColorAlpha =
-    string |
-    [number, number, number, number] |
-    { r: number, g: number, b: number, a: number };
+	string |
+	[number, number, number, number] |
+	{ r: number; g: number; b: number; a: number };
 
 export interface ArrowsControl {
-    'arrows'?: boolean,
-    'arrow-step'?: number,
-    'big-arrows'?: boolean,
-    'big-arrow-step'?: number,
+	'arrows'?: boolean;
+	'arrow-step'?: number;
+	'big-arrows'?: boolean;
+	'big-arrow-step'?: number;
 }
 
 export interface InputControl {
-    'input'?: boolean,
+	input?: boolean;
 }
 
 export interface SliderControl {
-    'slider'?: boolean,
-    'slider-step'?: number | null,
+	'slider'?: boolean;
+	'slider-step'?: number | null;
 }
 
 export interface FileFilter {
-    description?: string,
-    files?: string[],
+	description?: string;
+	files?: string[];
 }
 
 export interface FileControl {
-    'filters'?: FileFilter[]
+	filters?: FileFilter[];
 }
 
 export interface Setting {
-    type: SettingType,
-    name?: string,
-    description?: string,
+	type: SettingType;
+	name?: string;
+	description?: string;
 }
 
 export interface IntSetting extends Setting {
-    type: 'int',
-    default: number,
-    min?: number,
-    max?: number,
-    'one-of'?: number[],
-    control: ArrowsControl & SliderControl & InputControl,
+	'type': 'int';
+	'default': number;
+	'min'?: number;
+	'max'?: number;
+	'one-of'?: number[];
+	'control': ArrowsControl & SliderControl & InputControl;
 }
 
 export interface FloatSetting extends Setting {
-    type: 'float',
-    default: number,
-    min?: number,
-    max?: number,
-    'one-of'?: number[],
-    control: ArrowsControl & SliderControl & InputControl,
+	'type': 'float';
+	'default': number;
+	'min'?: number;
+	'max'?: number;
+	'one-of'?: number[];
+	'control': ArrowsControl & SliderControl & InputControl;
 }
 
 export interface StringSetting extends Setting {
-    type: 'string',
-    default: string,
-    match?: string,
-    'one-of': string[],
+	'type': 'string';
+	'default': string;
+	'match'?: string;
+	'one-of': string[];
 }
 
 export interface BoolSetting extends Setting {
-    type: 'bool',
-    default: boolean,
+	type: 'bool';
+	default: boolean;
 }
 
 export interface ColorSetting extends Setting {
-    type: 'color' | 'rgb',
-    default: Color,
+	type: 'color' | 'rgb';
+	default: Color;
 }
 
 export interface ColorAlphaSetting extends Setting {
-    type: 'rgba',
-    default: ColorAlpha,
+	type: 'rgba';
+	default: ColorAlpha;
 }
 
 export interface FileSetting extends Setting {
-    type: 'path' | 'file',
-    default: string,
-    control?: FileControl,
+	type: 'path' | 'file';
+	default: string;
+	control?: FileControl;
 }
 
-export type Settings = { [id: string]: Setting };
+export interface Settings { [id: string]: Setting }
 
 export interface Issues {
-    info: string,
-    url?: string,
+	info: string;
+	url?: string;
 }
 
 export interface Dependency {
-    id: string,
-    version: Version,
-    required?: boolean,
+	id: string;
+	version: Version;
+	required?: boolean;
 }
 
 export interface Api {
-    include: string[],
+	include: string[];
 }
 
 export interface ModJson {
-    geode: Version,
-    version: Version,
-    id: string,
-    name: string,
-    developer: string,
-    description?: string,
-    repository?: string,
-    dependencies?: Dependency[] | null,
-    resources?: Resources | null,
-    settings?: Settings,
-    issues?: Issues,
-    'early-load'?: boolean,
-    api?: Api,
+	'geode': Version;
+	'version': Version;
+	'id': string;
+	'name': string;
+	'developer': string;
+	'description'?: string;
+	'repository'?: string;
+	'dependencies'?: Dependency[] | null;
+	'resources'?: Resources | null;
+	'settings'?: Settings;
+	'issues'?: Issues;
+	'early-load'?: boolean;
+	'api'?: Api;
 }
 
 // Mod runtime info, queried through loader IPC
 
 export interface RTHook {
-    address: number,
-    detour: number,
-    name: string,
-    enabled: boolean,
+	address: number;
+	detour: number;
+	name: string;
+	enabled: boolean;
 }
 
 export interface RTPatch {
-    address: number,
-    original: number[],
-    patch: number[],
-    applied: boolean,
+	address: number;
+	original: number[];
+	patch: number[];
+	applied: boolean;
 }
 
 export interface ModRunTimeInfo {
-    hooks: RTHook[],
-    patches: RTPatch[],
-    enabled: boolean,
-    loaded: boolean,
-    'temp-dir': string,
-    'save-dir': string,
-    'config-dir': string,
+	'hooks': RTHook[];
+	'patches': RTPatch[];
+	'enabled': boolean;
+	'loaded': boolean;
+	'temp-dir': string;
+	'save-dir': string;
+	'config-dir': string;
 }
 
 export interface RTModJson extends ModJson {
-    path: string,
-    binary: string,
-    runtime: ModRunTimeInfo,
+	path: string;
+	binary: string;
+	runtime: ModRunTimeInfo;
 }

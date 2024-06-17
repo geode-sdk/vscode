@@ -8,22 +8,22 @@ This is a rewrite and enhancement of the previous `geode-support` extension, whi
 
 ## Features
 
- * Launch GD (`Geode: Launch Geometry Dash` command).
- * Validation for `mod.json`
- * Sprite browser (Use the `Ctrl + Alt + B` shortcut to launch, or `Geode: Open Sprite Browser`)
- * Colorization for `FLAlertLayer` tags
- * Inline color hints for `ccColor3B` and `ccColor4B`
- * Preview sprites on hover
- * View mod setting info on hover
+* Launch GD (`Geode: Launch Geometry Dash` command).
+* Validation for `mod.json`
+* Sprite browser (Use the `Ctrl + Alt + B` shortcut to launch, or `Geode: Open Sprite Browser`)
+* Colorization for `FLAlertLayer` tags
+* Inline color hints for `ccColor3B` and `ccColor4B`
+* Preview sprites on hover
+* View mod setting info on hover
 
-![](./assets/color-hover.png)
+![cocos2d color picker inline hint (color picker)](./res/color-hover.png)
 
-![](./assets/setting-hover.png)
+![geode settings inline hint (text)](./res/setting-hover.png)
 
-![](./assets/sprite-hover.png)
+![sprite hover inline hint (icons)](./res/sprite-hover.png)
 
 ## To-do
 
- * Generate classes
- * UI designer
- * Possibly some sort of Clippy feature? (Linter)
+* Generate classes
+* UI designer
+* Possibly some sort of Clippy feature? (Linter)

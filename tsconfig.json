@@ -1,18 +1,20 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
 		"target": "ES2020",
-		"lib": [
-			"ES2020"
-		],
-		"sourceMap": true,
+		"lib": ["ESNext"],
 		"rootDir": "src",
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true,
 		"strict": true,
+		"strictNullChecks": true,
+		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
-		"noFallthroughCasesInSwitch": true,
+		"sourceMap": true,
+		"esModuleInterop": true
 	},
-    "include": [
-        "src/**/*.ts"
-    ]
+	"include": [
+		"src/**/*.ts"
+	]
 }
