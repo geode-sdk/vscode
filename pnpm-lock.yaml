@@ -7,34 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@img/sharp-win32-x64':
-        specifier: ^0.33.4
-        version: 0.33.4
-      '@vscode/codicons':
-        specifier: ^0.0.36
-        version: 0.0.36
-      '@vscode/webview-ui-toolkit':
-        specifier: ^1.4.0
-        version: 1.4.0(react@18.3.1)
-      camelcase:
-        specifier: ^8.0.0
-        version: 8.0.0
-      fuse.js:
-        specifier: ^7.0.0
-        version: 7.0.0
-      object-hash:
-        specifier: ^3.0.0
-        version: 3.0.0
-      plist:
-        specifier: ^3.1.0
-        version: 3.1.0
-      semver:
-        specifier: ^7.6.2
-        version: 7.6.2
-      sharp:
-        specifier: ^0.33.4
-        version: 0.33.4
     devDependencies:
       '@antfu/ni':
         specifier: ^0.21.12
@@ -45,6 +17,9 @@ importers:
       '@flowr/utils':
         specifier: ^3.7.0
         version: 3.7.0
+      '@img/sharp-win32-x64':
+        specifier: ^0.33.4
+        version: 0.33.4
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -63,12 +38,21 @@ importers:
       '@types/vscode':
         specifier: ^1.72.0
         version: 1.90.0
+      '@vscode/codicons':
+        specifier: ^0.0.36
+        version: 0.0.36
       '@vscode/vsce':
         specifier: ^2.27.0
         version: 2.27.0
+      '@vscode/webview-ui-toolkit':
+        specifier: ^1.4.0
+        version: 1.4.0(react@18.3.1)
       bumpp:
         specifier: ^9.4.1
         version: 9.4.1
+      camelcase:
+        specifier: ^8.0.0
+        version: 8.0.0
       eslint:
         specifier: ^9.5.0
         version: 9.5.0
@@ -81,6 +65,21 @@ importers:
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
+      fuse.js:
+        specifier: ^7.0.0
+        version: 7.0.0
+      object-hash:
+        specifier: ^3.0.0
+        version: 3.0.0
+      plist:
+        specifier: ^3.1.0
+        version: 3.1.0
+      semver:
+        specifier: ^7.6.2
+        version: 7.6.2
+      sharp:
+        specifier: ^0.33.4
+        version: 0.33.4
       tsup:
         specifier: ^8.1.0
         version: 8.1.0(postcss@8.4.38)(typescript@5.4.5)

@@ -1,5 +1,4 @@
 {
-    "$schema": "../res/mod-info-validation.json",
     "name": "Geode Test Mod",
     "developers": ["meow", "meow 2", "meow 3"],
     "description": "My Epic Mod",
