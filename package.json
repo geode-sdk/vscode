@@ -196,7 +196,8 @@
 		]
 	},
 	"scripts": {
-		"build": "NODE_ENV=production tsup",
+		"build": "NODE_ENV=production tsup --minify",
+		"build:dev": "NODE_ENV=development tsup",
 		"dev": "NODE_ENV=production tsup --watch",
 		"vscode:prepublish": "nr build",
 		"test": "vitest",
@@ -212,6 +213,7 @@
 		"@flowr/eslint-config": "^3.7.0",
 		"@flowr/utils": "^3.7.0",
 		"@img/sharp-win32-x64": "^0.33.4",
+
 		"@types/fs-extra": "^11.0.4",
 		"@types/node": "^20.14.2",
 		"@types/object-hash": "^3.0.6",
