@@ -5,7 +5,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  publish:
+    name: Publish to VS Code Marketplace
     runs-on: windows-2022
     steps:
     - name: Checkout
