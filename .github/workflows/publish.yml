@@ -1,3 +1,5 @@
+name: Publish to VS Code Marketplace
+
 on:
   release:
     types:
@@ -6,7 +8,6 @@ on:
 
 jobs:
   publish:
-    name: Publish to VS Code Marketplace
     runs-on: windows-2022
     steps:
     - name: Checkout
