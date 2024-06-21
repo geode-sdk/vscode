@@ -1,60 +1,64 @@
-
 import { None, Option, Some } from "../utils/monads";
 import { Panel, ScriptPackage, Widget } from "./Widget";
 
 export namespace scripts {
-    export type ObserveCallback = (widget: Widget, visible: boolean) => void;
-    type ObserverID = number;
+	export type ObserveCallback = (widget: Widget, visible: boolean) => void;
+	type ObserverID = number;
 
-    export class Observer {
-        #id: ObserverID;
-        #panel: Panel;
+	export class Observer {
+		#id: ObserverID;
+		#panel: Panel;
 
-        constructor(panel: Panel, root: Widget, callback: ObserveCallback) {
-            this.#panel = panel;
-            this.#id = Observer.createID();
+		constructor(panel: Panel, root: Widget, callback: ObserveCallback) {
+			this.#panel = panel;
+			this.#id = Observer.createID();
 
-            observers.push(this);
+			observers.push(this);
 
-            root.on('mount', _ => {
-                panel.post('create-observer', { id: this.#id, root: root.getID() });
-                panel.addHandler(
-                    `visibility-changed-${this.#id}`,
-                    (_, args) => {
-                        args.entries.forEach((entry: { id: string, visible: boolean }) => {
-                            const w = panel.getChild(entry.id, true);
-                            if (w) {
-                                callback(w, entry.visible);
-                            }
-                        });
-                    }
-                );
-            }).on('unmount', _ => {
-                panel.post('remove-observer', { id: this.#id });
-                panel.removeHandler(`visibility-changed-${this.#id}`);
-            });
-        }
-        
-        private static createID(): ObserverID {
-            let id = 0;
-            while (id in observers) {
-                id = Math.random();
-            }
-            return id;
-        }
+			root.on("mount", (_) => {
+				panel.post("create-observer", {
+					id: this.#id,
+					root: root.getID(),
+				});
+				panel.addHandler(
+					`visibility-changed-${this.#id}`,
+					(_, args) => {
+						args.entries.forEach(
+							(entry: { id: string; visible: boolean }) => {
+								const w = panel.getChild(entry.id, true);
+								if (w) {
+									callback(w, entry.visible);
+								}
+							},
+						);
+					},
+				);
+			}).on("unmount", (_) => {
+				panel.post("remove-observer", { id: this.#id });
+				panel.removeHandler(`visibility-changed-${this.#id}`);
+			});
+		}
 
-        remove() {
-            this.#panel.post('remove-observer', { id: this.#id });
-            if (observers.includes(this)) {
-                observers.splice(observers.indexOf(this), 1);
-            }
-        }
-    }
-    const observers: Observer[] = [];
+		private static createID(): ObserverID {
+			let id = 0;
+			while (id in observers) {
+				id = Math.random();
+			}
+			return id;
+		}
 
-    export const observer = {
-        id: '_scrollToView',
-        js: /*javascript*/ `
+		remove() {
+			this.#panel.post("remove-observer", { id: this.#id });
+			if (observers.includes(this)) {
+				observers.splice(observers.indexOf(this), 1);
+			}
+		}
+	}
+	const observers: Observer[] = [];
+
+	export const observer = {
+		id: "_scrollToView",
+		js: /*javascript*/ `
             const intersectionObservers = {};
 
             onMessage('create-observer', args => {
@@ -113,22 +117,26 @@ export namespace scripts {
             });
         `,
 
-        createObserver(panel: Panel, root: Widget, callback: ObserveCallback): Option<Observer> {
-            if (panel.isRegisteredWidgetType('_scrollToView')) {
-                return Some(new Observer(panel, root, callback));
-            } else {
-                console.warn(
-                    "createObserver called, but this panel doesn't " +
-                    "have the observer script registered"
-                );
-                return None;
-            }
-        },
-    };
+		createObserver(
+			panel: Panel,
+			root: Widget,
+			callback: ObserveCallback,
+		): Option<Observer> {
+			if (panel.isRegisteredWidgetType("_scrollToView")) {
+				return Some(new Observer(panel, root, callback));
+			} else {
+				console.warn(
+					"createObserver called, but this panel doesn't " +
+						"have the observer script registered",
+				);
+				return None;
+			}
+		},
+	};
 
-    export const globalClickListener = {
-        id: '_globalClickListener',
-        js: /*javascript*/ `
+	export const globalClickListener = {
+		id: "_globalClickListener",
+		js: /*javascript*/ `
             const globalClickListeners = [];
 
             function onGlobalClick(callback) {
@@ -139,5 +147,5 @@ export namespace scripts {
                 globalClickListeners.forEach(c => c(e));
             });
         `,
-    };
+	};
 }

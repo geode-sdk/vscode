@@ -1,16 +1,15 @@
-
 import { Column, DivProps } from "./Container";
 import { Button, ButtonProps } from "./Interactive";
 import { AttrMode, Panel, ScriptPackage, Widget } from "./Widget";
 
 export interface MenuItemProps extends ButtonProps {
-    onClick?: (panel: Panel) => void,
+	onClick?: (panel: Panel) => void;
 }
 
 export class MenuItem extends Button {
-    static scripts: ScriptPackage = {
-        id: 'MenuItem',
-        css: /*css*/ `
+	static scripts: ScriptPackage = {
+		id: "MenuItem",
+		css: /*css*/ `
             .menu-item {
                 background-color: transparent;
                 border: 1px solid transparent;
@@ -20,26 +19,26 @@ export class MenuItem extends Button {
                 background-color: var(--vscode-menubar-selectionBackground);
                 border: 1px solid var(--vscode-menubar-selectionBorder);
             }
-        `
-    };
+        `,
+	};
 
-    constructor(name: string, props?: MenuItemProps) {
-        super(name, props);
-        this.attr('class', 'menu-item', AttrMode.add);
-    }
+	constructor(name: string, props?: MenuItemProps) {
+		super(name, props);
+		this.attr("class", "menu-item", AttrMode.add);
+	}
 }
 
 export interface MenuItemValue extends MenuItemProps {
-    name: string,
+	name: string;
 }
 
 export interface MenuProps extends DivProps {}
 
 export class Menu extends Column {
-    static scripts: ScriptPackage = {
-        id: 'Menu',
-        requires: ['_globalClickListener'],
-        css: /*css*/ `
+	static scripts: ScriptPackage = {
+		id: "Menu",
+		requires: ["_globalClickListener"],
+		css: /*css*/ `
             .menu {
                 position: absolute;
                 background: var(--vscode-menu-background);
@@ -49,7 +48,7 @@ export class Menu extends Column {
                 box-shadow: 0 0 1rem var(--vscode-widget-shadow);
             }
         `,
-        js: /*javascript*/ `
+		js: /*javascript*/ `
             let lastClickedX = 0;
             let lastClickedY = 0;
 
@@ -78,29 +77,30 @@ export class Menu extends Column {
                 post('close-menus', undefined);
             });
         `,
-        setup: panel => {
-            panel.addHandler('close-menus', _ => {
-                // close visible menus and remove them from list
-                Menu.menus = Menu.menus.filter(m => {
-                    if (m.getParent()) {
-                        m.getParent()?.remove(m);
-                        return false;
-                    }
-                    return true;
-                }).concat(Menu.menusToAdd);
-                Menu.menusToAdd = [];
-            });
-        },
-    };
-    static menus: Menu[] = [];
-    static menusToAdd: Menu[] = [];
+		setup: (panel) => {
+			panel.addHandler("close-menus", (_) => {
+				// close visible menus and remove them from list
+				Menu.menus = Menu.menus
+					.filter((m) => {
+						if (m.getParent()) {
+							m.getParent()?.remove(m);
+							return false;
+						}
+						return true;
+					})
+					.concat(Menu.menusToAdd);
+				Menu.menusToAdd = [];
+			});
+		},
+	};
+	static menus: Menu[] = [];
+	static menusToAdd: Menu[] = [];
 
-    constructor(items: MenuItemValue[], props?: MenuProps) {
-        super(props);
-        this.attr('class', 'menu', AttrMode.add);
-        this.addHandlerClass('menu');
-        items.map(item => this.add(new MenuItem(item.name, item)));
-        Menu.menusToAdd.push(this);
-    }
+	constructor(items: MenuItemValue[], props?: MenuProps) {
+		super(props);
+		this.attr("class", "menu", AttrMode.add);
+		this.addHandlerClass("menu");
+		items.map((item) => this.add(new MenuItem(item.name, item)));
+		Menu.menusToAdd.push(this);
+	}
 }
-
