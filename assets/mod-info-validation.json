@@ -749,64 +749,64 @@
                 "type": "string",
                 "oneOf": [
                     {
-                        "const": "universal",
-                        "title": "The mod affects the whole game"
+                        "enum": ["universal"],
+                        "description": "The mod affects the whole game"
                     },
                     {
-                        "const": "gameplay",
-                        "title": "The mod affects gameplay"
+                        "enum": ["gameplay"],
+                        "description": "The mod affects gameplay"
                     },
                     {
-                        "const": "editor",
-                        "title": "The mod affects the editor"
+                        "enum": ["editor"],
+                        "description": "The mod affects the editor"
                     },
                     {
-                        "const": "interface",
-                        "title": "The mod affects some specific layer"
+                        "enum": ["interface"],
+                        "description": "The mod affects some specific layer"
                     },
                     {
-                        "const": "offline",
-                        "title": "The mod does not require an internet connection"
+                        "enum": ["offline"],
+                        "description": "The mod does not require an internet connection"
                     },
                     {
-                        "const": "online",
-                        "title": "The mod requires an internet connection to work"
+                        "enum": ["online"],
+                        "description": "The mod requires an internet connection to work"
                     },
                     {
-                        "const": "bugfix",
-                        "title": "The mod fixes an existing feature"
+                        "enum": ["bugfix"],
+                        "description": "The mod fixes an existing feature"
                     },
                     {
-                        "const": "enhancement",
-                        "title": "The mod enhances an existing feature"
+                        "enum": ["enhancement"],
+                        "description": "The mod enhances an existing feature"
                     },
                     {
-                        "const": "music",
-                        "title": "The mod deals with songs ingame"
+                        "enum": ["music"],
+                        "description": "The mod deals with songs ingame"
                     },
                     {
-                        "const": "performance",
-                        "title": "The mod optimizes existing content"
+                        "enum": ["performance"],
+                        "description": "The mod optimizes existing content"
                     },
                     {
-                        "const": "customization",
-                        "title": "The mod adds customization options"
+                        "enum": ["customization"],
+                        "description": "The mod adds customization options"
                     },
                     {
-                        "const": "utility",
-                        "title": "The mod adds utilities"
+                        "enum": ["utility"],
+                        "description": "The mod adds utilities"
                     },
                     {
-                        "const": "content",
-                        "title": "The mod adds new content"
+                        "enum": ["content"],
+                        "description": "The mod adds new content"
                     },
                     {
-                        "const": "developer",
-                        "title": "The mod is intended for developers"
+                        "enum": ["developer"],
+                        "description": "The mod is intended for developers"
                     },
                     {
-                        "const": "cheats",
-                        "title": "The mod provides cheats"
+                        "enum": ["cheats"],
+                        "description": "The mod provides cheats"
                     }
                 ]
             }
