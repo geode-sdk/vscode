@@ -748,21 +748,66 @@
             "items": {
                 "type": "string",
                 "oneOf": [
-                    { "const": "universal" },
-                    { "const": "gameplay" },
-                    { "const": "editor" },
-                    { "const": "offline" },
-                    { "const": "online" },
-                    { "const": "enhancement" },
-                    { "const": "music" },
-                    { "const": "interface" },
-                    { "const": "bugfix" },
-                    { "const": "utility" },
-                    { "const": "performance" },
-                    { "const": "customization" },
-                    { "const": "content" },
-                    { "const": "developer" },
-                    { "const": "cheats" }
+                    {
+                        "const": "universal",
+                        "title": "The mod affects the whole game"
+                    },
+                    {
+                        "const": "gameplay",
+                        "title": "The mod affects gameplay"
+                    },
+                    {
+                        "const": "editor",
+                        "title": "The mod affects the editor"
+                    },
+                    {
+                        "const": "interface",
+                        "title": "The mod affects some specific layer"
+                    },
+                    {
+                        "const": "offline",
+                        "title": "The mod does not require an internet connection"
+                    },
+                    {
+                        "const": "online",
+                        "title": "The mod requires an internet connection to work"
+                    },
+                    {
+                        "const": "bugfix",
+                        "title": "The mod fixes an existing feature"
+                    },
+                    {
+                        "const": "enhancement",
+                        "title": "The mod enhances an existing feature"
+                    },
+                    {
+                        "const": "music",
+                        "title": "The mod deals with songs ingame"
+                    },
+                    {
+                        "const": "performance",
+                        "title": "The mod optimizes existing content"
+                    },
+                    {
+                        "const": "customization",
+                        "title": "The mod adds customization options"
+                    },
+                    {
+                        "const": "utility",
+                        "title": "The mod adds utilities"
+                    },
+                    {
+                        "const": "content",
+                        "title": "The mod adds new content"
+                    },
+                    {
+                        "const": "developer",
+                        "title": "The mod is intended for developers"
+                    },
+                    {
+                        "const": "cheats",
+                        "title": "The mod provides cheats"
+                    }
                 ]
             }
         },
