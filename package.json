@@ -2,7 +2,7 @@
   	"name": "geode",
   	"displayName": "Geode",
   	"description": "Utilities for the Geode Geometry Dash modding framework",
-  	"version": "1.13.2",
+  	"version": "1.13.3",
   	"engines": {
   	  	"vscode": "^1.72.0"
   	},
@@ -196,7 +196,7 @@
   	  	"pretest": "npm run compile-tests && npm run compile && npm run lint",
   	  	"lint": "eslint src --ext ts",
   	  	"deploy": "vsce publish",
-		"format": "prettier --write src/**/*.ts"
+  	  	"format": "prettier --write src/**/*.ts"
   	},
   	"devDependencies": {
   	  	"@types/glob": "^7.2.0",
@@ -229,6 +229,6 @@
   	  	"object-hash": "^3.0.0",
   	  	"plist": "^3.0.6",
   	  	"semver": "^7.5.4",
-  	  	"sharp": "^0.33.2"
+  	  	"sharp": "^0.33.4"
   	}
 }

@@ -9,6 +9,7 @@ node_modules/**
 !node_modules/sharp/lib
 !node_modules/sharp/LICENSE
 !node_modules/sharp/package.json
+!node_modules/@img/
 !node_modules/semver
 !node_modules/detect-libc
 !node_modules/color
