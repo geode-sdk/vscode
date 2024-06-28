@@ -63,7 +63,14 @@ export class Database {
 	private addSpritesFromDir(src: Source, dir: string) {
 		const collection = this.newCollection(src);
 
-		for (const file of readdirRecursiveSync(dir)) {
+		let files: string[];
+		try {
+			files = readdirRecursiveSync(dir);
+		} catch (e) {
+			return;
+		}
+
+		for (const file of files) {
 			// find spritesheets
 			if (file.endsWith(".plist")) {
 				// check if this is a spritesheet (does it have a corresponding .png file)
@@ -250,7 +257,18 @@ export class Database {
 			} else if (typeIsProject(path)) {
 				this.addSpritesFromMod(path);
 			} else {
-				this.addSpritesFromDir(path, join(path.gdPath, "Resources"));
+				if (process.platform === "darwin") {
+					// macos is special, as always
+					this.addSpritesFromDir(
+						path,
+						join(path.gdExecutablePath, "Resources"),
+					);
+				} else {
+					this.addSpritesFromDir(
+						path,
+						join(path.gdPath, "Resources"),
+					);
+				}
 			}
 		}
 	}
