@@ -181,7 +181,7 @@
 		"jsonValidation": [
 			{
 				"fileMatch": "mod.json",
-				"url": "./assets/mod-info-validation.json"
+				"url": "https://raw.githubusercontent.com/geode-sdk/vscode/main/assets/mod-info-validation.json"
 			}
 		]
 	},
