@@ -1,4 +1,4 @@
-name: Build and upload vsix
+name: Build vsix
 
 on:
   push:
