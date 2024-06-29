@@ -1,5 +1,15 @@
 # Geode for VS Code Changelog
 
+## [v1.13.4]
+ - Actually include sharp binaries for all platforms, by switching to pnpm
+
+## [v1.13.3]
+ - Include sharp binaries for every platform, preventing issues on non Windows
+
+## [v1.13.2]
+ - Add new keys to `mod.json` like `tags`, `superseded`, and etc
+ - Action is now published from GitHub workflow
+
 ## [v1.13.1]
  - Undeprecate `repository` in `mod.json` since `links` isn't implemented client-side yet
 

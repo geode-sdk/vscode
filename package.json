@@ -2,15 +2,23 @@
 	"name": "geode",
 	"displayName": "Geode",
 	"description": "Utilities for the Geode Geometry Dash modding framework",
-	"version": "1.13.3",
+	"version": "1.13.4",
 	"engines": {
 		"vscode": "^1.72.0"
 	},
 	"packageManager": "pnpm@9.x",
 	"pnpm": {
 		"supportedArchitectures": {
-			"os": ["current", "linux", "win32", "darwin"],
-			"cpu": ["x64", "arm64"]
+			"os": [
+				"current",
+				"linux",
+				"win32",
+				"darwin"
+			],
+			"cpu": [
+				"x64",
+				"arm64"
+			]
 		}
 	},
 	"author": {
