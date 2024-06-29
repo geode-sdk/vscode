@@ -1,0 +1,29 @@
+name: Build and upload vsix
+
+on:
+  push:
+    branches:
+      - '*'
+    
+jobs:
+  publish:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+
+    - run: npm ci
+
+    - name: Package
+      run: npx vsce package
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Built extension
+        path: "*.vsix"
