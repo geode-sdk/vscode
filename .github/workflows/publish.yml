@@ -8,19 +8,25 @@ on:
 
 jobs:
   publish:
-    runs-on: windows-2022
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        run_install: false
 
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 18.x
 
-    - run: npm ci
+    - name: Install dependencies
+      run: pnpm install
 
     - name: Publish
-      run: npm run deploy
+      run: pnpm run deploy vsce package
       env:
         VSCE_PAT: ${{ secrets.VSCE_PAT }}

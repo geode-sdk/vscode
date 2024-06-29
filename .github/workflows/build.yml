@@ -7,20 +7,39 @@ on:
     
 jobs:
   publish:
-    runs-on: windows-2022
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        run_install: false
 
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 18.x
 
-    - run: npm ci
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - uses: actions/cache@v4
+      name: Setup pnpm cache
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      run: pnpm install
 
     - name: Package
-      run: npx vsce package
+      run: pnpm exec vsce package
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
