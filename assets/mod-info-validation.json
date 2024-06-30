@@ -725,7 +725,7 @@
                     },
                     {
                         "properties": {
-                            "type": { "const": "custom" },
+                            "type": { "const": "custom" }
                         },
                         "required": ["type"]
                     }
