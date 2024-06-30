@@ -597,6 +597,17 @@
                             "match": {
                                 "type": "string",
                                 "description": "A regex the string must match."
+                            },
+                            "filter": {
+                                "type": "string",
+                                "description": "A string containing all the allowed characters for the input."
+                            },
+                            "one-of": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "A list of the only allowed values for the setting. Turns the setting into a selector instead of an input."
                             }
                         },
                         "required": ["type", "default"]

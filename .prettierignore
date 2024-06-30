@@ -5,3 +5,4 @@ pnpm-lock.yaml
 .vscode/
 *.md
 .github/
+assets/*.json
