@@ -23,9 +23,9 @@ class CCColorProvider implements DocumentColorProvider {
 
 	private parseColor(color: string): Color | undefined {
 		const bytes = color.match(MATCH_COLOR_BYTE);
-		getOutputChannel().appendLine(`got ${bytes?.length} matches`);
+		// getOutputChannel().appendLine(`got ${bytes?.length} matches`);
 		if (!bytes || bytes.length < 3 || bytes.length > (this.rgba ? 4 : 3)) {
-			getOutputChannel().appendLine(`didnt barse color ${color}`);
+			// getOutputChannel().appendLine(`didnt barse color ${color}`);
 			return undefined;
 		}
 		return new Color(
@@ -64,9 +64,9 @@ class CCColorProvider implements DocumentColorProvider {
 			line.toLowerCase().includes("color") ||
 			line.includes(this.rgba ? "ccc4" : "ccc3")
 		) {
-			getOutputChannel().appendLine(`${line} passed the test`);
+			// getOutputChannel().appendLine(`${line} passed the test`);
 			for (const match of line.matchAll(this.generateRegex())) {
-				getOutputChannel().appendLine(`${match[0]} matched`);
+				// getOutputChannel().appendLine(`${match[0]} matched`);
 				const color = this.parseColor(match[0]);
 				if (match.index && color) {
 					ret.push(

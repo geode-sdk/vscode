@@ -5,40 +5,56 @@
     "scopeName": "source.geode-flalert-literal",
     "patterns": [
         {
+            "match": "<ca>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.ca"
+        },
+        {
             "match": "<cb>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.blue"
+            "name": "geode.flalert.cb"
+        },
+        {
+            "match": "<cc>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cc"
+        },
+        {
+            "match": "<cd>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cd"
+        },
+        {
+            "match": "<cf>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cf"
         },
         {
             "match": "<cg>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.green"
-        },
-        {
-            "match": "<cl>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.aqua"
+            "name": "geode.flalert.cg"
         },
         {
             "match": "<cj>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.cyan"
+            "name": "geode.flalert.cj"
         },
         {
-            "match": "<cy>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.yellow"
+            "match": "<cl>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cl"
         },
         {
             "match": "<co>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.orange"
-        },
-        {
-            "match": "<cr>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.red"
+            "name": "geode.flalert.co"
         },
         {
             "match": "<cp>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.pink"
+            "name": "geode.flalert.cp"
         },
         {
-            "match": "<ca>((.*?<\/c>)|(.*)(?=\"))",
-            "name": "geode.flalert.purple"
+            "match": "<cr>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cr"
+        },
+        {
+            "match": "<cs>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cs"
+        },
+        {
+            "match": "<cy>((.*?<\/c>)|(.*)(?=\"))",
+            "name": "geode.flalert.cy"
         }
     ]
 }

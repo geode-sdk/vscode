@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.14.0]
+ - Add preliminary linting features for settings (checks for invalid setting names)
+ - Add support for 2.206 color tags in `FLAlertLayer` (`<ca>`, `<cc>`, `<cd>`, `<cf>`, `<cs>`)
+
 ## [v1.13.4]
  - Actually include sharp binaries for all platforms, by switching to pnpm
 

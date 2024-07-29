@@ -70,7 +70,7 @@ export class SpriteHoverPreview implements HoverProvider {
 			let item: Option<Item<ItemType>>;
 			if (match.text.endsWith("_spr")) {
 				const name = match.text.substring(1, match.text.length - 5);
-				const project = getProjectFromDocument(document);
+				const project = getProjectFromDocument(document.uri);
 				if (!project) {
 					return undefined;
 				}
@@ -102,41 +102,6 @@ export class SpriteHoverPreview implements HoverProvider {
 					resolve(new Hover(md, match.range));
 				}
 			});
-		}
-		return undefined;
-	}
-}
-
-export class SettingHover implements HoverProvider {
-	provideHover(
-		document: TextDocument,
-		position: Position,
-		token: CancellationToken,
-	): ProviderResult<Hover> {
-		const project = getProjectFromDocument(document);
-		if (!project || !project.modJson.settings) {
-			return undefined;
-		}
-		const match = getMatch(
-			document,
-			position,
-			/(?<=[gs]etSettingValue.*?\(\s*")[a-z0-9\-]+(?="[^\)]*\))/g,
-		);
-		if (match) {
-			if (match.text in project.modJson.settings) {
-				const rawModJson = readFileSync(
-					join(project.path, "mod.json"),
-				).toString();
-				const setting = project.modJson.settings[match.text];
-				return new Hover(
-					`# ${setting.name ?? match.text}\n\n${setting.description ?? "No Description"}` +
-						`\n\n[Go to Definition](/${project.path}/mod.json#${getLineOfString(rawModJson, match.text)})`,
-					match.range,
-				);
-			} else {
-				// todo: figure out how to make this a linter warning
-				return new Hover(`Unknown setting ${match.text}`, match.range);
-			}
 		}
 		return undefined;
 	}
