@@ -2,7 +2,7 @@
 	"name": "geode",
 	"displayName": "Geode",
 	"description": "Utilities for the Geode Geometry Dash modding framework",
-	"version": "1.14.0",
+	"version": "1.15.0",
 	"engines": {
 		"vscode": "^1.72.0"
 	},
@@ -103,91 +103,135 @@
 				"textMateRules": [
 					{
 						"scope": "geode.flalert.ca",
-						"settings": { "foreground": "#9632ff" }
+						"settings": {
+							"foreground": "#9632ff"
+						}
 					},
 					{
 						"scope": "geode.flalert.cb",
-						"settings": { "foreground": "#4a52e1" }
+						"settings": {
+							"foreground": "#4a52e1"
+						}
 					},
 					{
 						"scope": "geode.flalert.cc",
-						"settings": { "foreground": "#ffff96" }
+						"settings": {
+							"foreground": "#ffff96"
+						}
 					},
 					{
 						"scope": "geode.flalert.cd",
-						"settings": { "foreground": "#ff96ff" }
+						"settings": {
+							"foreground": "#ff96ff"
+						}
 					},
 					{
 						"scope": "geode.flalert.cf",
-						"settings": { "foreground": "#96ffff" }
+						"settings": {
+							"foreground": "#96ffff"
+						}
 					},
 					{
 						"scope": "geode.flalert.cg",
-						"settings": { "foreground": "#40e348" }
+						"settings": {
+							"foreground": "#40e348"
+						}
 					},
 					{
 						"scope": "geode.flalert.cj",
-						"settings": { "foreground": "#32c8ff" }
+						"settings": {
+							"foreground": "#32c8ff"
+						}
 					},
 					{
 						"scope": "geode.flalert.cl",
-						"settings": { "foreground": "#60abef" }
+						"settings": {
+							"foreground": "#60abef"
+						}
 					},
 					{
 						"scope": "geode.flalert.co",
-						"settings": { "foreground": "#ffa54b" }
+						"settings": {
+							"foreground": "#ffa54b"
+						}
 					},
 					{
 						"scope": "geode.flalert.cp",
-						"settings": { "foreground": "#ff00ff" }
+						"settings": {
+							"foreground": "#ff00ff"
+						}
 					},
 					{
 						"scope": "geode.flalert.cr",
-						"settings": { "foreground": "#ff5a5a" }
+						"settings": {
+							"foreground": "#ff5a5a"
+						}
 					},
 					{
 						"scope": "geode.flalert.cs",
-						"settings": { "foreground": "#ffdc41" }
+						"settings": {
+							"foreground": "#ffdc41"
+						}
 					},
 					{
 						"scope": "geode.flalert.cy",
-						"settings": { "foreground": "#ffff00" }
+						"settings": {
+							"foreground": "#ffff00"
+						}
 					},
 					{
 						"scope": "geode.flalert.blue",
-						"settings": { "foreground": "#4a52e1" }
+						"settings": {
+							"foreground": "#4a52e1"
+						}
 					},
 					{
 						"scope": "geode.flalert.green",
-						"settings": { "foreground": "#40e348" }
+						"settings": {
+							"foreground": "#40e348"
+						}
 					},
 					{
 						"scope": "geode.flalert.aqua",
-						"settings": { "foreground": "#60abef" }
+						"settings": {
+							"foreground": "#60abef"
+						}
 					},
 					{
 						"scope": "geode.flalert.cyan",
-						"settings": { "foreground": "#32c8ff" }
+						"settings": {
+							"foreground": "#32c8ff"
+						}
 					},
 					{
 						"scope": "geode.flalert.yellow",
-						"settings": { "foreground": "#ffff00" }
+						"settings": {
+							"foreground": "#ffff00"
+						}
 					},
 					{
 						"scope": "geode.flalert.orange",
-						"settings": { "foreground": "#ffa54b" }
+						"settings": {
+							"foreground": "#ffa54b"
+						}
 					},
 					{
 						"scope": "geode.flalert.red",
-						"settings": { "foreground": "#ff5a5a" }
+						"settings": {
+							"foreground": "#ff5a5a"
+						}
 					},
 					{
 						"scope": "geode.flalert.pink",
-						"settings": { "foreground": "#ff00ff" }
+						"settings": {
+							"foreground": "#ff00ff"
+						}
 					},
 					{
 						"scope": "geode.flalert.purple",
-						"settings": { "foreground": "#9632ff" }
+						"settings": {
+							"foreground": "#9632ff"
+						}
 					}
 				]
 			}
@@ -230,7 +274,7 @@
 		"jsonValidation": [
 			{
 				"fileMatch": "mod.json",
-				"url": "https://raw.githubusercontent.com/geode-sdk/vscode/main/assets/mod-info-validation.json"
+				"url": "./dist/validation/mod.json"
 			}
 		]
 	},
@@ -264,8 +308,9 @@
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
 		"prettier": "^3.3.2",
-		"ts-loader": "^9.3.0",
-		"typescript": "^4.7.2",
+		"ts-json-schema-generator": "^2.3.0",
+		"ts-loader": "^9.5.1",
+		"typescript": "^4.9.5",
 		"webpack": "^5.72.1",
 		"webpack-cli": "^4.9.2"
 	},
