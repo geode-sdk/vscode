@@ -10,13 +10,14 @@ const path = require("path");
 
 class JsonValidationGenner {
 	apply(compiler: Compiler) {
-		compiler.hooks.watchRun.tap("generate mod.json validation", () => {
+		compiler.hooks.compile.tap("generate mod.json validation", () => {
 			const schema = createGenerator({
 				path: "./src/project/mod.ts",
 				tsconfig: "./tsconfig.json",
 				type: "ModJson",
 				markdownDescription: true
 			}).createSchema("ModJson");
+			// scary to hardcode dist folder but oh well
 			mkdirSync("./dist/validation", { recursive: true });
 			writeFileSync("./dist/validation/mod.json", JSON.stringify(schema));
 		});
