@@ -1,110 +1,127 @@
 import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, CodeActionProvider, Command, Diagnostic, DiagnosticCollection, DiagnosticSeverity, ExtensionContext, languages, Position, ProviderResult, Range, Selection, TextDocument, Uri, workspace, WorkspaceEdit } from "vscode";
 import { getProjectFromDocument } from "./project";
-import { getOutputChannel } from "../config";
 import { readFile } from "fs/promises";
-import { readFileSync } from "fs";
 
-type Binding = "inline" | "link" | number | null;
-type Bindings = {
-    classes: {
-        name: string,
-        functions: {
-            name: string,
-            args: { type: string, name: string }[],
-            const: boolean,
-            virtual: boolean,
-            static: boolean,
-            bindings: {
-                win: Binding,
-                imac: Binding,
-                m1: Binding,
-                ios: Binding,
-                android32: Binding,
-                android64: Binding,
-            }
-        }[],
-    }[]
-};
-
-let LOADED_BINDINGS: Bindings | undefined = undefined;
+// type Binding = "inline" | "link" | number | null;
+// type Bindings = {
+//     classes: {
+//         name: string,
+//         functions: {
+//             name: string,
+//             args: { type: string, name: string }[],
+//             const: boolean,
+//             virtual: boolean,
+//             static: boolean,
+//             bindings: {
+//                 win: Binding,
+//                 imac: Binding,
+//                 m1: Binding,
+//                 ios: Binding,
+//                 android32: Binding,
+//                 android64: Binding,
+//             }
+//         }[],
+//     }[]
+// };
+// 
+// let LOADED_BINDINGS: Bindings | undefined = undefined;
 
 interface MaybeDocument {
     uri: Uri,
     data: string,
 }
 
+const TYPE_LOOKUPS: Record<string, string> = {
+    bool: "bool",
+    int: "int64_t",
+    float: "double",
+    string: "std::string",
+    file: "std::filesystem::path",
+    folder: "std::filesystem::path",
+    color: "cocos2d::ccColor3B",
+    rgb: "cocos2d::ccColor3B",
+    rgba: "cocos2d::ccColor4B"
+};
+
 function lint(
     document: MaybeDocument,
     diagnostics: Diagnostic[],
     code: string,
     regex: RegExp,
-    condition: (match: { text: string, range: Range }) => string | undefined,
-    startLine: number = 0,
-    endLine?: number,
+    condition: (match: { text: string, groups: Record<string, string> | undefined, range: Range }) => { msg: string, level: DiagnosticSeverity } | string | undefined,
 ) {
-	const lines = document.data.split("\n");
+    const ignoreRanges: { from: number, to: number }[] = [];
 
-    let ignoring: "next" | "until-end" | undefined;
-	for (let line = startLine; line < lines.length; line++) {
-        if (endLine && line > endLine) {
-            break;
+    for (const match of document.data.matchAll(new RegExp(`(?:\\/\\/\\s*@geode-begin-ignore\\(${code}\\).*?$)(?:(?!\\/\\/\\s*@geode-end-ignore\\(${code}\\))(?:\\s|.))*`, "gm"))) {
+        if (match.index != undefined) {
+            ignoreRanges.push({ from: match.index, to: match.index + match[0].length });
         }
+    }
 
-        const lineData = lines[line];
-
-        // Allow ignoring lints via comments
-        if (lineData.includes(`geode-ignore-${code}`) || lineData.includes("geode-ignore-all")) {
-            ignoring = "next";
-            continue;
-        }
-        else if (lineData.includes(`geode-begin-ignore-${code}`) || lineData.includes("geode-begin-ignore-all")) {
-            ignoring = "until-end";
-            continue;
-        }
-        else if (lineData.includes(`geode-end-ignore-${code}`) || lineData.includes("geode-end-ignore-all")) {
-            ignoring = undefined;
-        }
-        // Skip if we're ignoring stuff
-        else if (ignoring !== undefined) {
-            if (ignoring === "next") {
-                ignoring = undefined;
-            }
+    // Look for matches for the regex
+    for (const match of document.data.matchAll(new RegExp(
+        `(?<ignore>\\/\\/\\s*@geode-ignore\\(${code}\\).*?$\\r?\\s+^.*?)?${regex.source}`,
+        regex.flags.includes("m") ? regex.flags : regex.flags + "m"
+    ))) {
+        if (match.index == undefined || match.groups?.ignore || ignoreRanges.some(range => range.from <= match.index! && range.to >= match.index!)) {
             continue;
         }
 
-        // Look for matches for the regex
-		for (const match of lineData.matchAll(regex)) {
-			if (!match.index) {
-				continue;
-			}
-            const range = new Range(
-                new Position(line, match.index),
-                new Position(line, match.index + match[0].length),
-            );
-            const msg = condition({ text: match[0], range });
-            if (msg !== undefined) {
-                const diagnostic = new Diagnostic(range, msg, DiagnosticSeverity.Warning);
-                diagnostic.code = code;
-                diagnostic.source = "geode";
-                diagnostics.push(diagnostic);
-            }
-		}
-	}
+        const priorLines = document.data.substring(0, match.index).split("\n");
+        const range = new Range(
+            new Position(priorLines.length - 1, priorLines.at(-1)!.length),
+            new Position(priorLines.length + match[0].split("\n").length - 2, match.index + match[0].length),
+        );
+        const result = condition({ text: match[0], groups: match.groups, range });
+
+        if (result !== undefined) {
+            const isString = typeof result == "string";
+            const diagnostic = new Diagnostic(range, isString ? result : result.msg, isString ? DiagnosticSeverity.Warning : result.level);
+            diagnostic.code = code;
+            diagnostic.source = "geode";
+            diagnostics.push(diagnostic);
+        }
+    }
+}
+
+function lintDumbStuff(document: MaybeDocument, diagnostics: Diagnostic[]) {
+    lint(document, diagnostics, "no", /using\s+namespace\s+std\s*;/g, () => {
+        return { msg: "NO GOD! NO GOD PLEASE NO! NO! NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!", level: DiagnosticSeverity.Error };
+    });
+    lint(document, diagnostics, "geode-alternative", /std\s*::\s*cout/g, () => {
+        return "Use the logging methods from the \"geode::log\" namespace instead of \"std::cout\"";
+    });
+    lint(
+        document, diagnostics,
+        "recursive-hook",
+        /hook\s*\(\s*(?:(?:\w+_cast|as)\s*<\s*.+?\s*>\s*\(|\(\s*.+?\s*\))\s*addresser\s*::\s*getNonVirtual\s*\(\s*&\s*web\s*::\s*WebRequest\s*::\s*send(?:\s|[^;])+?/g,
+        () => {
+            return "Do not hook \"web::WebRequest::send\". This will easily cause infinite loops between mods.";
+        }
+    );
 }
 
 function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
-    const project = getProjectFromDocument(document.uri);
-    if (!project || !project.modJson.settings) {
+    const settings = getProjectFromDocument(document.uri)?.modJson.settings;
+    if (!settings) {
         return;
     }
     lint(
         document, diagnostics,
         "unknown-setting",
-        /(?<=[gs]etSettingValue.*?\(\s*")[a-z0-9\-]+(?="[^\)]*\))/g,
-        ({ text }) => {
-            if (!(text in project.modJson.settings!)) {
-                return `Unknown setting ${text}`;
+        /[gs]etSettingValue<\s*(?<type>[^>]+?)\s*>\s*\(\s*"(?<name>(?:[^"\\]|\\.)+?)\"\s*\)/g,
+        ({ groups }) => {
+            const setting = settings[groups!.name];
+            const types = TYPE_LOOKUPS[setting.type]?.split("::").reverse();
+
+            if (!setting) {
+                return `Unknown setting ${groups!.name}`;
+            } else if (setting.type == "title") {
+                return "Titles can't be used as a setting value";
+            } else if (!setting.type.startsWith("custom:") && !groups!.type.split("::").reverse().every((part, i) => part.trim() == types?.[i])) {
+                return `Setting ${groups!.name} is of type ${setting.type}, not ${groups!.type}`;
             }
+
             return undefined;
         }
     );
@@ -148,6 +165,7 @@ function applyGeodeLints(document: MaybeDocument, diagnosticCollection: Diagnost
         const diagnostics: Diagnostic[] = [];
     
         // Add more linters here if needed
+        lintDumbStuff(document, diagnostics);
         lintSettings(document, diagnostics);
         // lintOverrides(document, diagnostics);
     
@@ -157,7 +175,7 @@ function applyGeodeLints(document: MaybeDocument, diagnosticCollection: Diagnost
 }
 
 class SuppressDiagnosticProvider implements CodeActionProvider {
-    provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
+    provideCodeActions(document: TextDocument, _1: Range | Selection, context: CodeActionContext, _2: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
         const actions: CodeAction[] = [];
         context.diagnostics.forEach(diagnostic => {
             // Add a Quick Fix for dismissing Geode diagnostics
