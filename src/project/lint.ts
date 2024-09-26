@@ -84,21 +84,10 @@ function lint(
     }
 }
 
-function lintDumbStuff(document: MaybeDocument, diagnostics: Diagnostic[]) {
-    lint(document, diagnostics, "no", /using\s+namespace\s+std\s*;/g, () => {
-        return { msg: "NO GOD! NO GOD PLEASE NO! NO! NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!", level: DiagnosticSeverity.Error };
-    });
+function lintAlternative(document: MaybeDocument, diagnostics: Diagnostic[]) {
     lint(document, diagnostics, "geode-alternative", /std\s*::\s*cout/g, () => {
         return "Use the logging methods from the \"geode::log\" namespace instead of \"std::cout\"";
     });
-    lint(
-        document, diagnostics,
-        "recursive-hook",
-        /hook\s*\(\s*(?:(?:\w+_cast|as)\s*<\s*.+?\s*>\s*\(|\(\s*.+?\s*\))\s*addresser\s*::\s*getNonVirtual\s*\(\s*&\s*web\s*::\s*WebRequest\s*::\s*send(?:\s|[^;])+?/g,
-        () => {
-            return "Do not hook \"web::WebRequest::send\". This will easily cause infinite loops between mods.";
-        }
-    );
 }
 
 function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
@@ -165,7 +154,7 @@ function applyGeodeLints(document: MaybeDocument, diagnosticCollection: Diagnost
         const diagnostics: Diagnostic[] = [];
     
         // Add more linters here if needed
-        lintDumbStuff(document, diagnostics);
+        lintAlternative(document, diagnostics);
         lintSettings(document, diagnostics);
         // lintOverrides(document, diagnostics);
     
