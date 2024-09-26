@@ -16,13 +16,13 @@ export interface Font {
 	 * @pattern [0-9]+(-[0-9]+)?(,([0-9]+(-[0-9]+)?))*
 	 * @default 32-126,8226
 	 */
-	charset: string,
+	charset?: string | null,
 	/**
 	 * If specified, will generate a black outline of the provided size around 
 	 * the font's characters. Experimental!
 	 * @minimum 0
 	 */
-	outline: number,
+	outline?: number | null,
 }
 
 export interface Resources {
