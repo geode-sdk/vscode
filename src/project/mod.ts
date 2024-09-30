@@ -477,7 +477,7 @@ export type Tag =
 	"cheats" |
 	"paid" |
 	"joke" |
-    "modtober24";
+	"modtober24";
 
 /**
  * Configuration options for a Geode mod. Specifies metadata like the name and 
