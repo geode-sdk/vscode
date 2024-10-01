@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.15.1]
+ - Add `modtober24` tag
+
 ## [v1.15.0]
  - Improve `mod.json` validation by generating it from TypeScript, along with support for Settings V3.
 
