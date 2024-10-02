@@ -180,7 +180,7 @@ class SuppressDiagnosticProvider implements CodeActionProvider {
                 action.edit.insert(
                     document.uri,
                     new Position(diagnostic.range.start.line, 0),
-                    `${indent}// geode-ignore(${diagnostic.code})\n`
+                    `${indent}// @geode-ignore(${diagnostic.code})\n`
                 );
                 action.diagnostics = [diagnostic];
                 actions.push(action);
