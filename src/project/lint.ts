@@ -52,7 +52,9 @@ function lint(
 ) {
     const ignoreRanges: { from: number, to: number }[] = [];
 
-    for (const match of document.data.matchAll(new RegExp(`(?:\\/\\/\\s*@geode-begin-ignore\\(${code}\\).*?$)(?:(?!\\/\\/\\s*@geode-end-ignore\\(${code}\\))(?:\\s|.))*`, "gm"))) {
+    for (const match of document.data.matchAll(
+        new RegExp(`(?:\\/\\/\\s*@geode-begin-ignore\\(${code}\\).*?$)(?:(?!\\/\\/\\s*@geode-end-ignore\\(${code}\\))(?:\\s|.))*|\\/\\*(?:(?!\\*\\/)(?:\\s|.))*`, "gm")
+    )) {
         if (match.index != undefined) {
             ignoreRanges.push({ from: match.index, to: match.index + match[0].length });
         }
@@ -60,7 +62,7 @@ function lint(
 
     // Look for matches for the regex
     for (const match of document.data.matchAll(new RegExp(
-        `(?<ignore>\\/\\/\\s*@geode-ignore\\(${code}\\).*?$\\r?\\s+^.*?)?${regex.source}`,
+        `(?<ignore>\\/\\/\\s*@geode-ignore\\(${code}\\).*?$\\r?\\n^.*?|\\/\\/.*?)?${regex.source}`,
         regex.flags.includes("m") ? regex.flags : regex.flags + "m"
     ))) {
         if (match.index == undefined || match.groups?.ignore || ignoreRanges.some(range => range.from <= match.index! && range.to >= match.index!)) {
