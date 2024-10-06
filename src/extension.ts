@@ -2,13 +2,12 @@ import {
 	window,
 	ExtensionContext,
 	commands,
-	SnippetString,
 	languages,
+    workspace,
 } from "vscode";
 import { getOutputChannel, loadData, saveData, setupConfig } from "./config";
 import * as geode from "./geode/geode";
 import { browser } from "./browser/browser";
-import { DevToolsPanel } from "./devtools/DevToolsPanel";
 import { execSync } from "child_process";
 import { getActiveProject, getOpenedProjects } from "./project/project";
 import { env } from "vscode";
@@ -18,6 +17,10 @@ import { SpriteHoverPreview } from "./project/hover";
 import { registerLinters } from "./project/lint";
 
 export async function activate(context: ExtensionContext) {
+    if ((await workspace.findFiles("mod.json")).length == 0) {
+        return;
+    }
+
 	const channel = window.createOutputChannel("Geode");
 
 	// store globals
