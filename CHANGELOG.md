@@ -1,5 +1,10 @@
 # Geode for VS Code Changelog
 
+## [v1.15.2]
+ - Disable extension if no mod.json is found within workspace
+ - Fix linter triggering on comments
+ - Fix quick fix inserting wrong syntax
+
 ## [v1.15.1]
  - Add `modtober24` tag
 
