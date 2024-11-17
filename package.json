@@ -33,7 +33,7 @@
 		"url": "https://github.com/geode-sdk/vscode"
 	},
 	"activationEvents": [
-		"onLanguage:cpp",
+		"workspaceContains:**/loader/",
 		"workspaceContains:**/mod.json"
 	],
 	"galleryBanner": {
@@ -50,10 +50,6 @@
 			{
 				"title": "Geode: Open Sprite Browser",
 				"command": "geode.openSpriteBrowser"
-			},
-			{
-				"title": "Geode: Publish Mod",
-				"command": "geode.publishMod"
 			}
 		],
 		"keybindings": [
@@ -65,12 +61,8 @@
 		"languages": [
 			{
 				"id": "bro",
-				"aliases": [
-					"Bro"
-				],
-				"extensions": [
-					".bro"
-				],
+				"aliases": ["Broma"],
+				"extensions": [".bro"],
 				"configuration": "./src/broma/language-configuration.json"
 			}
 		],

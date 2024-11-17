@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.16.0]
+ - Remove the `Geode: Publish` command as it no longer works
+
 ## [v1.15.2]
  - Disable extension if no mod.json is found within workspace
  - Fix linter triggering on comments

@@ -55,7 +55,7 @@ function lint(
     for (const match of document.data.matchAll(
         new RegExp(`(?:\\/\\/\\s*@geode-begin-ignore\\(${code}\\).*?$)(?:(?!\\/\\/\\s*@geode-end-ignore\\(${code}\\))(?:\\s|.))*|\\/\\*(?:(?!\\*\\/)(?:\\s|.))*`, "gm")
     )) {
-        if (match.index != undefined) {
+        if (match.index !== undefined) {
             ignoreRanges.push({ from: match.index, to: match.index + match[0].length });
         }
     }
@@ -65,7 +65,7 @@ function lint(
         `(?<ignore>\\/\\/\\s*@geode-ignore\\(${code}\\).*?$\\r?\\n^.*?|\\/\\/.*?)?${regex.source}`,
         regex.flags.includes("m") ? regex.flags : regex.flags + "m"
     ))) {
-        if (match.index == undefined || match.groups?.ignore || ignoreRanges.some(range => range.from <= match.index! && range.to >= match.index!)) {
+        if (match.index === undefined || match.groups?.ignore || ignoreRanges.some(range => range.from <= match.index! && range.to >= match.index!)) {
             continue;
         }
 
@@ -77,7 +77,7 @@ function lint(
         const result = condition({ text: match[0], groups: match.groups, range });
 
         if (result !== undefined) {
-            const isString = typeof result == "string";
+            const isString = typeof result === "string";
             const diagnostic = new Diagnostic(range, isString ? result : result.msg, isString ? DiagnosticSeverity.Warning : result.level);
             diagnostic.code = code;
             diagnostic.source = "geode";
@@ -107,9 +107,9 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 
             if (!setting) {
                 return `Unknown setting ${groups!.name}`;
-            } else if (setting.type == "title") {
+            } else if (setting.type === "title") {
                 return "Titles can't be used as a setting value";
-            } else if (!setting.type.startsWith("custom:") && !groups!.type.split("::").reverse().every((part, i) => part.trim() == types?.[i])) {
+            } else if (!setting.type.startsWith("custom:") && !groups!.type.split("::").reverse().every((part, i) => part.trim() === types?.[i])) {
                 return `Setting ${groups!.name} is of type ${setting.type}, not ${groups!.type}`;
             }
 

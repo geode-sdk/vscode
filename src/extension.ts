@@ -17,10 +17,6 @@ import { SpriteHoverPreview } from "./project/hover";
 import { registerLinters } from "./project/lint";
 
 export async function activate(context: ExtensionContext) {
-    if ((await workspace.findFiles("mod.json")).length == 0) {
-        return;
-    }
-
 	const channel = window.createOutputChannel("Geode");
 
 	// store globals
@@ -68,53 +64,6 @@ export async function activate(context: ExtensionContext) {
 	context.subscriptions.push(
 		commands.registerCommand("geode.openSpriteBrowser", async () => {
 			browser.open();
-		}),
-	);
-
-	context.subscriptions.push(
-		commands.registerCommand("geode.publishMod", async () => {
-			const res = geode.cli.runCLICmdInProject(`project publish`);
-			if (res.isError()) {
-				window.showErrorMessage(
-					`Unable to publish mod: ${res.unwrapErr()}`,
-				);
-				return;
-			}
-			const value = res.unwrap();
-			getOutputChannel().append(value);
-			// Check if unable to automatically push
-			let pushCmd = value.match(/`git.*`/g)?.[0];
-			pushCmd = pushCmd?.substring(1, pushCmd.length - 1);
-			if (pushCmd) {
-				try {
-					getOutputChannel().appendLine(`Running ${pushCmd}`);
-					execSync(pushCmd, {
-						encoding: "utf-8",
-						cwd: getActiveProject()?.path,
-					});
-				} catch (err) {
-					window.showErrorMessage(`Syncing publish failed: ${err}`);
-				}
-			}
-			let prURL = value.match(/https:\/\/.*?\.\.\.[a-zA-Z0-9]+/g)?.[0];
-			if (!prURL) {
-				window.showErrorMessage(
-					`Unable to find Github pull request URL from command output - see output panel for details`,
-				);
-				getOutputChannel().append(value);
-				getOutputChannel().show();
-				return;
-			}
-			window
-				.showInformationMessage(
-					`To complete the publish, please open a Pull Request in your indexer: ${prURL}`,
-					"Open URL",
-				)
-				.then((btn) => {
-					if (btn === "Open URL" && prURL) {
-						env.openExternal(Uri.parse(prURL));
-					}
-				});
 		}),
 	);
 
