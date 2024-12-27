@@ -474,7 +474,7 @@ export type Tag =
 	"customization" |
 	"content" |
 	"developer" |
-	"cheats" |
+	"cheat" |
 	"paid" |
 	"joke" |
 	"modtober24";
