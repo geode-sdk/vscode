@@ -822,7 +822,7 @@
                         "description": "The mod is intended for developers"
                     },
                     {
-                        "enum": ["cheats"],
+                        "enum": ["cheat"],
                         "description": "The mod provides cheats"
                     }
                 ]
