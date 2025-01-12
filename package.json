@@ -260,6 +260,16 @@
 					"type": "integer",
 					"default": 250,
 					"description": "How many items to add in the Sprite Browser when you click 'Load More'"
+				},
+				"geode.modifyClassSuggestions.enable": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable suggestions for Modify classes"
+				},
+				"geode.modifyClassSuggestions.stripCocosNamespace": {
+					"type": "boolean",
+					"default": true,
+					"description": "Whether to automatically remove `cocos2d::` from included code"
 				}
 			}
 		},
