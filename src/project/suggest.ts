@@ -69,7 +69,7 @@ export class ModifyClassMethodCompletion implements CompletionItemProvider {
 		let suggestions = [];
 		for (let func of classInfo.functions) {
 			const shortFuncDecl = `${func.name}(${func.args.map((a) => `${a.type} ${a.name}`).join(", ")})`;
-			const fullFuncDecl = `${func.static ? "static " : ""}${func.return} ${shortFuncDecl}`;
+			const fullFuncDecl = `${func.static ? "static " : ""}${func.return} ${shortFuncDecl}`.trimStart();
 			const origCall = `${currentClass}::${func.name}(${func.args.map((a) => a.name).join(", ")})`;
 
 			let origStatement;
@@ -77,6 +77,8 @@ export class ModifyClassMethodCompletion implements CompletionItemProvider {
 				origStatement = `\${1}\n\t${origCall};`;
 			} else if (func.return === "bool") {
 				origStatement = `if (!${origCall}) return false;\n\t\${1}\n\treturn true;`;
+			} else if (func.kind !== "normal") {
+				origStatement = `${origCall};\n\t\${1}`;
 			} else {
 				origStatement = `${func.return} ret = ${origCall};\n\t\${1}\n\treturn ret;`;
 			}
@@ -87,6 +89,9 @@ export class ModifyClassMethodCompletion implements CompletionItemProvider {
 			);
 
 			item.insertText = `${fullFuncDecl} {\n\t${origStatement}\n}`;
+			if (func.kind === "ctor" || func.kind === "dtor") {
+				item.insertText = `void ${func.kind === "ctor" ? "constructor" : "destructor"}() {\n\t${origStatement}\n}`;
+			}
 			if (stripCocos) {
 				item.insertText = item.insertText.replace(/cocos2d::/g, "");
 			}
