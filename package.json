@@ -270,6 +270,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Whether to automatically remove `cocos2d::` from included code"
+				},
+				"geode.modifyClassSuggestions.addOverrideMacro": {
+					"type": "boolean",
+					"default": false,
+					"description": "Add $override to the beginning of the included code"
 				}
 			}
 		},

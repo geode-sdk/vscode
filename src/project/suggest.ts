@@ -65,11 +65,15 @@ export class ModifyClassMethodCompletion implements CompletionItemProvider {
 		const stripCocos = getExtConfig().get<boolean>(
 			"modifyClassSuggestions.stripCocosNamespace",
 		);
+		const addOverrideMacro = getExtConfig().get<boolean>(
+			"modifyClassSuggestions.addOverrideMacro",
+		);
 
 		let suggestions = [];
 		for (let func of classInfo.functions) {
 			const shortFuncDecl = `${func.name}(${func.args.map((a) => `${a.type} ${a.name}`).join(", ")})`;
-			const fullFuncDecl = `${func.static ? "static " : ""}${func.return} ${shortFuncDecl}`.trimStart();
+			const fullFuncDecl =
+				`${func.static ? "static " : ""}${func.return} ${shortFuncDecl}`.trimStart();
 			const origCall = `${currentClass}::${func.name}(${func.args.map((a) => a.name).join(", ")})`;
 
 			let origStatement;
@@ -91,6 +95,9 @@ export class ModifyClassMethodCompletion implements CompletionItemProvider {
 			item.insertText = `${fullFuncDecl} {\n\t${origStatement}\n}`;
 			if (func.kind === "ctor" || func.kind === "dtor") {
 				item.insertText = `void ${func.kind === "ctor" ? "constructor" : "destructor"}() {\n\t${origStatement}\n}`;
+			}
+			if (addOverrideMacro) {
+				item.insertText = `\\$override\n${item.insertText}`;
 			}
 			if (stripCocos) {
 				item.insertText = item.insertText.replace(/cocos2d::/g, "");
