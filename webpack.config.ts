@@ -15,7 +15,8 @@ class JsonValidationGenner {
 				path: "./src/project/mod.ts",
 				tsconfig: "./tsconfig.json",
 				type: "ModJson",
-				markdownDescription: true
+				markdownDescription: true,
+				extraTags: ["deprecationMessage"]
 			}).createSchema("ModJson");
 			// scary to hardcode dist folder but oh well
 			mkdirSync("./dist/validation", { recursive: true });

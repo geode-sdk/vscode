@@ -288,7 +288,8 @@ export interface StringSetting extends ValueSetting {
 // todo in Geode v4: remove this
 export interface PathSetting extends ValueSetting {
 	/**
-	 * @deprecated Use the "file" or "folder" type instead
+	 * @deprecated
+	 * @deprecationMessage Use the "file" or "folder" type instead
 	 */
 	type: "path",
 	default: SettingDefaultValue<string>,
@@ -358,7 +359,8 @@ export interface ColorAlphaSetting extends ValueSetting {
  */
 export interface LegacyCustomSetting extends SettingBase {
 	/**
-	 * @deprecated Use custom setting types (i.e. `custom:my-type-name`) instead. 
+	 * @deprecated
+	 * @deprecationMessage Use custom setting types (i.e. `custom:my-type-name`) instead. 
      * See [our docs](https://docs.geode-sdk.org/mods/settings) for more
 	 */
 	type: "custom",
@@ -390,21 +392,11 @@ export type Setting =
 
 export interface Dependency {
 	/**
-	 * ID of the dependency
-	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
-	 */
-	id: string,
-	/**
 	 * Version of the dependency. Geode assumes the mod follows [semver](https://semver.org); 
 	 * this means that versions "1.5.3" and "1.4.0" will be considered valid 
 	 * for dependency version "1.4.5" but "2.1.0" would not be valid
 	 */
 	version: Version,
-	/**
-	 * Whether the dependency is required in order to load this mod
-	 * @deprecated Use the "importance" property instead
-	 */
-	required?: boolean,
 	/**
 	 * Whether this dependency is required for the mod to work, or only 
 	 * recommended for users
@@ -416,7 +408,30 @@ export interface Dependency {
 	 * platforms
 	 */
 	platforms?: ShortPlatformIDOrGeneric[],
+	/**
+	 * Dependency-specific settings, if it takes any
+	 */
+	settings?: any,
 }
+export interface LegacyDependency extends Dependency {
+	/**
+	 * ID of the dependency
+	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
+	 */
+	id: string,
+	/**
+	 * Whether the dependency is required in order to load this mod
+	 * @deprecated
+	 * @deprecationMessage Use the "importance" property instead
+	 */
+	required?: boolean,
+}
+/**
+ * @deprecated
+ * @deprecationMessage Use the object-style "dependencies" key instead
+ */
+export type LegacyDependencies = LegacyDependency[];
+
 export interface Incompatibility {
 	/**
 	 * ID of the incompatability
@@ -527,7 +542,8 @@ interface ModJsonBase {
 	description?: string,
 	/**
 	 * URL of the mod's Git repository, or other equivalent homepage
-	 * @deprecated Use the \"links\" key instead
+	 * @deprecated
+	 * @deprecationMessage Use the \"links\" key instead
 	 */
 	repository?: string,
 	/**
@@ -551,7 +567,7 @@ interface ModJsonBase {
 	 * List of mods this mod depends on. See [the docs](https://docs.geode-sdk.org/mods/dependencies) 
 	 * for more information
 	 */
-	dependencies?: Dependency[] | null,
+	dependencies?: { [id: string]: Version | Dependency } | LegacyDependencies | null,
 	/**
 	 * List of mods this mod is incompatible with
 	 */
