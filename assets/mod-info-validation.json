@@ -280,8 +280,58 @@
             }
         },
         "dependencies": {
-            "type": [ "array", "null" ],
+            "type": ["object", "array", "null"],
             "description": "List of mods this mod depends on.",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "Version of the dependency. May use wildcards (*) if a specific version is not required.",
+                        "pattern": "^\\*|(v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)$"
+                    },
+                    "importance": {
+                        "type": "string",
+                        "description": "How important the dependency is.",
+                        "default": "required",
+                        "oneOf": [
+                            {
+                                "const": "required",
+                                "title": "The dependency is required for the mod to load. Will show an error."
+                            },
+                            {
+                                "const": "recommended",
+                                "title": "The dependency is not required but is recommended for a better experience. Will show a recommendation."
+                            },
+                            {
+                                "const": "suggested",
+                                "title": "The dependency is not required but the mod can integrate with it if the dependency is installed. Will show a suggestion."
+                            }
+                        ]
+                    },
+                    "platforms": {
+                        "type": "array",
+                        "description": "If this dependency should only be used on certain platforms, specify this property; by default, Geode assumes dependencies are used on all platforms",
+                        "items": {
+                            "type": "string",
+                            "oneOf": [
+                                { "const": "win" },
+                                { "const": "macos" },
+                                { "const": "mac-intel" },
+                                { "const": "mac-arm" },
+                                { "const": "android" },
+                                { "const": "android32" },
+                                { "const": "android64" }
+                            ]
+                        }
+                    },
+                    "settings": {
+                        "description": "Dependency-specific settings"
+                    }
+                },
+                "required": ["version"],
+                "unevaluatedProperties": false
+            },
             "items": {
                 "type": "object",
                 "properties": {
