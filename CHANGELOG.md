@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.17.0]
+ - Rename `cheats` tag to `cheat` (#20, #21)
+ - Suggest methods available to hook inside of modify class (#5)
+
 ## [v1.16.0]
  - Remove the `Geode: Publish` command as it no longer works
 
