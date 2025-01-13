@@ -1,7 +1,7 @@
 # Geode for VS Code Changelog
 
 ## [v1.18.0]
- - Geode 4.2.0 `mod.json` changes: `dependencies` may now be an object, and `dependencies` may specify `settings` for dependency-specific settings
+ - Geode 4.2.0 `mod.json` changes: `dependencies` and `incompatibilities` may now be objects, and `dependencies.[id]` may specify `settings` for dependency-specific settings
 
 ## [v1.17.0]
  - Rename `cheats` tag to `cheat` (#20, #21)

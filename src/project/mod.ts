@@ -434,11 +434,6 @@ export type LegacyDependencies = LegacyDependency[];
 
 export interface Incompatibility {
 	/**
-	 * ID of the incompatability
-	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
-	 */
-	id: string,
-	/**
 	 * Version of the incompatability. Geode assumes the mod follows [semver](https://semver.org); 
 	 * this means that versions "1.5.3" and "1.4.0" will be considered valid 
 	 * for incompatability version "1.4.5" but "2.1.0" would not be valid
@@ -469,6 +464,18 @@ export interface Incompatibility {
 	 */
 	platforms?: ShortPlatformIDOrGeneric[],
 }
+export interface LegacyIncompatibility extends Incompatibility {
+	/**
+	 * ID of the incompatability
+	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
+	 */
+	id: string,
+}
+/**
+ * @deprecated
+ * @deprecationMessage Use the object-style "incompatibilities" key instead
+ */
+export type LegacyIncompatibilities = LegacyIncompatibility[];
 
 /**
  * A tag for a mod. See [the docs](https://docs.geode-sdk.org/mods/configuring#tags) 
@@ -571,7 +578,7 @@ interface ModJsonBase {
 	/**
 	 * List of mods this mod is incompatible with
 	 */
-	incompatibilities?: Incompatibility[],
+	incompatibilities?: { [id: string]: Version | Dependency } | LegacyIncompatibilities,
 	resources?: Resources,
 	/**
 	 * The mod's settings. These are editable by the user in-game through the 
