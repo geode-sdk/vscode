@@ -16,38 +16,38 @@ export interface Font {
 	 * @pattern [0-9]+(-[0-9]+)?(,([0-9]+(-[0-9]+)?))*
 	 * @default 32-126,8226
 	 */
-	charset?: string | null,
+	charset?: string,
 	/**
 	 * If specified, will generate a black outline of the provided size around 
 	 * the font's characters. Experimental!
 	 * @minimum 0
 	 */
-	outline?: number | null,
+	outline?: number,
 }
 
 export interface Resources {
 	/**
 	 * Files to include with the mod. Things like sounds, binaries, etc.
 	 */
-	files?: string[] | null,
+	files?: string[],
 	/**
 	 * Sprites to include with the mod. The sprites will automatically have UHD, 
 	 * HD and SD versions created of them
 	 */
-	sprites?: string[] | null,
+	sprites?: string[],
 	/**
 	 * Fonts to include with the mod. Provided format should be TTF / OTF. 
 	 * Fonts will be converted automatically into GD-compatible BM fonts by 
 	 * Geode CLI before packaging. List the names of the fonts as keys
 	 */
-	fonts?: { [name: string]: Font } | null,
+	fonts?: { [name: string]: Font },
 	/**
 	 * The mod's sprite sheets. Sprite sheets are better optimized than using 
 	 * individual image files, so using them for the majority of the sprites in 
 	 * your mod is recommended. List the names of the mod's spritesheets as 
 	 * keys, and as their values a list of files to include in the sheet
 	 */
-	spritesheets?: { [name: string]: string[] } | null,
+	spritesheets?: { [name: string]: string[] },
 }
 
 export type ShortPlatformIDNoArch = "win" | "mac" | "android" | "ios";
@@ -567,12 +567,12 @@ interface ModJsonBase {
 	 * List of mods this mod depends on. See [the docs](https://docs.geode-sdk.org/mods/dependencies) 
 	 * for more information
 	 */
-	dependencies?: { [id: string]: Version | Dependency } | LegacyDependencies | null,
+	dependencies?: { [id: string]: Version | Dependency } | LegacyDependencies,
 	/**
 	 * List of mods this mod is incompatible with
 	 */
-	incompatibilities?: Incompatibility[] | null,
-	resources?: Resources | null,
+	incompatibilities?: Incompatibility[],
+	resources?: Resources,
 	/**
 	 * The mod's settings. These are editable by the user in-game through the 
 	 * mod's settings page. See [the docs page](https://docs.geode-sdk.org/mods/settings) 
