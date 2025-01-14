@@ -419,12 +419,6 @@ export interface LegacyDependency extends Dependency {
 	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
 	 */
 	id: string,
-	/**
-	 * Whether the dependency is required in order to load this mod
-	 * @deprecated
-	 * @deprecationMessage Use the "importance" property instead
-	 */
-	required?: boolean,
 }
 /**
  * @deprecated
