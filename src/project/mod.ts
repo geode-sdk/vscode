@@ -723,14 +723,15 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 		token: CancellationToken
 	): ProviderResult<(CodeAction | Command)[]> {
 		const modJson = parseTree(document.getText());
+		const actions: CodeAction[] = [];
 
 		function addCorrector<L extends Array<any>, N>(
 			key: string,
 			mapper: (result: N, old: L[0]) => void
-		): CodeAction | undefined {
+		) {
 			const prop = modJson?.children?.find(c => c.children?.at(0)?.value === key);
 			if (!prop) {
-				return undefined;
+				return;
 			}
 			const propValue = prop.children?.at(1);
 			const indentation = document.positionAt(prop.offset).character;
@@ -755,33 +756,32 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 						return result;
 					}, {} as N), undefined, indentation).replace(/\n/g, `\n${" ".repeat(indentation)}`)
 				);
-				return action;
+				actions.push(action);
 			}
-			return undefined;
 		}
 
-		return [
-			addCorrector<LegacyDependencies, Dependencies>("dependencies", (result, dep) => {
-				// Shorthand
-				if (dep.importance === "required" && dep.platforms === undefined) {
-					result[dep.id] = dep.version;
-				}
-				// Longhand
-				else {
-					result[dep.id] = {
-						importance: dep.importance,
-						version: dep.version,
-						platforms: dep.platforms,
-					};
-				}
-			}),
-			addCorrector<LegacyIncompatibilities, Incompatibilities>("incompatibilities", (result, inc) => {
-				result[inc.id] = {
-					importance: inc.importance,
-					version: inc.version,
-					platforms: inc.platforms,
+		addCorrector<LegacyDependencies, Dependencies>("dependencies", (result, dep) => {
+			// Shorthand
+			if (dep.importance === "required" && dep.platforms === undefined) {
+				result[dep.id] = dep.version;
+			}
+			// Longhand
+			else {
+				result[dep.id] = {
+					importance: dep.importance,
+					version: dep.version,
+					platforms: dep.platforms,
 				};
-			})
-		].filter(v => !!v);
+			}
+		});
+		addCorrector<LegacyIncompatibilities, Incompatibilities>("incompatibilities", (result, inc) => {
+			result[inc.id] = {
+				importance: inc.importance,
+				version: inc.version,
+				platforms: inc.platforms,
+			};
+		});
+
+		return actions;
 	}
 }
