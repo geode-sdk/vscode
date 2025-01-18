@@ -481,12 +481,44 @@ export interface Incompatibility {
 	 */
 	platforms?: ShortPlatformIDOrGeneric[],
 }
-export interface LegacyIncompatibility extends Incompatibility {
+export type Incompatibilities = { [id: string]: Incompatibility };
+
+export interface LegacyIncompatibility {
 	/**
 	 * ID of the incompatability
 	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
 	 */
 	id: string,
+	/**
+	 * Version of the incompatability. Geode assumes the mod follows [semver](https://semver.org); 
+	 * this means that versions "1.5.3" and "1.4.0" will be considered valid 
+	 * for incompatability version "1.4.5" but "2.1.0" would not be valid
+	 */
+	version: Version,
+	/**
+	 * How kind of an incompatibility this is
+	 */
+	importance:
+		/**
+		 * This mod does not work with the incompatible mod
+		 */
+		"breaking" |
+		/**
+		 * This mod might work with the incompatible mod, but there will be bugs
+		 */
+		"conflicting" | 
+		/**
+		 * This mod is a newer version/alternative for the incompatible mod. 
+		 * Geode will present this to the user and allow them to automatically 
+		 * migrate from the old mod to this one
+		 */
+		"superseded",
+	/**
+	 * If this incompatibility should only be on certain platforms, specify 
+	 * this property; by default, Geode assumes incompatibilities are used on 
+	 * all platforms
+	 */
+	platforms?: ShortPlatformIDOrGeneric[],
 }
 /**
  * @deprecated
@@ -595,7 +627,7 @@ interface ModJsonBase {
 	/**
 	 * List of mods this mod is incompatible with
 	 */
-	incompatibilities?: { [id: string]: Version | Dependency } | LegacyIncompatibilities,
+	incompatibilities?: Incompatibilities | LegacyIncompatibilities,
 	resources?: Resources,
 	/**
 	 * The mod's settings. These are editable by the user in-game through the 
@@ -691,46 +723,65 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 		token: CancellationToken
 	): ProviderResult<(CodeAction | Command)[]> {
 		const modJson = parseTree(document.getText());
-		const dependencies = modJson?.children?.find(c => c.children?.at(0)?.value === "dependencies");
-		if (!dependencies) {
+
+		function addCorrector<L extends Array<any>, N>(
+			key: string,
+			mapper: (result: N, old: L[0]) => void
+		): CodeAction | undefined {
+			const prop = modJson?.children?.find(c => c.children?.at(0)?.value === key);
+			if (!prop) {
+				return undefined;
+			}
+			const propValue = prop.children?.at(1);
+			const indentation = document.positionAt(prop.offset).character;
+			if (
+				propValue && propValue.type === "array" &&
+				new Range(
+					document.positionAt(prop.offset),
+					document.positionAt(prop.offset + prop.length)
+				).intersection(range) !== undefined
+			) {
+				const action = new CodeAction(`Convert to new \`${key}\` syntax`, CodeActionKind.QuickFix);
+				action.isPreferred = true;
+				action.edit = new WorkspaceEdit();
+				action.edit.replace(
+					document.uri,
+					new Range(
+						document.positionAt(propValue.offset),
+						document.positionAt(propValue.offset + propValue.length)
+					),
+					JSON.stringify((getNodeValue(propValue) as L[]).reduce((result, dep) => {
+						mapper(result, dep);
+						return result;
+					}, {} as N), undefined, indentation).replace(/\n/g, `\n${" ".repeat(indentation)}`)
+				);
+				return action;
+			}
 			return undefined;
 		}
-		const dependenciesValue = dependencies.children?.at(1);
-		const indentation = document.positionAt(dependencies.offset).character;
-		if (
-			dependenciesValue && dependenciesValue.type === "array" &&
-			new Range(
-				document.positionAt(dependencies.offset),
-				document.positionAt(dependencies.offset + dependencies.length)
-			).intersection(range) !== undefined
-		) {
-			const action = new CodeAction("Convert to new `dependencies` syntax", CodeActionKind.QuickFix);
-			action.isPreferred = true;
-			action.edit = new WorkspaceEdit();
-			action.edit.replace(
-				document.uri,
-				new Range(
-					document.positionAt(dependenciesValue.offset),
-					document.positionAt(dependenciesValue.offset + dependenciesValue.length)
-				),
-				JSON.stringify((getNodeValue(dependenciesValue) as LegacyDependencies).reduce((result, dep) => {
-					// Shorthand
-					if (dep.importance === "required" && dep.platforms === undefined) {
-						result[dep.id] = dep.version;
-					}
-					// Longhand
-					else {
-						result[dep.id] = {
-							importance: dep.importance,
-							version: dep.version,
-							platforms: dep.platforms,
-						};
-					}
-					return result;
-				}, {} as Dependencies), undefined, indentation).replace(/\n/g, `\n${" ".repeat(indentation)}`)
-			);
-			return [action];
-		}
-		return undefined;
+
+		return [
+			addCorrector<LegacyDependencies, Dependencies>("dependencies", (result, dep) => {
+				// Shorthand
+				if (dep.importance === "required" && dep.platforms === undefined) {
+					result[dep.id] = dep.version;
+				}
+				// Longhand
+				else {
+					result[dep.id] = {
+						importance: dep.importance,
+						version: dep.version,
+						platforms: dep.platforms,
+					};
+				}
+			}),
+			addCorrector<LegacyIncompatibilities, Incompatibilities>("incompatibilities", (result, inc) => {
+				result[inc.id] = {
+					importance: inc.importance,
+					version: inc.version,
+					platforms: inc.platforms,
+				};
+			})
+		].filter(v => !!v);
 	}
 }
