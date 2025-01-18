@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, CodeActionProvider, Command, commands, languages, Position, ProviderResult, Range, Selection, TextDocument, WorkspaceEdit } from "vscode";
+import { createScanner, getNodeValue, parseTree } from "jsonc-parser";
+import { getOutputChannel } from "../config";
+
 export interface Font {
 	/**
 	 * Path to the font's TTF / OTF file (relative to mod root folder)
@@ -413,12 +417,31 @@ export interface Dependency {
 	 */
 	settings?: any,
 }
-export interface LegacyDependency extends Dependency {
+export type Dependencies = { [id: string]: Version | Dependency };
+
+export interface LegacyDependency {
 	/**
 	 * ID of the dependency
 	 * @pattern [a-z0-9\-_]+\.[a-z0-9\-_]+
 	 */
 	id: string,
+	/**
+	 * Version of the dependency. Geode assumes the mod follows [semver](https://semver.org); 
+	 * this means that versions "1.5.3" and "1.4.0" will be considered valid 
+	 * for dependency version "1.4.5" but "2.1.0" would not be valid
+	 */
+	version: Version,
+	/**
+	 * Whether this dependency is required for the mod to work, or only 
+	 * recommended for users
+	 */
+	importance: "required" | "recommended" | "suggested",
+	/**
+	 * If this dependency should only be on certain platforms, specify this 
+	 * property; by default, Geode assumes dependencies are used on all 
+	 * platforms
+	 */
+	platforms?: ShortPlatformIDOrGeneric[],
 }
 /**
  * @deprecated
@@ -568,7 +591,7 @@ interface ModJsonBase {
 	 * List of mods this mod depends on. See [the docs](https://docs.geode-sdk.org/mods/dependencies) 
 	 * for more information
 	 */
-	dependencies?: { [id: string]: Version | Dependency } | LegacyDependencies,
+	dependencies?: Dependencies | LegacyDependencies,
 	/**
 	 * List of mods this mod is incompatible with
 	 */
@@ -658,4 +681,56 @@ export interface RTModJson extends ModJsonBase {
 	path: string;
 	binary: string;
 	runtime: ModRunTimeInfo;
+}
+
+export class ModJsonSuggestionsProvider implements CodeActionProvider {
+	provideCodeActions(
+		document: TextDocument,
+		range: Range | Selection,
+		context: CodeActionContext,
+		token: CancellationToken
+	): ProviderResult<(CodeAction | Command)[]> {
+		const modJson = parseTree(document.getText());
+		const dependencies = modJson?.children?.find(c => c.children?.at(0)?.value === "dependencies");
+		if (!dependencies) {
+			return undefined;
+		}
+		const dependenciesValue = dependencies.children?.at(1);
+		const indentation = document.positionAt(dependencies.offset).character;
+		if (
+			dependenciesValue && dependenciesValue.type === "array" &&
+			new Range(
+				document.positionAt(dependencies.offset),
+				document.positionAt(dependencies.offset + dependencies.length)
+			).intersection(range) !== undefined
+		) {
+			const action = new CodeAction("Convert to new `dependencies` syntax", CodeActionKind.QuickFix);
+			action.isPreferred = true;
+			action.edit = new WorkspaceEdit();
+			action.edit.replace(
+				document.uri,
+				new Range(
+					document.positionAt(dependenciesValue.offset),
+					document.positionAt(dependenciesValue.offset + dependenciesValue.length)
+				),
+				JSON.stringify((getNodeValue(dependenciesValue) as LegacyDependencies).reduce((result, dep) => {
+					// Shorthand
+					if (dep.importance === "required" && dep.platforms === undefined) {
+						result[dep.id] = dep.version;
+					}
+					// Longhand
+					else {
+						result[dep.id] = {
+							importance: dep.importance,
+							version: dep.version,
+							platforms: dep.platforms,
+						};
+					}
+					return result;
+				}, {} as Dependencies), undefined, indentation).replace(/\n/g, `\n${" ".repeat(indentation)}`)
+			);
+			return [action];
+		}
+		return undefined;
+	}
 }

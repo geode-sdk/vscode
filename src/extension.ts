@@ -14,6 +14,7 @@ import { CCColor3bProvider, CCColor4bProvider } from "./project/color";
 import { SpriteHoverPreview } from "./project/hover";
 import { registerLinters } from "./project/lint";
 import { ModifyClassMethodCompletion } from "./project/suggest";
+import { ModJsonSuggestionsProvider } from "./project/mod";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
@@ -89,6 +90,12 @@ export async function activate(context: ExtensionContext) {
 			{ language: "cpp" },
 			new ModifyClassMethodCompletion(),
 		),
+	);
+	context.subscriptions.push(
+		languages.registerCodeActionsProvider(
+			{ pattern: "**/mod.json" },
+			new ModJsonSuggestionsProvider(),
+		)
 	);
 
 	registerLinters(context);

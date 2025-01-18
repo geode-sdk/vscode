@@ -61,8 +61,12 @@
 		"languages": [
 			{
 				"id": "bro",
-				"aliases": ["Broma"],
-				"extensions": [".bro"],
+				"aliases": [
+					"Broma"
+				],
+				"extensions": [
+					".bro"
+				],
 				"configuration": "./src/broma/language-configuration.json"
 			}
 		],
@@ -327,6 +331,7 @@
 		"@vscode/webview-ui-toolkit": "^1.1.0",
 		"camelcase": "^7.0.0",
 		"fuse.js": "^6.6.2",
+		"jsonc-parser": "^3.3.1",
 		"object-hash": "^3.0.0",
 		"plist": "^3.0.6",
 		"semver": "^7.5.4",
