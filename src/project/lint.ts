@@ -204,6 +204,7 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
         /(?<method>\S+)?\(\s*(?<args>(?:(?:"|')[^"']*(?:"|')(?:_spr)?\s*,?\s*)+)\s*\)/g,
         ({ groups }) => {
             if (
+                !groups!.method.match(/^[A-z]|:/) ||
                 groups!.method.startsWith("web::") || 
                 groups!.method.includes("expandSpriteName")
             ) {
