@@ -2,7 +2,6 @@ import {
 	CancellationToken,
 	Hover,
 	HoverProvider,
-	MarkdownString,
 	Position,
 	ProviderResult,
 	Range,
@@ -14,7 +13,7 @@ import {
 	ItemType,
 	SheetItem,
 	SheetSpriteItem,
-	fetchItemImage,
+	getItemImage,
 	sourceID,
 } from "../browser/item";
 import { Option } from "../utils/monads";
@@ -66,14 +65,18 @@ export class SpriteHoverPreview implements HoverProvider {
 			position,
 			/"[a-zA-Z0-9_\-\.]+\.(png|fnt|ogg)"(_spr)?/g,
 		);
+
 		if (match) {
 			let item: Option<Item<ItemType>>;
+
 			if (match.text.endsWith("_spr")) {
 				const name = match.text.substring(1, match.text.length - 5);
 				const project = getProjectFromDocument(document.uri);
+
 				if (!project) {
 					return undefined;
 				}
+
 				const collection = browser
 					.getDatabase()
 					.getCollectionById(sourceID(project));
@@ -85,24 +88,30 @@ export class SpriteHoverPreview implements HoverProvider {
 						match.text.substring(1, match.text.length - 1),
 					);
 			}
+
 			if (!item) {
 				return undefined;
 			}
+
 			return new Promise(async (resolve, _) => {
-				const res = await fetchItemImage(item as Item<ItemType>);
+				const res = await getItemImage(item as Item<ItemType>);
+
 				if (res.isValue()) {
-					let md = "";
-					md += `![Sprite Preview](data:image/png;base64,${res.unwrap()})`;
+					const content = res.unwrap();
+
 					if (item?.type === ItemType.sheetSprite) {
-						md += `\n\nSheet: ${(item as SheetSpriteItem).sheet}`;
+						content.appendText(`\n\nSheet: ${(item as SheetSpriteItem).sheet}`);
 					}
+
 					if (typeIsProject(item?.src)) {
-						md += `\n\nMod: ${item?.src.modJson.name}`;
+						content.appendText(`\n\nMod: ${item?.src.modJson.name}`);
 					}
-					resolve(new Hover(md, match.range));
+
+					resolve(new Hover(content, match.range));
 				}
 			});
 		}
+
 		return undefined;
 	}
 }
