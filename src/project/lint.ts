@@ -1,6 +1,10 @@
 import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, CodeActionProvider, Command, Diagnostic, DiagnosticCollection, DiagnosticSeverity, ExtensionContext, languages, Position, ProviderResult, Range, Selection, TextDocument, Uri, workspace, WorkspaceEdit } from "vscode";
-import { getProjectFromDocument } from "./project";
+import { getProjectFromDocument, typeIsProject } from "./project";
 import { readFile } from "fs/promises";
+import { browser } from "../browser/browser";
+import { parse as parsePath } from "path";
+import { Item, ItemType } from "../browser/item";
+import { Database } from "../browser/database";
 
 // type Binding = "inline" | "link" | number | null;
 // type Bindings = {
@@ -42,6 +46,31 @@ const TYPE_LOOKUPS: Record<string, string> = {
     rgb: "cocos2d::ccColor3B",
     rgba: "cocos2d::ccColor4B"
 };
+
+let RESOURCE_FILE_EXTENSIONS: string[] = [];
+
+function getResourcesFileExtensions(db: Database): string[] {
+    const extFromPath = <T extends ItemType>(i: Item<T>) => parsePath(i.path).ext.slice(1);
+
+    if (!RESOURCE_FILE_EXTENSIONS.length) {
+        for (const collection of db.getCollections()) {
+            RESOURCE_FILE_EXTENSIONS.push(
+                ...new Set(collection.sheets.map(extFromPath))
+            );
+            RESOURCE_FILE_EXTENSIONS.push(
+                ...new Set(collection.sprites.map(extFromPath))
+            );
+            RESOURCE_FILE_EXTENSIONS.push(
+                ...new Set(collection.fonts.map(extFromPath))
+            );
+            RESOURCE_FILE_EXTENSIONS.push(
+                ...new Set(collection.audio.map(extFromPath))
+            );
+        }
+    }
+
+    return RESOURCE_FILE_EXTENSIONS;
+}
 
 function lint(
     document: MaybeDocument,
@@ -151,6 +180,100 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 //     }
 // }
 
+function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[]) {
+    const modJson = getProjectFromDocument(document.uri)?.modJson;
+    if (!modJson) {
+        return;
+    }
+    
+    const db = browser.getDatabase();
+    const dependencies = ["geode.loader"];
+
+    if (modJson?.dependencies) {
+        // TODO: Deprecate
+        if (modJson.dependencies instanceof Array) {
+            dependencies.push(...modJson.dependencies.map((d) => d.id));
+        } else {
+            dependencies.push(...Object.keys(modJson.dependencies));
+        }
+    }
+
+    lint(
+        document, diagnostics,
+        "unknown-resource",
+        /(?<method>\S+)?\(\s*(?<args>(?:(?:"|')[^"']*(?:"|')(?:_spr)?\s*,?\s*)+)\s*\)/g,
+        ({ groups }) => {
+            if (
+                groups!.method.startsWith("web::") || 
+                groups!.method.includes("expandSpriteName")
+            ) {
+                return undefined;
+            }
+
+            const args = groups!.args
+                // remove indentation
+                .replace(/("|'),\s*/g, "$1, ")
+                // match only functions with parameters of strings
+                .matchAll(/(?:(((?:"|')\S+\.\S+(?:"|'))(_spr)?)+?)(?:,\s*|\))?/g);
+
+            for (const arg of args) {
+                const hasSpr = arg[3] === "_spr" || groups!.method.endsWith("spr");
+                const resourceName = arg[2]!.replace(/'|"/g, "");
+                // resourceName might have the same name as a gd resource, so first
+                // try to find it in the mod's resources
+                const item = db.getCollectionById(`mod:${modJson.id}`)?.findByName(resourceName)
+                    ?? db.findItemByName(resourceName);
+
+                {
+                    // avoid matching stuff that doesnt look like a resource
+                    if (!resourceName.match(
+                        new RegExp(`^\\S+\\.(${getResourcesFileExtensions(db).join('|')})$`, "i")
+                    )) {
+                        continue;
+                    }
+
+                    let shouldBreak = false;
+
+                    // avoid matching resources from dependencies
+                    for (const dep of dependencies) {
+                        if (resourceName.startsWith(`${dep}/`)) {
+                            shouldBreak = true;
+                            break;
+                        }
+                    }
+
+                    if (shouldBreak) {
+                        continue;
+                    }
+                }
+
+                if (!item) {
+                    return {
+                        level: DiagnosticSeverity.Warning,
+                        msg: `Resource "${resourceName}" doesn't exist`
+                    };
+                }
+
+                if (!hasSpr && typeIsProject(item.src)) {
+                    return {
+                        level: DiagnosticSeverity.Warning,
+                        msg: `Resource is missing _spr, perhaps you meant "${resourceName}"_spr?`
+                    };
+                }
+
+                if (hasSpr && !typeIsProject(item.src)) {
+                    return {
+                        level: DiagnosticSeverity.Warning,
+                        msg: `Resource "${resourceName}" was not found in mod.json`
+                    };
+                }
+            }
+
+            return undefined;
+        }
+    );
+}
+
 function applyGeodeLints(document: MaybeDocument, diagnosticCollection: DiagnosticCollection) {
     if (document.uri.toString().endsWith('.cpp') || document.uri.toString().endsWith('.hpp')) {
         const diagnostics: Diagnostic[] = [];
@@ -159,6 +282,7 @@ function applyGeodeLints(document: MaybeDocument, diagnosticCollection: Diagnost
         lintAlternative(document, diagnostics);
         lintSettings(document, diagnostics);
         // lintOverrides(document, diagnostics);
+        lintUnknownResource(document, diagnostics);
     
         // Replace lints on the document
         diagnosticCollection.set(document.uri, diagnostics);
