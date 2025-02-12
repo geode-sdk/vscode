@@ -6,7 +6,11 @@
 	"patterns": [
 		{
 			"name": "keyword.other.bro",
-			"match": "\\b(mac|win|ios|android|PAD)\\b"
+			"match": "\\b(PAD|mac|win|ios|android|imac|m1|android32|android64)\\b"
+		},
+		{
+			"name": "constant.language.todoreturn.bro markup.underline",
+			"match": "\\b(TodoReturn)\\b"
 		},
 		{
 			"name": "keyword.bro",

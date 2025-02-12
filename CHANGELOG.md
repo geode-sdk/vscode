@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [v1.18.1]
+ - Fix syntax highlighting for Broma
+
 ## [v1.18.0]
  - Geode 4.2.0 `mod.json` changes: `dependencies` and `incompatibilities` may now be objects, and `dependencies.[id]` may specify `settings` for dependency-specific settings
 

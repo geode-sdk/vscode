@@ -15,6 +15,7 @@ This is a rewrite and enhancement of the previous `geode-support` extension, whi
  * Inline color hints for `ccColor3B` and `ccColor4B`
  * Preview sprites on hover
  * View mod setting info on hover
+ * Syntax highlighting for [Broma](https://github.com/geode-sdk/Broma) files
 
 ![](./assets/color-hover.png)
 
