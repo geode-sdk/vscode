@@ -579,8 +579,9 @@ export class BrowserPanel extends Panel {
 				threshold: 0.2,
 			});
 			this.#currentItemList = fuse.search(query).map((t) => t.item);
-			const count = `Found ${this.#currentItemList.length} results`;
-			this.#searchResults?.setText(count);
+
+			const itemCount = this.#currentItemList.length;
+			this.#searchResults?.setText(`Found ${itemCount} result${itemCount !== 1 ? "s" : ""}`);
 		} else {
 			this.#currentItemList = list.sort((a, b) => {
 				switch (this.#sorting.getSelected()) {
@@ -591,18 +592,38 @@ export class BrowserPanel extends Panel {
 				}
 				return 0;
 			});
-			this.#searchResults?.setText(`Showing ${this.#showCount} items`);
+
+			const itemCount = Math.min(this.#showCount, list.length);
+			this.#searchResults?.setText(`Showing ${itemCount} item${itemCount !== 1 ? "s" : ""}`);
 		}
 
 		this.showItems(0, this.#showCount);
 
-		// todo: update count to reflect search results
-		this.#collection.badge("all", col?.getTotalCount() ?? 0);
-		this.#collection.badge("sheets", col?.getSheetCount() ?? 0);
-		this.#collection.badge("frames", col?.getSheetSpriteCount() ?? 0);
-		this.#collection.badge("sprites", col?.getSpriteCount() ?? 0);
-		this.#collection.badge("fonts", col?.getFontCount() ?? 0);
-		this.#collection.badge("audio", col?.getAudioCount() ?? 0);
+		let allCount: number = 0;
+		let sheetsCount: number = 0;
+		let framesCount: number = 0;
+		let spritesCount: number = 0;
+		let fontsCount: number = 0;
+		let audioCount: number = 0;
+
+		for (const { type } of this.#currentItemList) {
+			allCount++;
+
+			switch (type) {
+				case ItemType.sprite: spritesCount++; break;
+				case ItemType.sheet: sheetsCount++; break;
+				case ItemType.sheetSprite: framesCount++; break;
+				case ItemType.font: fontsCount++; break;
+				case ItemType.audio: audioCount++; break;
+			}
+		}
+
+		this.#collection.badge("all", allCount);
+		this.#collection.badge("sheets", sheetsCount);
+		this.#collection.badge("frames", framesCount);
+		this.#collection.badge("sprites", spritesCount);
+		this.#collection.badge("fonts", fontsCount);
+		this.#collection.badge("audio", audioCount);
 	}
 
 	favoritedItem() {

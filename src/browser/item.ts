@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { SnippetString, TextEditor, window, workspace } from "vscode";
+import { MarkdownString, SnippetString, TextEditor, Uri, window, workspace } from "vscode";
 import { getAsset } from "../config";
 import { cli } from "../geode/cli";
 import { getActiveProject, Project, typeIsProject } from "../project/project";
@@ -15,6 +15,7 @@ import { getBMFontDatabase } from "./BMFontDatabase";
 import { browser } from "./browser";
 import { createCoverImage, getSheetDatabase } from "./SheetDatabase";
 import * as sharp from "sharp";
+import { parse as parsePath }  from "path";
 
 export enum ItemType {
 	sprite,
@@ -150,6 +151,49 @@ export async function fetchItemImage<T extends ItemType>(
 			return Ok(readFileSync(item.path, { encoding: "base64" }));
 		}
 	}
+
+	return Err("Unsupported type");
+}
+
+export async function getItemImage<T extends ItemType>(
+	item: Item<T>,
+): Future<MarkdownString> {
+	switch (item.type) {
+		case ItemType.sheetSprite:
+		case ItemType.sheet:
+		case ItemType.font: {
+			const image = await fetchItemImage(item);
+
+			if (image.isError()) {
+				return Err(image.unwrapErr());
+			}
+
+			return Ok(new MarkdownString(
+				`![General Preview](data:image/png;base64,${image.unwrap()})`
+			));
+		}
+
+		case ItemType.audio: {
+			const itemPath = getAsset("audio-{theme}.png");
+
+			const content = new MarkdownString(`<img src="${parsePath(itemPath).base}"/>`);
+			content.supportHtml = true;
+			content.baseUri = Uri.file(itemPath);
+
+			return Ok(content);
+		}
+
+		case ItemType.sprite: {
+			const itemPath = item.path;
+
+			const content = new MarkdownString(`<img src="${parsePath(itemPath).base}"/>`);
+			content.supportHtml = true;
+			content.baseUri = Uri.file(itemPath);
+			
+			return Ok(content);
+		}
+	}
+
 	return Err("Unsupported type");
 }
 

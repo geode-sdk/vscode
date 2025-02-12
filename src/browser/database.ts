@@ -194,25 +194,27 @@ export class Database {
 
 		const collection = this.newCollection(mod);
 
-		mod.modJson.resources.files
-			?.flatMap((f) => G.glob.sync(f, globOptions))
-			.forEach((file) => {
-				if (file.endsWith(".ogg")) {
-					collection.audio.push({
-						type: ItemType.audio,
-						name: basename(file),
-						path: file,
-						src: mod,
-					});
-				} else {
-					collection.sprites.push({
-						type: ItemType.sprite,
-						name: basename(file),
-						path: file,
-						src: mod,
-					});
-				}
-			});
+		[
+			...mod.modJson.resources?.files ?? [],
+			...mod.modJson.resources?.sprites ?? []
+		]?.flatMap((f) => G.glob.sync(f, globOptions))
+		.forEach((file: string) => {
+			if (file.endsWith(".ogg")) {
+				collection.audio.push({
+					type: ItemType.audio,
+					name: basename(file),
+					path: file,
+					src: mod,
+				});
+			} else {
+				collection.sprites.push({
+					type: ItemType.sprite,
+					name: basename(file),
+					path: file,
+					src: mod,
+				});
+			}
+		});
 
 		Object.entries(mod.modJson.resources.spritesheets ?? {})?.forEach(
 			([sheet, patterns]) => {

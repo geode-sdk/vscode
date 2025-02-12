@@ -12,7 +12,7 @@ import {
 import { getOutputChannel } from "../config";
 
 const MATCH_COLOR_BYTE =
-	/\b((25[0-5])|(2[0-4][0-9])|([0-1][0-9][0-9])|([0-9][0-9]?)\b)/g;
+	/\b((25[0-5])|(2[0-4][0-9])|([0-1][0-9][0-9])|([0-9][0-9]?)\b|0[xX][0-9a-fA-F]+\b)/g;
 
 class CCColorProvider implements DocumentColorProvider {
 	rgba: boolean;
@@ -87,12 +87,16 @@ class CCColorProvider implements DocumentColorProvider {
 		return ret;
 	}
 
-	private representColor(color: Color, type: "initializer" | "function") {
+	private representColor(color: Color, hex: boolean, type: "initializer" | "function") {
 		const colors = [color.red, color.green, color.blue];
 		if (this.rgba) {
 			colors.push(color.alpha);
 		}
-		const list = colors.map((c) => (c * 255).toString()).join(", ");
+
+		const list = colors.map(
+			(c) => `${hex ? "0x" : ""}${(c * 255).toString(hex ? 16 : 10)}`
+		).join(", ");
+
 		switch (type) {
 			case "initializer":
 				return `{ ${list} }`;
@@ -107,9 +111,11 @@ class CCColorProvider implements DocumentColorProvider {
 	): ProviderResult<ColorInformation[]> {
 		const res = [];
 		const lines = document.getText().split("\n");
+
 		for (let line = 0; line < lines.length; line += 1) {
 			res.push(...this.findColorsInCodeLine(line, lines[line]));
 		}
+
 		return res;
 	}
 
@@ -118,9 +124,11 @@ class CCColorProvider implements DocumentColorProvider {
 		context: { readonly document: TextDocument; readonly range: Range },
 		token: CancellationToken,
 	): ProviderResult<ColorPresentation[]> {
+		const isHex = context.document.getText(context.range).includes("0x");
+
 		return [
-			new ColorPresentation(this.representColor(color, "initializer")),
-			new ColorPresentation(this.representColor(color, "function")),
+			new ColorPresentation(this.representColor(color, isHex, "initializer")),
+			new ColorPresentation(this.representColor(color, isHex, "function")),
 		];
 	}
 }
