@@ -195,8 +195,8 @@ export class Database {
 		const collection = this.newCollection(mod);
 
 		[
-			...mod.modJson.resources?.files || [],
-			...mod.modJson.resources?.sprites || []
+			...mod.modJson.resources?.files ?? [],
+			...mod.modJson.resources?.sprites ?? []
 		]?.flatMap((f) => G.glob.sync(f, globOptions))
 		.forEach((file: string) => {
 			if (file.endsWith(".ogg")) {

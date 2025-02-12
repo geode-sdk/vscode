@@ -142,7 +142,7 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
                 return `Setting ${groups!.name} is of type ${setting.type}, not ${groups!.type}`;
             }
 
-            return undefined;
+            return;
         }
     );
 }
@@ -171,7 +171,7 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 //                 if (!LOADED_BINDINGS!.classes.find(p => p.name === text)) {
 //                     return `Unknown modify class ${text}`;
 //                 }
-//                 return undefined;
+//                 return;
 //             }
 //         );
 //     }
@@ -187,6 +187,7 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
     }
     
     const db = browser.getDatabase();
+    const knownResourceExts = getResourcesFileExtensions(db);
     const dependencies = ["geode.loader"];
 
     if (modJson?.dependencies) {
@@ -208,7 +209,7 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
                 groups!.method.startsWith("web::") || 
                 groups!.method.includes("expandSpriteName")
             ) {
-                return undefined;
+                return;
             }
 
             const args = groups!.args
@@ -227,9 +228,12 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
 
                 {
                     // avoid matching stuff that doesnt look like a resource
-                    if (!resourceName.match(
-                        new RegExp(`^\\S+\\.(${getResourcesFileExtensions(db).join('|')})$`, "i")
-                    )) {
+                    const parts = resourceName.split(".");
+                    if (parts.length < 2) {
+                        continue;
+                    }
+                    const ext = parts[parts.length - 1].toLowerCase();
+                    if (!knownResourceExts.includes(ext)) {
                         continue;
                     }
 
@@ -270,7 +274,7 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
                 }
             }
 
-            return undefined;
+            return;
         }
     );
 }
