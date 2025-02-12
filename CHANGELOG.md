@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.19.0]
+ - Add lint for missing resources, or missing `_spr`
+ - Fix many issues with sprite browser (#23)
+
 ## [v1.18.1]
  - Fix syntax highlighting for Broma
 
