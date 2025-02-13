@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [v1.19.1]
+ - Bundle separate .vsix per platform, making it smaller
+   - Extension is now ~10mb instead of 50mb!
+
 ## [v1.19.0]
  - Add lint for missing resources, or missing `_spr`
  - Fix many issues with sprite browser (#23)
