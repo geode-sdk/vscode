@@ -1,79 +1,48 @@
-name: Build Multiplatform
+name: Build vsix
+
 on:
   push:
     branches:
-      - "**"
-
+      - '*'
+    
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-          - os: windows-latest
-            platform: win32
-            arch: x64
-            npm-arch: x64
-
-          - os: windows-latest
-            platform: win32
-            arch: arm64
-            npm-arch: arm
-
-          - os: ubuntu-latest
-            platform: linux
-            arch: x64
-            npm-arch: x64
-
-          - os: ubuntu-latest
-            platform: linux
-            arch: arm64
-            npm-arch: arm64
-
-          # - os: ubuntu-latest
-          #   platform: linux
-          #   arch: armhf
-          #   npm-arch: arm
-
-          # - os: ubuntu-latest
-          #   platform: alpine
-          #   arch: x64
-          #   npm-arch: x64
-
-          - os: macos-latest
-            platform: darwin
-            arch: x64
-            npm-arch: x64
-
-          - os: macos-latest
-            platform: darwin
-            arch: arm64
-            npm-arch: arm64
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          run_install: false
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        run_install: false
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
 
-      - run: pnpm install --frozen-lockfile
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          npm_config_arch: ${{ matrix.npm-arch }}
-          npm_config_target_arch: ${{ matrix.npm-arch }}
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - run: npx @vscode/vsce package --target ${{ env.target }}
-        env:
-          target: "${{ matrix.platform }}-${{ matrix.arch }}"
-  
-      - uses: actions/upload-artifact@v4
-        with:
-          name: "${{ matrix.platform }}-${{ matrix.arch }}"
-          path: "*.vsix"
+    - uses: actions/cache@v4
+      name: Setup pnpm cache
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Package
+      run: pnpm exec vsce package
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Built extension
+        path: "*.vsix"

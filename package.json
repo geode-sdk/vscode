@@ -2,11 +2,11 @@
 	"name": "geode",
 	"displayName": "Geode",
 	"description": "Utilities for the Geode Geometry Dash modding framework",
-	"version": "1.19.0",
+	"version": "1.19.1",
 	"engines": {
 		"vscode": "^1.72.0"
 	},
-	"packageManager": "pnpm@9.x",
+	"packageManager": "pnpm@10.3.0",
 	"author": {
 		"name": "Geode Team",
 		"url": "https://github.com/geode-sdk"
