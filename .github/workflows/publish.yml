@@ -54,7 +54,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Package
-        run: npx @vscode/vsce package --target ${{ env.target }}
+        run: pnpm dlx @vscode/vsce package --target ${{ env.target }}
         env:
           target: "${{ matrix.platform }}-${{ matrix.arch }}"
   
