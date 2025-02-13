@@ -285,7 +285,6 @@
 		"watch-tests": "tsc -p . -w --outDir out",
 		"pretest": "npm run compile-tests && npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
-		"deploy": "vsce publish",
 		"format": "prettier --write src/**/*.ts"
 	},
 	"devDependencies": {
@@ -300,7 +299,6 @@
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
 		"@vscode/test-electron": "^2.1.3",
-		"@vscode/vsce": "^2.29.0",
 		"eslint": "^8.16.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",

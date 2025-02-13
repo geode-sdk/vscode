@@ -13,30 +13,37 @@ jobs:
             platform: win32
             arch: x64
             npm-arch: x64
+
           - os: windows-latest
             platform: win32
             arch: arm64
             npm-arch: arm
+
           - os: ubuntu-latest
             platform: linux
             arch: x64
             npm-arch: x64
+
           - os: ubuntu-latest
             platform: linux
             arch: arm64
             npm-arch: arm64
-          - os: ubuntu-latest
-            platform: linux
-            arch: armhf
-            npm-arch: arm
-          - os: ubuntu-latest
-            platform: alpine
-            arch: x64
-            npm-arch: x64
+
+          # - os: ubuntu-latest
+          #   platform: linux
+          #   arch: armhf
+          #   npm-arch: arm
+
+          # - os: ubuntu-latest
+          #   platform: alpine
+          #   arch: x64
+          #   npm-arch: x64
+
           - os: macos-latest
             platform: darwin
             arch: x64
             npm-arch: x64
+
           - os: macos-latest
             platform: darwin
             arch: arm64
@@ -56,13 +63,13 @@ jobs:
         with:
           node-version: 18.x
 
-      - run: pnpm install
+      - run: pnpm install --frozen-lockfile
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           npm_config_arch: ${{ matrix.npm-arch }}
           npm_config_target_arch: ${{ matrix.npm-arch }}
 
-      - run: npx vsce package --target ${{ env.target }}
+      - run: npx @vscode/vsce package --target ${{ env.target }}
         env:
           target: "${{ matrix.platform }}-${{ matrix.arch }}"
   
