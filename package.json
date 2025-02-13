@@ -7,20 +7,6 @@
 		"vscode": "^1.72.0"
 	},
 	"packageManager": "pnpm@9.x",
-	"pnpm": {
-		"supportedArchitectures": {
-			"os": [
-				"current",
-				"linux",
-				"win32",
-				"darwin"
-			],
-			"cpu": [
-				"x64",
-				"arm64"
-			]
-		}
-	},
 	"author": {
 		"name": "Geode Team",
 		"url": "https://github.com/geode-sdk"
