@@ -131,10 +131,13 @@ function lint(
 
     // Look for matches for the regex
     for (const match of document.data.matchAll(new RegExp(
-        `(?<ignore>\\/\\/\\s*@geode-ignore\\(${code}\\).*?$\\r?\\n^.*?|\\/\\/.*?)?${regex.source}`,
+        `${/((\/\/\s*@geode-ignore\((?<ignoreTags>[^\)]*)\).*?$\r?\n^.*?)|(\/\/.*?))?/.source}${regex.source}`,
         regex.flags.includes("m") ? regex.flags : regex.flags + "m"
     ))) {
-        if (match.index === undefined || match.groups?.ignore || ignoreRanges.some(range => range.from <= match.index! && range.to >= match.index!)) {
+        if (
+            match.index === undefined || match.groups?.ignoreTags?.includes(code) ||
+            ignoreRanges.some(range => range.from <= match.index! && range.to >= match.index!)
+        ) {
             continue;
         }
 
@@ -227,8 +230,8 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 // }
 
 function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[], initialRun: boolean) {
-    const modJson = getProjectFromDocument(document.uri)?.modJson;
-    if (!modJson) {
+    const mod = getProjectFromDocument(document.uri);
+    if (!mod) {
         return;
     }
     
@@ -238,94 +241,60 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[],
 
     // Reload DB on filesave (in case new resources have been added to fix the issues)
     if (!initialRun) {
-        db.refresh();
+        db.refreshModSprites(mod);
     }
 
-    if (modJson?.dependencies) {
+    if (mod.modJson.dependencies) {
         // TODO: Deprecate
-        if (modJson.dependencies instanceof Array) {
-            dependencies.push(...modJson.dependencies.map((d) => d.id));
+        if (mod.modJson.dependencies instanceof Array) {
+            dependencies.push(...mod.modJson.dependencies.map((d) => d.id));
         } else {
-            dependencies.push(...Object.keys(modJson.dependencies));
+            dependencies.push(...Object.keys(mod.modJson.dependencies));
         }
     }
 
     lint(
         document, diagnostics,
         "unknown-resource",
-        /(?<method>expandSpriteName|[Ss]prite|[Ll]abel)(?<args>.*("[^"]+\.[^"]+"(_spr)?))+/gs,
-        ({ groups: { method, args }, offset }) => {
-            // Don't lint `expandSpriteName` because if someone is using it they 
-            // should know what they are doing
-            if (method === "expandSpriteName") {
+        // Match resource-name-looking strings ("x.png", "thing.fnt" etc.)
+        // todo: this method doesn't actually match mistakes like "thing" where you forget the file extension
+        /"(?<modID>[a-z0-9\-_\.]+\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g,
+        ({ groups: { modID, name, suffix }, range }) => {
+            // Resource might have the same name as a GD resource, so first
+            // try to find it in the mod's resources
+            const item = db.getCollectionById(`mod:${mod.modJson.id}`)?.findByName(name)
+                ?? db.findItemByName(name);
+
+            // Avoid matching resources from dependencies
+            if (modID && dependencies.includes(modID)) {
                 return undefined;
             }
 
-            const results = [];
-
-            // Extract any arguments that look like "sprite.png"
-            for (const arg of args.matchAll(/"(?<name>[^"]+\.[^"]+)"(?<suffix>_spr)?/g)) {
-                const { name, suffix } = arg.groups!;
-                // `offset` is the offset of the lint regex, `method.length` is 
-                // because we are matching only the `args` match
-                const nameRange = rangeFromRegex(document, arg, offset + method.length);
-
-                // Resource might have the same name as a GD resource, so first
-                // try to find it in the mod's resources
-                const item = db.getCollectionById(`mod:${modJson.id}`)?.findByName(name)
-                    ?? db.findItemByName(name);
-
-                {
-                    // Avoid matching stuff that doesnt look like a resource
-                    const parts = name.split(".");
-                    if (parts.length < 2) {
-                        continue;
-                    }
-                    const ext = parts[parts.length - 1].toLowerCase();
-                    if (!knownResourceExts.includes(ext)) {
-                        continue;
-                    }
-
-                    let shouldBreak = false;
-
-                    // Avoid matching resources from dependencies
-                    for (const dep of dependencies) {
-                        if (name.startsWith(`${dep}/`)) {
-                            shouldBreak = true;
-                            break;
-                        }
-                    }
-
-                    if (shouldBreak) {
-                        continue;
-                    }
-                }
-
-                if (!item) {
-                    results.push({
+            if (!item) {
+                return [{
+                    level: DiagnosticSeverity.Warning,
+                    msg: `Resource "${name}" doesn't exist`,
+                    range,
+                }];
+            }
+            else {
+                if (!suffix && typeIsProject(item.src)) {
+                    return [{
                         level: DiagnosticSeverity.Warning,
-                        msg: `Resource "${name}" doesn't exist`,
-                        range: nameRange,
-                    });
+                        msg: `Resource is missing _spr, perhaps you meant "${name}"_spr?`,
+                        range,
+                    }];
                 }
-                else {
-                    if (!suffix && typeIsProject(item.src)) {
-                        results.push({
-                            level: DiagnosticSeverity.Warning,
-                            msg: `Resource is missing _spr, perhaps you meant "${name}"_spr?`,
-                            range: nameRange,
-                        });
-                    }
-                    else if (suffix && !typeIsProject(item.src)) {
-                        results.push({
-                            level: DiagnosticSeverity.Warning,
-                            msg: `Resource "${name}" was not found in mod.json`,
-                            range: nameRange,
-                        });
-                    }
+                else if (suffix && !typeIsProject(item.src)) {
+                    return [{
+                        level: DiagnosticSeverity.Warning,
+                        msg: `Resource "${name}" was not found in mod.json`,
+                        range,
+                    }];
                 }
             }
-            return results;
+
+            return undefined;
         }
     );
 }
@@ -380,6 +349,10 @@ export function registerLinters(context: ExtensionContext) {
     context.subscriptions.push(workspace.onDidChangeTextDocument(ev => {
         if (getExtConfig().get<boolean>("lints.enable")) {
             applyGeodeLints({ uri: ev.document.uri, data: ev.document.getText() }, geodeDiagnostics, false);
+        }
+        // If lints aren't enabled, reset diagnostics to remove existing ones
+        else {
+            geodeDiagnostics.set(ev.document.uri, []);
         }
     }));
 

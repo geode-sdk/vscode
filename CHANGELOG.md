@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [1.19.3]
+ - More fixes to missing resources linting
+ - Multiple lints can now be suppressed at once via `@geode-ignore(x, y, z)` (not yet supported for ignore ranges)
+
 ## [1.19.2]
  - Fix lint for missing resources having poor performance & not updating on resource change
  - Add option to disable lints alltogether

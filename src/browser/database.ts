@@ -250,6 +250,11 @@ export class Database {
 		);
 	}
 
+	refreshModSprites(mod: Project) {
+		// Delete existing database for this mod
+		this.collections = this.collections.filter(c => c.id !== sourceID(mod));
+		this.addSpritesFromMod(mod);
+	}
 	refresh() {
 		// reset database
 		this.collections = [];
