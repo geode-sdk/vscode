@@ -35,6 +35,44 @@ interface MaybeDocument {
     data: string,
 }
 
+/**
+ * Get the `Position` in a `MaybeDocument` based on a character index
+ * @param document A document
+ * @param index The index of the character whose line/column position you want
+ * @returns The line/column position of the character
+ */
+function positionAtIndex(document: MaybeDocument, index: number): Position {
+    // I'm assuming this is more performant than `data.split('\n')`
+    // This def should be performant since this is run for every source file in 
+    // the project every time they are saved
+    let newlines = 0;
+    let lastLineLength = 0;
+    for (let i = 0; i < index && i < document.data.length; i += 1) {
+        if (document.data[i] === '\n') {
+            newlines += 1;
+            lastLineLength = 0;
+        }
+        else {
+            lastLineLength += 1;
+        }
+    }
+    return new Position(newlines, lastLineLength);
+}
+/**
+ * Get the `Range` of a Regex match in a whole document
+ * @param document The document on which the Regex was matched
+ * @param regexResult The result of the Regex match
+ * @param offset If the Regex was matched on a substring of the whole document, 
+ * this is the offset of the substring the regex was matched on
+ * @returns 
+ */
+function rangeFromRegex(document: MaybeDocument, regexResult: RegExpMatchArray, offset: number = 0): Range {
+    return new Range(
+        positionAtIndex(document, (regexResult.index ?? 0) + offset),
+        positionAtIndex(document, (regexResult.index ?? 0) + offset + regexResult[0].length),
+    );
+}
+
 const TYPE_LOOKUPS: Record<string, string> = {
     bool: "bool",
     int: "int64_t",
@@ -77,7 +115,8 @@ function lint(
     diagnostics: Diagnostic[],
     code: string,
     regex: RegExp,
-    condition: (match: { text: string, groups: Record<string, string> | undefined, range: Range }) => { msg: string, level: DiagnosticSeverity } | string | undefined,
+    condition: (match: { text: string, groups: Record<string, string>, range: Range, offset: number }) => 
+        { msg: string, level: DiagnosticSeverity, range: Range }[] | string | undefined,
 ) {
     const ignoreRanges: { from: number, to: number }[] = [];
 
@@ -98,19 +137,25 @@ function lint(
             continue;
         }
 
-        const priorLines = document.data.substring(0, match.index).split("\n");
-        const range = new Range(
-            new Position(priorLines.length - 1, priorLines.at(-1)!.length),
-            new Position(priorLines.length + match[0].split("\n").length - 2, match.index + match[0].length),
-        );
-        const result = condition({ text: match[0], groups: match.groups, range });
+        const range = rangeFromRegex(document, match);
+        let result = condition({ text: match[0], groups: match.groups ?? {}, range, offset: match.index });
 
-        if (result !== undefined) {
-            const isString = typeof result === "string";
-            const diagnostic = new Diagnostic(range, isString ? result : result.msg, isString ? DiagnosticSeverity.Warning : result.level);
-            diagnostic.code = code;
-            diagnostic.source = "geode";
-            diagnostics.push(diagnostic);
+        // For uniform handling convert the result to an array
+        if (typeof result === "string") {
+            result = [{
+                msg: result,
+                level: DiagnosticSeverity.Warning,
+                range: range,
+            }];
+        }
+
+        if (result) {
+            for (const diag of result) {
+                const diagnostic = new Diagnostic(diag.range, diag.msg, diag.level);
+                diagnostic.code = code;
+                diagnostic.source = "geode";
+                diagnostics.push(diagnostic);
+            }
         }
     }
 }
@@ -130,19 +175,19 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
         document, diagnostics,
         "unknown-setting",
         /[gs]etSettingValue<\s*(?<type>[^>]+?)\s*>\s*\(\s*"(?<name>(?:[^"\\]|\\.)+?)\"\s*\)/g,
-        ({ groups }) => {
-            const setting = settings[groups!.name];
+        ({ groups: { name, type } }) => {
+            const setting = settings[name];
             const types = TYPE_LOOKUPS[setting.type]?.split("::").reverse();
 
             if (!setting) {
-                return `Unknown setting ${groups!.name}`;
+                return `Unknown setting ${name}`;
             } else if (setting.type === "title") {
                 return "Titles can't be used as a setting value";
-            } else if (!setting.type.startsWith("custom:") && !groups!.type.split("::").reverse().every((part, i) => part.trim() === types?.[i])) {
-                return `Setting ${groups!.name} is of type ${setting.type}, not ${groups!.type}`;
+            } else if (!setting.type.startsWith("custom:") && !type.split("::").reverse().every((part, i) => part.trim() === types?.[i])) {
+                return `Setting ${name} is of type ${setting.type}, not ${type}`;
             }
 
-            return;
+            return undefined;
         }
     );
 }
@@ -180,7 +225,7 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 //     }
 // }
 
-function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[]) {
+function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[], initialRun: boolean) {
     const modJson = getProjectFromDocument(document.uri)?.modJson;
     if (!modJson) {
         return;
@@ -189,6 +234,11 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
     const db = browser.getDatabase();
     const knownResourceExts = getResourcesFileExtensions(db);
     const dependencies = ["geode.loader"];
+
+    // Reload DB on filesave (in case new resources have been added to fix the issues)
+    if (!initialRun) {
+        db.refresh();
+    }
 
     if (modJson?.dependencies) {
         // TODO: Deprecate
@@ -202,33 +252,31 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
     lint(
         document, diagnostics,
         "unknown-resource",
-        /(?<method>\S+)?\(\s*(?<args>(?:(?:"|')[^"']*(?:"|')(?:_spr)?\s*,?\s*)+)\s*\)/g,
-        ({ groups }) => {
-            if (
-                !groups!.method.match(/^[A-z]|:/) ||
-                groups!.method.startsWith("web::") || 
-                groups!.method.includes("expandSpriteName")
-            ) {
-                return;
+        /(?<method>expandSpriteName|[Ss]prite|[Ll]abel)(?<args>.*("[^"]+\.[^"]+"(_spr)?))+/gs,
+        ({ groups: { method, args }, offset }) => {
+            // Don't lint `expandSpriteName` because if someone is using it they 
+            // should know what they are doing
+            if (method === "expandSpriteName") {
+                return undefined;
             }
 
-            const args = groups!.args
-                // remove indentation
-                .replace(/("|'),\s*/g, "$1, ")
-                // match only functions with parameters of strings
-                .matchAll(/(?:(((?:"|')\S+\.\S+(?:"|'))(_spr)?)+?)(?:,\s*|\))?/g);
+            const results = [];
 
-            for (const arg of args) {
-                const hasSpr = arg[3] === "_spr" || groups!.method.endsWith("spr");
-                const resourceName = arg[2]!.replace(/'|"/g, "");
-                // resourceName might have the same name as a gd resource, so first
+            // Extract any arguments that look like "sprite.png"
+            for (const arg of args.matchAll(/"(?<name>[^"]+\.[^"]+)"(?<suffix>_spr)?/g)) {
+                const { name, suffix } = arg.groups!;
+                // `offset` is the offset of the lint regex, `method.length` is 
+                // because we are matching only the `args` match
+                const nameRange = rangeFromRegex(document, arg, offset + method.length);
+
+                // Resource might have the same name as a GD resource, so first
                 // try to find it in the mod's resources
-                const item = db.getCollectionById(`mod:${modJson.id}`)?.findByName(resourceName)
-                    ?? db.findItemByName(resourceName);
+                const item = db.getCollectionById(`mod:${modJson.id}`)?.findByName(name)
+                    ?? db.findItemByName(name);
 
                 {
-                    // avoid matching stuff that doesnt look like a resource
-                    const parts = resourceName.split(".");
+                    // Avoid matching stuff that doesnt look like a resource
+                    const parts = name.split(".");
                     if (parts.length < 2) {
                         continue;
                     }
@@ -239,9 +287,9 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
 
                     let shouldBreak = false;
 
-                    // avoid matching resources from dependencies
+                    // Avoid matching resources from dependencies
                     for (const dep of dependencies) {
-                        if (resourceName.startsWith(`${dep}/`)) {
+                        if (name.startsWith(`${dep}/`)) {
                             shouldBreak = true;
                             break;
                         }
@@ -253,33 +301,35 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[])
                 }
 
                 if (!item) {
-                    return {
+                    results.push({
                         level: DiagnosticSeverity.Warning,
-                        msg: `Resource "${resourceName}" doesn't exist`
-                    };
+                        msg: `Resource "${name}" doesn't exist`,
+                        range: nameRange,
+                    });
                 }
-
-                if (!hasSpr && typeIsProject(item.src)) {
-                    return {
-                        level: DiagnosticSeverity.Warning,
-                        msg: `Resource is missing _spr, perhaps you meant "${resourceName}"_spr?`
-                    };
-                }
-
-                if (hasSpr && !typeIsProject(item.src)) {
-                    return {
-                        level: DiagnosticSeverity.Warning,
-                        msg: `Resource "${resourceName}" was not found in mod.json`
-                    };
+                else {
+                    if (!suffix && typeIsProject(item.src)) {
+                        results.push({
+                            level: DiagnosticSeverity.Warning,
+                            msg: `Resource is missing _spr, perhaps you meant "${name}"_spr?`,
+                            range: nameRange,
+                        });
+                    }
+                    else if (suffix && !typeIsProject(item.src)) {
+                        results.push({
+                            level: DiagnosticSeverity.Warning,
+                            msg: `Resource "${name}" was not found in mod.json`,
+                            range: nameRange,
+                        });
+                    }
                 }
             }
-
-            return;
+            return results;
         }
     );
 }
 
-function applyGeodeLints(document: MaybeDocument, diagnosticCollection: DiagnosticCollection) {
+function applyGeodeLints(document: MaybeDocument, diagnosticCollection: DiagnosticCollection, initialRun: boolean) {
     if (document.uri.toString().endsWith('.cpp') || document.uri.toString().endsWith('.hpp')) {
         const diagnostics: Diagnostic[] = [];
     
@@ -287,7 +337,7 @@ function applyGeodeLints(document: MaybeDocument, diagnosticCollection: Diagnost
         lintAlternative(document, diagnostics);
         lintSettings(document, diagnostics);
         // lintOverrides(document, diagnostics);
-        lintUnknownResource(document, diagnostics);
+        lintUnknownResource(document, diagnostics, initialRun);
     
         // Replace lints on the document
         diagnosticCollection.set(document.uri, diagnostics);
@@ -327,7 +377,7 @@ export function registerLinters(context: ExtensionContext) {
 
     // Relint on change
     context.subscriptions.push(workspace.onDidChangeTextDocument(ev => {
-        applyGeodeLints({ uri: ev.document.uri, data: ev.document.getText() }, geodeDiagnostics);
+        applyGeodeLints({ uri: ev.document.uri, data: ev.document.getText() }, geodeDiagnostics, false);
     }));
 
     // This is for adding Quick Fixes for those diagnostics
@@ -339,7 +389,7 @@ export function registerLinters(context: ExtensionContext) {
     // Skip build/ folder for obvious performance reasons
     workspace.findFiles('**/*.{cpp,hpp}', 'build*/**').then(docs => {
         docs.forEach(uri => readFile(uri.fsPath).then(data => {
-            applyGeodeLints({ uri, data: data.toString() }, geodeDiagnostics);
+            applyGeodeLints({ uri, data: data.toString() }, geodeDiagnostics, true);
         }));
     });
 }
