@@ -265,6 +265,11 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Add $override to the beginning of the included code"
+				},
+				"geode.lints.enable": {
+					"type": "boolean",
+					"default": true,
+					"description": "Enable Geode lints"
 				}
 			}
 		},

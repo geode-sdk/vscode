@@ -5,6 +5,7 @@ import { browser } from "../browser/browser";
 import { parse as parsePath } from "path";
 import { Item, ItemType } from "../browser/item";
 import { Database } from "../browser/database";
+import { getExtConfig } from "../config";
 
 // type Binding = "inline" | "link" | number | null;
 // type Bindings = {
@@ -377,7 +378,9 @@ export function registerLinters(context: ExtensionContext) {
 
     // Relint on change
     context.subscriptions.push(workspace.onDidChangeTextDocument(ev => {
-        applyGeodeLints({ uri: ev.document.uri, data: ev.document.getText() }, geodeDiagnostics, false);
+        if (getExtConfig().get<boolean>("lints.enable")) {
+            applyGeodeLints({ uri: ev.document.uri, data: ev.document.getText() }, geodeDiagnostics, false);
+        }
     }));
 
     // This is for adding Quick Fixes for those diagnostics
@@ -385,11 +388,17 @@ export function registerLinters(context: ExtensionContext) {
     // to already provided lints...
     context.subscriptions.push(languages.registerCodeActionsProvider('cpp', new SuppressDiagnosticProvider()));
 
-    // Lint all files on startup (so errors in unopened files get alerted too)
-    // Skip build/ folder for obvious performance reasons
-    workspace.findFiles('**/*.{cpp,hpp}', 'build*/**').then(docs => {
-        docs.forEach(uri => readFile(uri.fsPath).then(data => {
-            applyGeodeLints({ uri, data: data.toString() }, geodeDiagnostics, true);
-        }));
-    });
+    // Skip this step if lints are disabled
+    // We don't want to just skip the whole `registerLinters` function if the 
+    // setting is disabled because then users would be required to restart 
+    // VSCode to refresh the setting's value
+    if (getExtConfig().get<boolean>("lints.enable")) {
+        // Lint all files on startup (so errors in unopened files get alerted too)
+        // Skip build/ folder for obvious performance reasons
+        workspace.findFiles('**/*.{cpp,hpp}', 'build*/**').then(docs => {
+            docs.forEach(uri => readFile(uri.fsPath).then(data => {
+                applyGeodeLints({ uri, data: data.toString() }, geodeDiagnostics, true);
+            }));
+        });
+    }
 }

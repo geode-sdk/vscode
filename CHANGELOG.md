@@ -2,6 +2,7 @@
 
 ## [1.19.2]
  - Fix lint for missing resources having poor performance & not updating on resource change
+ - Add option to disable lints alltogether
 
 ## [1.19.1]
  - Bundle separate .vsix per platform, making it smaller
