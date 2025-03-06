@@ -268,7 +268,7 @@ export class Database {
 					// macos is special, as always
 					this.addSpritesFromDir(
 						path,
-						join(path.gdExecutablePath, "Resources"),
+						join(path.gdExecutablePath, "Contents", "Resources"),
 					);
 				} else {
 					this.addSpritesFromDir(
