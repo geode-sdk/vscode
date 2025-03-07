@@ -2,11 +2,12 @@
 
 "use strict";
 
-import { Configuration, Compiler } from "webpack";
+import type { Configuration, Compiler } from "webpack";
 import { createGenerator } from "ts-json-schema-generator";
 import { mkdirSync, writeFileSync } from "fs";
 
-const path = require("path");
+import path from "path";
+import url from "url";
 
 class JsonValidationGenner {
 	apply(compiler: Compiler) {
@@ -30,7 +31,7 @@ const extensionConfig: Configuration = {
 	mode: "none",
 	entry: "./src/extension.ts",
 	output: {
-		path: path.resolve(__dirname, "dist"),
+		path: path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), "dist"),
 		filename: "extension.js",
 		libraryTarget: "commonjs2",
 	},
@@ -60,4 +61,4 @@ const extensionConfig: Configuration = {
 	},
 	plugins: [new JsonValidationGenner()],
 };
-module.exports = [extensionConfig];
+export default [extensionConfig];

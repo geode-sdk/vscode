@@ -63,7 +63,7 @@ export class SpriteHoverPreview implements HoverProvider {
 		const match = getMatch(
 			document,
 			position,
-			/"[a-zA-Z0-9_\-\.]+\.(png|fnt|ogg)"(_spr)?/g,
+			/"([\w.-]+\/)?[\w.-]+\.(png|fnt|ogg)"(_spr)?/g,
 		);
 
 		if (match) {
