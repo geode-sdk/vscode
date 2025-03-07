@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import G = require("glob");
-import { basename, join } from "path";
+import { basename, join, relative } from "path";
 import { getExtConfig } from "../config";
 import { cli } from "../geode/cli";
 import { getOpenedProjects, Project, typeIsProject } from "../project/project";
@@ -79,7 +79,7 @@ export class Database {
 				}
 
 				const sheetPath = preferredFile(file);
-				const sheetName = removeQualityDecorators(basename(file));
+				const sheetName = removeQualityDecorators(relative(dir, file));
 
 				if (
 					!collection.sheets.some((sheet) => sheet.name === sheetName)
@@ -98,7 +98,7 @@ export class Database {
 				// read sheet data and find all *.png strings inside
 				readFileSync(sheetPath)
 					.toString()
-					.match(/\w+\.png/g)
+					.match(/([\w.-]+\/)?[\w-]+\.png/g)
 					?.forEach((match) => {
 						match = removeQualityDecorators(match);
 						// check that this is not the same as tehe sheet (metadata field)
@@ -124,7 +124,7 @@ export class Database {
 			// find fonts
 			else if (file.endsWith(".fnt")) {
 				const fontPath = preferredFile(file);
-				const fontName = removeQualityDecorators(basename(file));
+				const fontName = removeQualityDecorators(relative(dir, file));
 				if (!collection.fonts.some((fnt) => fnt.name === fontName)) {
 					collection.fonts.push({
 						type: ItemType.font,
@@ -137,7 +137,7 @@ export class Database {
 			// find audio
 			else if (file.endsWith(".ogg")) {
 				const audioPath = preferredFile(file);
-				const audioName = removeQualityDecorators(basename(file));
+				const audioName = removeQualityDecorators(relative(dir, file));
 				if (!collection.audio.some((fnt) => fnt.name === audioName)) {
 					collection.audio.push({
 						type: ItemType.audio,
@@ -150,7 +150,7 @@ export class Database {
 			// find sprites
 			else if (file.endsWith(".png")) {
 				const filePath = preferredFile(file);
-				const fileName = removeQualityDecorators(basename(file));
+				const fileName = removeQualityDecorators(relative(dir, file));
 				// is this a spritesheet?
 				if (
 					collection.sheets.some(
@@ -258,23 +258,38 @@ export class Database {
 	refresh() {
 		// reset database
 		this.collections = [];
-		for (const path of this.getSearchPaths()) {
+		const searchPaths = this.getSearchPaths();
+		const projectIDs = getOpenedProjects().filter((p) => typeIsProject(p)).map((p) => p.modJson.id);
+		for (const path of searchPaths) {
 			if (typeof path === "string") {
 				this.addSpritesFromDir(path, path);
 			} else if (typeIsProject(path)) {
 				this.addSpritesFromMod(path);
 			} else {
-				if (process.platform === "darwin") {
-					// macos is special, as always
-					this.addSpritesFromDir(
-						path,
-						join(path.gdExecutablePath, "Contents", "Resources"),
-					);
-				} else {
-					this.addSpritesFromDir(
-						path,
-						join(path.gdPath, "Resources"),
-					);
+				// macos is special, as always
+				const contentPath = process.platform === "darwin" ? join(path.gdExecutablePath, "Contents") : path.gdPath;
+				this.addSpritesFromDir(path, join(contentPath, "Resources"));
+
+				// add geode resources
+				const geodePath = join(contentPath, "geode");
+				const geodeResourcePath = join(geodePath, "resources");
+				if (existsSync(geodeResourcePath)) {
+					this.addSpritesFromDir(path, geodeResourcePath);
+				}
+
+				// add mod resources
+				const unzippedPath = join(geodePath, "unzipped");
+				if (existsSync(unzippedPath)) {
+					for (const mod of readdirSync(unzippedPath, { withFileTypes: true })) {
+						if (!mod.isDirectory() || projectIDs.includes(mod.name)) {
+							continue;
+						}
+
+						const resourcePath = join(unzippedPath, mod.name, "resources");
+						if (existsSync(resourcePath)) {
+							this.addSpritesFromDir(path, resourcePath);
+						}
+					}
 				}
 			}
 		}
