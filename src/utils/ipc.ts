@@ -1,6 +1,6 @@
 import * as net from "net";
 import { getOutputChannel } from "../config";
-import { Err, Future, None, Ok, Option, Some } from "../utils/monads";
+import { Err, Future, None, Ok, Option, Some } from "./monads";
 
 export namespace ipc {
 	export type MessageThen = (data: any) => void;

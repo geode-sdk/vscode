@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [1.20.0]
+ - Rewrite extension backend to use object-oriented paradigms
+ - Sprite browser now shows Geode resources aswell
+
 ## [1.19.3]
  - More fixes to missing resources linting
  - Multiple lints can now be suppressed at once via `@geode-ignore(x, y, z)` (not yet supported for ignore ranges)

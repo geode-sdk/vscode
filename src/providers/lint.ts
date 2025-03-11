@@ -1,11 +1,31 @@
-import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, CodeActionProvider, Command, Diagnostic, DiagnosticCollection, DiagnosticSeverity, ExtensionContext, languages, Position, ProviderResult, Range, Selection, TextDocument, Uri, workspace, WorkspaceEdit } from "vscode";
-import { getProjectFromDocument, typeIsProject } from "./project";
+import {
+    CancellationToken,
+    CodeAction,
+    CodeActionContext,
+    CodeActionKind,
+    CodeActionProvider,
+    Command,
+    Diagnostic,
+    DiagnosticCollection,
+    DiagnosticSeverity,
+    ExtensionContext,
+    languages,
+    Position,
+    ProviderResult,
+    Range,
+    Selection,
+    TextDocument,
+    Uri,
+    workspace,
+    WorkspaceEdit,
+} from "vscode";
 import { readFile } from "fs/promises";
-import { browser } from "../browser/browser";
 import { parse as parsePath } from "path";
-import { Item, ItemType } from "../browser/item";
-import { Database } from "../browser/database";
 import { getExtConfig } from "../config";
+import { ResourceDatabase } from "../project/resources/ResourceDatabase";
+import { Project } from "../project/Project";
+import { sourceID, sourceIDForModID } from "../project/resources/Resource";
+import { None } from "../utils/monads";
 
 // type Binding = "inline" | "link" | number | null;
 // type Bindings = {
@@ -88,35 +108,12 @@ const TYPE_LOOKUPS: Record<string, string> = {
 
 let RESOURCE_FILE_EXTENSIONS: string[] = [];
 
-function getResourcesFileExtensions(db: Database): string[] {
-    const extFromPath = <T extends ItemType>(i: Item<T>) => parsePath(i.path).ext.slice(1);
-
-    if (!RESOURCE_FILE_EXTENSIONS.length) {
-        for (const collection of db.getCollections()) {
-            RESOURCE_FILE_EXTENSIONS.push(
-                ...new Set(collection.sheets.map(extFromPath))
-            );
-            RESOURCE_FILE_EXTENSIONS.push(
-                ...new Set(collection.sprites.map(extFromPath))
-            );
-            RESOURCE_FILE_EXTENSIONS.push(
-                ...new Set(collection.fonts.map(extFromPath))
-            );
-            RESOURCE_FILE_EXTENSIONS.push(
-                ...new Set(collection.audio.map(extFromPath))
-            );
-        }
-    }
-
-    return RESOURCE_FILE_EXTENSIONS;
-}
-
 function lint(
     document: MaybeDocument,
     diagnostics: Diagnostic[],
     code: string,
     regex: RegExp,
-    condition: (match: { text: string, groups: Record<string, string>, range: Range, offset: number }) => 
+    condition: (match: { text: string, groups: Record<string, string | undefined>, range: Range, offset: number }) => 
         { msg: string, level: DiagnosticSeverity, range: Range }[] | string | undefined,
 ) {
     const ignoreRanges: { from: number, to: number }[] = [];
@@ -171,7 +168,7 @@ function lintAlternative(document: MaybeDocument, diagnostics: Diagnostic[]) {
 }
 
 function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
-    const settings = getProjectFromDocument(document.uri)?.modJson.settings;
+    const settings = Project.forDocument(document.uri)?.getModJson().settings;
     if (!settings) {
         return;
     }
@@ -180,6 +177,8 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
         "unknown-setting",
         /[gs]etSettingValue<\s*(?<type>[^>]+?)\s*>\s*\(\s*"(?<name>(?:[^"\\]|\\.)+?)\"\s*\)/g,
         ({ groups: { name, type } }) => {
+            name = name!;
+            type = type!;
             const setting = settings[name];
             const types = TYPE_LOOKUPS[setting.type]?.split("::").reverse();
 
@@ -230,26 +229,27 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 // }
 
 function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[], initialRun: boolean) {
-    const mod = getProjectFromDocument(document.uri);
+    const mod = Project.forDocument(document.uri);
     if (!mod) {
         return;
     }
-    
-    const db = browser.getDatabase();
-    const knownResourceExts = getResourcesFileExtensions(db);
+
+    const modJson = mod.getModJson();
+    const db = ResourceDatabase.get();
     const dependencies = ["geode.loader"];
 
     // Reload DB on filesave (in case new resources have been added to fix the issues)
     if (!initialRun) {
-        db.refreshModSprites(mod);
+        db.getCollectionForModID(modJson.id)?.reload();
     }
 
-    if (mod.modJson.dependencies) {
+    if (modJson.dependencies) {
         // TODO: Deprecate
-        if (mod.modJson.dependencies instanceof Array) {
-            dependencies.push(...mod.modJson.dependencies.map((d) => d.id));
-        } else {
-            dependencies.push(...Object.keys(mod.modJson.dependencies));
+        if (modJson.dependencies instanceof Array) {
+            dependencies.push(...modJson.dependencies.map((d) => d.id));
+        }
+        else {
+            dependencies.push(...Object.keys(modJson.dependencies));
         }
     }
 
@@ -258,34 +258,36 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[],
         "unknown-resource",
         // Match resource-name-looking strings ("x.png", "thing.fnt" etc.)
         // todo: this method doesn't actually match mistakes like "thing" where you forget the file extension
-        /"(?<modID>[a-z0-9\-_\.]+\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g,
+        /"((?<modID>[a-z0-9\-_\.]+)\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g,
         ({ groups: { modID, name, suffix }, range }) => {
-            // Resource might have the same name as a GD resource, so first
-            // try to find it in the mod's resources
-            const item = db.getCollectionById(`mod:${mod.modJson.id}`)?.findByName(name)
-                ?? db.findItemByName(name);
-
-            // Avoid matching resources from dependencies
-            if (modID && dependencies.includes(modID)) {
-                return undefined;
-            }
+            name = name!;
+            const item = modID ? 
+                db.getCollectionForModID(modID)?.findResourceByName(name) :
+                db.getCollection("all")?.findResourceByName(name);
 
             if (!item) {
+                if (modID && db.getCollectionForModID(modID) === undefined) {
+                    return [{
+                        level: DiagnosticSeverity.Warning,
+                        msg: `Unknown mod '${modID}'`,
+                        range,
+                    }];
+                }
                 return [{
                     level: DiagnosticSeverity.Warning,
-                    msg: `Resource "${name}" doesn't exist`,
+                    msg: `Resource "${name}" doesn't exist${modID ? ` in mod '${modID}'` : ""}`,
                     range,
                 }];
             }
-            else {
-                if (!suffix && typeIsProject(item.src)) {
+            else if (!modID) {
+                if (!suffix && item.getSource() instanceof Project) {
                     return [{
                         level: DiagnosticSeverity.Warning,
                         msg: `Resource is missing _spr, perhaps you meant "${name}"_spr?`,
                         range,
                     }];
                 }
-                else if (suffix && !typeIsProject(item.src)) {
+                else if (suffix && !(item.getSource() instanceof Project)) {
                     return [{
                         level: DiagnosticSeverity.Warning,
                         msg: `Resource "${name}" was not found in mod.json`,

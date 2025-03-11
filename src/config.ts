@@ -8,16 +8,11 @@ import {
 	workspace,
 	WorkspaceConfiguration,
 } from "vscode";
-import { browser } from "./browser/browser";
-import { ItemLocator, ItemType } from "./browser/item";
 import { Err, Ok, Result } from "./utils/monads";
+import { ResourceDatabase, UserSaveData } from "./project/resources/ResourceDatabase";
 
 let EXTENSION: ExtensionContext;
 let CHANNEL: OutputChannel;
-
-interface SaveData {
-	favorites: ItemLocator[];
-}
 
 export function getSaveDataPath(): string {
 	return join(EXTENSION.globalStorageUri.fsPath, "data.json");
@@ -25,16 +20,14 @@ export function getSaveDataPath(): string {
 
 export function saveData(): Result {
 	try {
-		// create save directory if it doesn't exist yet
+		// Create save directory if it doesn't exist yet
 		if (!existsSync(EXTENSION.globalStorageUri.fsPath)) {
 			mkdirSync(EXTENSION.globalStorageUri.fsPath);
 		}
 
-		const data: SaveData = {
-			favorites: browser.getDatabase().getFavorites(),
-		};
+		const data = ResourceDatabase.get().saveUserOptions();
 
-		// save data
+		// Save data
 		writeFileSync(getSaveDataPath(), JSON.stringify(data));
 		return Ok();
 	} catch (err) {
@@ -47,12 +40,9 @@ export function loadData(): Result {
 		return Ok();
 	}
 	try {
-		const data = JSON.parse(
-			readFileSync(getSaveDataPath()).toString(),
-		) as SaveData;
-
-		browser.getDatabase().loadFavorites(data.favorites);
-
+		ResourceDatabase.get().loadUserOptions(JSON.parse(
+			readFileSync(getSaveDataPath()).toString()
+		) as UserSaveData);
 		return Ok();
 	} catch (err) {
 		return Err(err as string);

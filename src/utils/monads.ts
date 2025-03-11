@@ -20,9 +20,15 @@ export class Result<T = undefined, E = string> {
 	static ok<T>(value: T) {
 		return new Result<T, never>(value, true);
 	}
-
 	static err<E>(error: E) {
 		return new Result<never, E>(error, false);
+	}
+
+	getValue(): Option<T> {
+		return this.#isValue ? this.#value as T : None;
+	}
+	getError(): Option<E> {
+		return !this.#isValue ? this.#value as E : None;
 	}
 
 	unwrap(): T | never {
@@ -31,7 +37,6 @@ export class Result<T = undefined, E = string> {
 		}
 		return this.#value as T;
 	}
-
 	unwrapErr(): E | never {
 		if (this.#isValue) {
 			throw new ReferenceError("unwrapErr() called on an Ok Result");
@@ -51,7 +56,6 @@ export class Result<T = undefined, E = string> {
 	isValue(): boolean {
 		return this.#isValue;
 	}
-
 	isError(): boolean {
 		return !this.#isValue;
 	}
@@ -63,7 +67,6 @@ export class Result<T = undefined, E = string> {
 			return this as unknown as Result<T2, E>;
 		}
 	}
-
 	async awaitMap<T2, P extends Promise<T2>>(
 		mapper: (value: T) => P,
 	): Future<T2, E> {

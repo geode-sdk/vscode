@@ -138,7 +138,6 @@ export class CCColor3bProvider extends CCColorProvider {
 		super(false);
 	}
 }
-
 export class CCColor4bProvider extends CCColorProvider {
 	constructor() {
 		super(true);

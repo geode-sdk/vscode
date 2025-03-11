@@ -1,7 +1,7 @@
 import { Menu, MenuItem } from "../widgets/Menu";
-import { TextEditor, Uri, ViewColumn, window, workspace } from "vscode";
+import { SnippetString, TextEditor, Uri, ViewColumn, window, workspace } from "vscode";
 import { getExtConfig } from "../config";
-import { Option } from "../utils/monads";
+import { Future, None, Option } from "../utils/monads";
 import {
 	Element,
 	Head,
@@ -23,23 +23,14 @@ import {
 } from "../widgets/Interactive";
 import { scripts } from "../widgets/Scripts";
 import { Panel, ScriptPackage, Widget } from "../widgets/Widget";
-import { browser } from "./browser";
-import {
-	fetchItemImage,
-	getSnippetOptions,
-	Item,
-	ItemType,
-	itemTypeID,
-	SheetItem,
-	sourceID,
-	useItem,
-} from "./item";
-import { insertSnippet } from "../project/source";
+import { insertSnippet } from "../utils/snippet";
 import { env } from "vscode";
 import Fuse from "fuse.js";
+import { ResourceDatabase, ResourceType } from "../project/resources/ResourceDatabase";
+import { AudioResource, FileResource, FontResource, Resource, SourceID, sourceID, SpriteFrameResource, SpriteResource, SpriteSheetResource } from "../project/resources/Resource";
 
-export class ItemWidget extends Widget {
-	#item: Item<ItemType>;
+export class ResourceWidget extends Widget {
+	#resource: Resource;
 	#image?: Div;
 	#favoriteButton?: Button;
 	#topButtons?: Div;
@@ -48,7 +39,7 @@ export class ItemWidget extends Widget {
 	#imageData?: string;
 
 	static scripts: ScriptPackage = {
-		id: "ItemWidget",
+		id: "ResourceWidget",
 		css: /*css*/ `
             .item {
                 padding: .1rem;
@@ -123,32 +114,33 @@ export class ItemWidget extends Widget {
         `,
 	};
 
-	constructor(item: Item<ItemType>) {
+	constructor(resource: Resource) {
 		super();
-		this.#item = item;
+		this.#resource = resource;
 		this.attr("class", "item");
 	}
 
 	private updateFavoritesButton() {
 		this.#topButtons?.remove(this.#favoriteButton);
-		if (browser.getDatabase().isFavorite(this.#item)) {
+		if (this.#resource.isFavorite()) {
 			this.#favoriteButton = new Button({
 				icon: "star-delete",
 				hoverText: "Remove favorite",
 				onClick: (panel) => {
-					browser.getDatabase().removeFavorite(this.#item);
+					this.#resource.setFavorite(false);
 					this.updateFavoritesButton();
-					if (panel instanceof BrowserPanel) {
+					if (panel instanceof SpriteBrowserPanel) {
 						panel.favoritedItem();
 					}
 				},
 			}).attr("style", "color: yellow") as Button;
-		} else {
+		}
+		else {
 			this.#favoriteButton = new Button({
 				icon: "star-add",
 				hoverText: "Add favorite",
 				onClick: (_) => {
-					browser.getDatabase().addFavorite(this.#item);
+					this.#resource.setFavorite(true);
 					this.updateFavoritesButton();
 				},
 			});
@@ -161,17 +153,18 @@ export class ItemWidget extends Widget {
 	private onMoreUseOptions() {
 		this.add(
 			new Menu(
-				getSnippetOptions(this.#item).map((o) => {
+				this.#resource.getSnippetOptions().map((o) => {
 					return {
 						name: o.name,
 						onClick: async (panel) => {
 							const res = await insertSnippet(
 								o.snippet,
-								BrowserPanel.getTargetEditor(),
+								SpriteBrowserPanel.getTargetEditor(),
 							);
 							if (res.isError()) {
 								window.showErrorMessage(res.unwrapErr());
-							} else if (panel instanceof BrowserPanel) {
+							}
+							else if (panel instanceof SpriteBrowserPanel) {
 								panel.close();
 							}
 						},
@@ -191,11 +184,21 @@ export class ItemWidget extends Widget {
 						icon: "info",
 						hoverText: "Show info about this item",
 						onClick: (_) => {
+							let path;
+							if (this.#resource instanceof FileResource) {
+								path = this.#resource.getFilePath();
+							}
+							else if (this.#resource instanceof SpriteFrameResource) {
+								path = this.#resource.getFilePath() ?? this.#resource.getSheet().getFilePath();
+							}
+							else {
+								path = "<Unknown>";
+							}
 							window.showInformationMessage(
-								`Name: ${this.#item.name}\n` +
-									`Path: ${this.#item.path}\n` +
-									`Type: ${this.#item.type}\n` +
-									`Source: ${this.#item.src}\n`,
+								`Name: ${this.#resource.getDisplayName()}\n` +
+									`Path: ${path}\n` +
+									`Type: ${this.#resource.constructor.name}\n` +
+									`Source: ${sourceID(this.#resource.getSource())}\n`,
 							);
 						},
 					}),
@@ -206,7 +209,7 @@ export class ItemWidget extends Widget {
 						hoverText: "Copy item name",
 						onClick: async (_) => {
 							try {
-								await env.clipboard.writeText(this.#item.name);
+								await env.clipboard.writeText(this.#resource.getDisplayName());
 							} catch {
 								window.showErrorMessage(
 									"Unable to copy name to clipboard!",
@@ -222,39 +225,44 @@ export class ItemWidget extends Widget {
 				.attr("id", "image-div")
 				.add(new LoadingCircle())),
 		);
-		this.add(new Text(this.#item.name));
+		this.add(new Text(this.#resource.getDisplayName()));
 
 		const bottomBtns = new Div().attr("class", "buttons");
-		if (this.#item.type === ItemType.sheet) {
+		if (this.#resource instanceof SpriteSheetResource) {
 			bottomBtns.add(
 				new Button("View", {
 					startIcon: "eye",
 					onClick: (panel) => {
-						if (panel instanceof BrowserPanel) {
-							panel.showSheet(this.#item as SheetItem);
+						if (panel instanceof SpriteBrowserPanel) {
+							panel.showSheet(this.#resource as SpriteSheetResource);
 						}
 					},
 				}).attr("style", "flex: 1"),
 			);
-		} else {
+		}
+		else {
 			bottomBtns.add(
 				new Button("Use", {
 					startIcon: "tools",
 					onClick: async (panel) => {
-						const res = await useItem(
-							this.#item,
-							BrowserPanel.getTargetEditor(),
-						);
-						if (res.isError()) {
-							window.showErrorMessage(res.unwrapErr());
-						} else if (panel instanceof BrowserPanel) {
+						try {
+							const res = await insertSnippet(
+								new SnippetString(this.#resource.getUsageCode()),
+								SpriteBrowserPanel.getTargetEditor()
+							);
+							if (res.isError()) {
+								throw res.unwrapErr();
+							}
 							panel.close();
+						}
+						catch (e: any) {
+							window.showErrorMessage(e.toString());
 						}
 					},
 				}).attr("style", "flex: 4"),
 			);
 
-			if (getSnippetOptions(this.#item).length) {
+			if (this.#resource.getSnippetOptions().length) {
 				bottomBtns.add(
 					new Button({
 						icon: "ellipsis",
@@ -271,14 +279,17 @@ export class ItemWidget extends Widget {
 		if (this.#imageData) {
 			this.#image.clear();
 			this.#image.add(new Image(this.#imageData));
-		} else {
-			fetchItemImage(this.#item).then((data) => {
+		}
+		else {
+			this.#resource.fetchImage().then((data) => {
 				if (this.#image) {
 					this.#image.clear();
 					if (data.isValue()) {
-						this.#image.add(new Image(data.unwrap()));
-						this.#imageData = data.unwrap();
-					} else {
+						const imgData = data.unwrap().toString("base64");
+						this.#image.add(new Image(imgData));
+						this.#imageData = imgData;
+					}
+					else {
 						this.#image.add(new Text(data.unwrapErr()));
 					}
 				}
@@ -294,7 +305,8 @@ export class ItemWidget extends Widget {
 			// if the user scrolls really quickly, we don't want to waste time
 			// sending a massive amount of rebuilds
 			this.#contentShowTimeout = setTimeout(() => this.content(), 75);
-		} else {
+		}
+		else {
 			clearTimeout(this.#contentShowTimeout);
 			// clear image data after a while to save memory
 			setTimeout(() => (this.#imageData = undefined), 5000);
@@ -314,8 +326,8 @@ export class ItemWidget extends Widget {
 	}
 }
 
-export class BrowserPanel extends Panel {
-	static #current?: BrowserPanel;
+export class SpriteBrowserPanel extends Panel {
+	static #current?: SpriteBrowserPanel;
 	#content: Grid;
 	#source: Select;
 	#collection: Tabs;
@@ -327,7 +339,7 @@ export class BrowserPanel extends Panel {
 	#searchTimeout?: NodeJS.Timeout;
 	#showCount: number = 0;
 	#loadMoreDiv?: Div;
-	#currentItemList: Item<ItemType>[] = [];
+	#currentItemList: Resource[] = [];
 	// can't save TextEditor directly as JS copies that for some reason while
 	// I need a reference
 	// this current solution works though which is good. if the user has the
@@ -338,15 +350,17 @@ export class BrowserPanel extends Panel {
 
 	static defaultTabs: TabProps[] = [
 		{ id: "all", title: "All" },
-		{ id: "sheets", title: "Sheets" },
+		{ id: "favorites", title: "Favorites" },
+		{ id: "spritesheets", title: "Sheets" },
 		{ id: "frames", title: "Frames" },
 		{ id: "sprites", title: "Sprites" },
 		{ id: "fonts", title: "Fonts" },
 		{ id: "audio", title: "Audio" },
-	];
+		{ id: "unknown", title: "Unknown" },
+	] satisfies { id: ResourceType, title: string }[];
 
 	static scripts: ScriptPackage = {
-		id: "BrowserPanel",
+		id: "SpriteBrowserPanel",
 		css: /*css*/ `
             :root {
                 --item-width:   minmax(13rem, 1fr);
@@ -383,6 +397,15 @@ export class BrowserPanel extends Panel {
         `,
 	};
 
+	private static getCollectionOptions(): { id: string, name: string }[] {
+		return ResourceDatabase.get().getCollections().map(c => {
+			return {
+				id: c.getID(),
+				name: c.getDisplayName()
+			};
+		});
+	}
+
 	private constructor() {
 		super({
 			id: "geode.sprite-browser",
@@ -390,7 +413,7 @@ export class BrowserPanel extends Panel {
 			lightIcon: "blockman-light.svg",
 			darkIcon: "blockman-dark.svg",
 			scripts: [
-				BrowserPanel.scripts,
+				SpriteBrowserPanel.scripts,
 				Head.scripts,
 				Label.scripts,
 				Text.scripts,
@@ -403,7 +426,7 @@ export class BrowserPanel extends Panel {
 				Tab.scripts,
 				Tabs.scripts,
 				Badge.scripts,
-				ItemWidget.scripts,
+				ResourceWidget.scripts,
 				LoadingCircle.scripts,
 				Image.scripts,
 				Input.scripts,
@@ -419,7 +442,7 @@ export class BrowserPanel extends Panel {
 		this.disposables.push(
 			window.onDidChangeActiveTextEditor((e) => {
 				if (e) {
-					BrowserPanel.targetFile = e.document.uri;
+					SpriteBrowserPanel.targetFile = e.document.uri;
 				}
 			}),
 		);
@@ -434,9 +457,7 @@ export class BrowserPanel extends Panel {
 								.add(new Label("Source"))
 								.add(
 									(this.#source = new Select(
-										browser
-											.getDatabase()
-											.getCollectionOptions(),
+										SpriteBrowserPanel.getCollectionOptions(),
 										{ onChange: (_) => this.updateData() },
 									)),
 								),
@@ -444,7 +465,7 @@ export class BrowserPanel extends Panel {
 						.add(new Spacer("2rem"))
 						.add(
 							(this.#search = new Input({
-								placeholder: "Search for sprites...",
+								placeholder: "Search for resources...",
 								label: "Search",
 								focus: true,
 								startIcon: "search",
@@ -494,7 +515,7 @@ export class BrowserPanel extends Panel {
 						),
 				)
 				.add(
-					(this.#collection = new Tabs(BrowserPanel.defaultTabs, {
+					(this.#collection = new Tabs(SpriteBrowserPanel.defaultTabs, {
 						onChange: (_) => this.updateData(),
 					})),
 				),
@@ -506,7 +527,7 @@ export class BrowserPanel extends Panel {
 			this,
 			this.#content,
 			(w, visible) => {
-				if (w instanceof ItemWidget) {
+				if (w instanceof ResourceWidget) {
 					w.becameVisible(visible);
 				}
 			},
@@ -516,12 +537,9 @@ export class BrowserPanel extends Panel {
 	}
 
 	private async updateCollections() {
-		await getExtConfig().update(
-			"textureQuality",
-			this.#quality.getSelected(),
-		);
-		browser.getDatabase().refresh();
-		this.#source.setItems(browser.getDatabase().getCollectionOptions());
+		await getExtConfig().update("textureQuality", this.#quality.getSelected());
+		await ResourceDatabase.get().reloadAll();
+		this.#source.setItems(SpriteBrowserPanel.getCollectionOptions());
 		this.updateData();
 	}
 
@@ -531,7 +549,7 @@ export class BrowserPanel extends Panel {
 
 		this.#currentItemList
 			.slice(a, b)
-			.forEach((item) => this.#content.add(new ItemWidget(item)));
+			.forEach(resource => this.#content.add(new ResourceWidget(resource)));
 
 		if (b < this.#currentItemList.length) {
 			const addCount =
@@ -566,64 +584,50 @@ export class BrowserPanel extends Panel {
 
 		const query = this.#search.getValue()?.toLowerCase() ?? "";
 
-		this.#showCount =
-			getExtConfig().get<number>("defaultSpriteShowCount") ?? 350;
+		this.#showCount = getExtConfig().get<number>("defaultSpriteShowCount") ?? 350;
 
-		const col = browser
-			.getDatabase()
-			.getCollectionById(this.#source.getSelected() ?? "all");
-		const list = col?.get(this.#collection.getSelected() ?? "all") ?? [];
+		const collection = ResourceDatabase.get().getCollection(this.#source.getSelected() ?? "all");
+		if (!collection) {
+			return;
+		}
+		const selectedTab = this.#collection.getSelected();
+		console.error(selectedTab);
+		const resources = selectedTab?.startsWith("sheet:") ?
+			collection.getFramesInSpriteSheet(selectedTab.substring(6)) :
+			collection.getResources(selectedTab as ResourceType);
 		if (query.length) {
-			const fuse = new Fuse(list, {
-				keys: ["name"],
+			const fuse = new Fuse(resources, {
+				keys: [{ 
+					name: "name",
+					getFn: r => r.getDisplayName(),
+				}],
 				threshold: 0.2,
 			});
-			this.#currentItemList = fuse.search(query).map((t) => t.item);
+			this.#currentItemList = fuse.search(query).map(t => t.item);
 
 			const itemCount = this.#currentItemList.length;
 			this.#searchResults?.setText(`Found ${itemCount} result${itemCount !== 1 ? "s" : ""}`);
-		} else {
-			this.#currentItemList = list.sort((a, b) => {
+		}
+		else {
+			this.#currentItemList = resources.sort((a, b) => {
 				switch (this.#sorting.getSelected()) {
 					case "a-z":
-						return a.name.localeCompare(b.name);
+						return a.getDisplayName().localeCompare(b.getDisplayName());
 					case "z-a":
-						return b.name.localeCompare(a.name);
+						return b.getDisplayName().localeCompare(a.getDisplayName());
 				}
 				return 0;
 			});
 
-			const itemCount = Math.min(this.#showCount, list.length);
+			const itemCount = Math.min(this.#showCount, resources.length);
 			this.#searchResults?.setText(`Showing ${itemCount} item${itemCount !== 1 ? "s" : ""}`);
 		}
 
 		this.showItems(0, this.#showCount);
 
-		let allCount: number = 0;
-		let sheetsCount: number = 0;
-		let framesCount: number = 0;
-		let spritesCount: number = 0;
-		let fontsCount: number = 0;
-		let audioCount: number = 0;
-
-		for (const { type } of this.#currentItemList) {
-			allCount++;
-
-			switch (type) {
-				case ItemType.sprite: spritesCount++; break;
-				case ItemType.sheet: sheetsCount++; break;
-				case ItemType.sheetSprite: framesCount++; break;
-				case ItemType.font: fontsCount++; break;
-				case ItemType.audio: audioCount++; break;
-			}
+		for (const [key, value] of Object.entries(collection.getStats())) {
+			this.#collection.badge(key, value.count);
 		}
-
-		this.#collection.badge("all", allCount);
-		this.#collection.badge("sheets", sheetsCount);
-		this.#collection.badge("frames", framesCount);
-		this.#collection.badge("sprites", spritesCount);
-		this.#collection.badge("fonts", fontsCount);
-		this.#collection.badge("audio", audioCount);
 	}
 
 	favoritedItem() {
@@ -634,35 +638,35 @@ export class BrowserPanel extends Panel {
 		}
 	}
 
-	showSheet(item: SheetItem) {
+	showSheet(item: SpriteSheetResource) {
 		this.#collection.setTabs([
-			...BrowserPanel.defaultTabs,
+			...SpriteBrowserPanel.defaultTabs,
 			{
-				id: item.name,
-				title: item.name,
-				badge: item.items.length,
+				id: `sheet:${item.getID()}`,
+				title: item.getDisplayName(),
+				badge: item.getFrames().length,
 				closable: true,
 			},
 		]);
-		this.#collection.select(item.name);
+		this.#collection.select(`sheet:${item.getID()}`);
 		this.updateData();
 	}
 
 	static getTargetEditor(): Option<TextEditor> {
 		return window.visibleTextEditors.find(
-			(f) => f.document.uri.fsPath === BrowserPanel.targetFile?.fsPath,
+			(f) => f.document.uri.fsPath === SpriteBrowserPanel.targetFile?.fsPath,
 		);
 	}
 
 	protected onDispose(): void {
-		BrowserPanel.#current = undefined;
+		SpriteBrowserPanel.#current = undefined;
 	}
 
 	static show() {
-		if (!BrowserPanel.#current) {
-			BrowserPanel.targetFile = window.activeTextEditor?.document.uri;
-			BrowserPanel.#current = new BrowserPanel();
+		if (!SpriteBrowserPanel.#current) {
+			SpriteBrowserPanel.targetFile = window.activeTextEditor?.document.uri;
+			SpriteBrowserPanel.#current = new SpriteBrowserPanel();
 		}
-		BrowserPanel.#current.show(ViewColumn.Beside);
+		SpriteBrowserPanel.#current.show(ViewColumn.Beside);
 	}
 }

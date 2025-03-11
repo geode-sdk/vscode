@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
-import { Char, FontData, parseFnt } from "./fntData";
+import { Char, FontData, parseFnt } from "../../utils/fntData";
 import { dirname, join } from "path";
 import * as sharp from "sharp";
-import { Err, Future, Ok } from "../utils/monads";
+import { Err, Future, Ok } from "../../utils/monads";
 
 function sharpFromClear(width: number, height: number) {
 	return sharp(Buffer.alloc(width * height * 4, 0x00000000), {
@@ -16,7 +16,7 @@ function sharpFromClear(width: number, height: number) {
 
 export interface IFont {
 	path: string;
-	render(text: string): Future<string>;
+	render(text: string): Future<Buffer>;
 }
 
 export class TrueTypeFont implements IFont {
@@ -26,7 +26,7 @@ export class TrueTypeFont implements IFont {
 		this.path = path;
 	}
 
-	async render(_: string): Future<string> {
+	async render(_: string): Future<Buffer> {
 		const width = 250;
 		const height = 50;
 
@@ -52,8 +52,7 @@ export class TrueTypeFont implements IFont {
 					},
 				])
 				.png()
-				.toBuffer()
-				.then((b) => b.toString("base64")),
+				.toBuffer(),
 		);
 	}
 }
@@ -75,7 +74,7 @@ export class BMFont implements IFont {
 		return new BMFont(font, path);
 	}
 
-	async render(text: string): Future<string> {
+	async render(text: string): Future<Buffer> {
 		interface RenderedChar {
 			data: Buffer;
 			c: Char;
@@ -122,16 +121,20 @@ export class BMFont implements IFont {
 				)
 				.png()
 				.toBuffer()
-				.then((b) => b.toString("base64")),
 		);
 	}
 }
 
 export class BMFontDatabase {
-	fonts: IFont[] = [];
+	#fonts: IFont[] = [];
+	static #sharedInstance: BMFontDatabase = new BMFontDatabase();
+
+	public static get(): BMFontDatabase {
+		return this.#sharedInstance;
+	}
 
 	public async loadFont(path: string): Future<IFont> {
-		const loaded = this.fonts.find((font) => font.path === path);
+		const loaded = this.#fonts.find((font) => font.path === path);
 		if (loaded) {
 			return Ok(loaded);
 		}
@@ -144,12 +147,7 @@ export class BMFontDatabase {
 		} else {
 			font = new TrueTypeFont(path);
 		}
-		this.fonts.push(font);
+		this.#fonts.push(font);
 		return Ok(font);
 	}
-}
-
-const DATABASE = new BMFontDatabase();
-export function getBMFontDatabase() {
-	return DATABASE;
 }

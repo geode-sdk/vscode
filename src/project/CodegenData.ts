@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { None, Option } from "../utils/monads";
-import { getActiveProject } from "./project";
+import { Project } from "./Project";
 
 export interface CodegenData {
 	classes: CodegenClass[];
@@ -44,12 +44,12 @@ export function getActiveCodegenData(): Option<CodegenData> {
 		return CACHED_CODEGEN_DATA;
 	}
 
-	const project = getActiveProject();
+	const project = Project.active();
 	if (!project) {
 		return None;
 	}
 
-	const codegenDataPath = `${project.path}/build/bindings/bindings/Geode/CodegenData.json`;
+	const codegenDataPath = `${project.getPath()}/build/bindings/bindings/Geode/CodegenData.json`;
 	if (!existsSync(codegenDataPath)) {
 		return None;
 	}

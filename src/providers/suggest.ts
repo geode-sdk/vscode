@@ -9,7 +9,7 @@ import {
 	SnippetString,
 	TextDocument,
 } from "vscode";
-import { getActiveCodegenData } from "./CodegenData";
+import { getActiveCodegenData } from "../project/CodegenData";
 import { getExtConfig } from "../config";
 
 const MODIFY_CLASS_REGEX =

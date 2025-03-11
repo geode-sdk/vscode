@@ -1,12 +1,34 @@
-import { Disposable, Uri, ViewColumn, WebviewPanel, window } from "vscode";
+import { Disposable, Uri, ViewColumn, Webview, WebviewPanel, window } from "vscode";
 import { getAsset } from "../config";
 import { None, Option, Some } from "../utils/monads";
-import {
-	clamp,
-	importCodiconToolkit,
-	importWebviewToolkit,
-} from "../utils/utils";
 import { sha1 } from "object-hash";
+import { getExtContext } from "../config";
+
+export function getWebviewUri(webview: Webview, pathList: string[]) {
+	return webview.asWebviewUri(
+		Uri.joinPath(getExtContext().extensionUri, ...pathList),
+	);
+}
+export function getWebviewToolkitPath(webview: Webview) {
+	return getWebviewUri(webview, [
+		"node_modules/@vscode/webview-ui-toolkit/dist/toolkit.min.js",
+	]);
+}
+export function importWebviewToolkit(webview: Webview) {
+	return /*html*/ `
+        <script type="module" src="${getWebviewToolkitPath(webview)}"></script>
+    `;
+}
+export function getCodiconToolkitPath(webview: Webview) {
+	return getWebviewUri(webview, [
+		"node_modules/@vscode/codicons/dist/codicon.css",
+	]);
+}
+export function importCodiconToolkit(webview: Webview) {
+	return /*html*/ `
+        <link href="${getCodiconToolkitPath(webview)}" rel="stylesheet" />
+    `;
+}
 
 export type Args = any;
 interface Message {

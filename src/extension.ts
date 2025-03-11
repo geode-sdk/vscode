@@ -3,18 +3,18 @@ import {
 	ExtensionContext,
 	commands,
 	languages,
-	CompletionItem,
-	CompletionItemKind,
 } from "vscode";
 import { getOutputChannel, loadData, saveData, setupConfig } from "./config";
-import * as geode from "./geode/geode";
-import { browser } from "./browser/browser";
-import { getOpenedProjects } from "./project/project";
-import { CCColor3bProvider, CCColor4bProvider } from "./project/color";
-import { SpriteHoverPreview } from "./project/hover";
-import { registerLinters } from "./project/lint";
-import { ModifyClassMethodCompletion } from "./project/suggest";
-import { ModJsonSuggestionsProvider } from "./project/mod";
+import { CCColor3bProvider, CCColor4bProvider } from "./providers/color";
+import { SpriteHoverPreview } from "./providers/hover";
+import { registerLinters } from "./providers/lint";
+import { ModifyClassMethodCompletion } from "./providers/suggest";
+import { ModJsonSuggestionsProvider } from "./project/ModJson";
+import { GeodeSDK } from "./project/GeodeSDK";
+import { GeodeCLI } from "./project/GeodeCLI";
+import { ResourceDatabase } from "./project/resources/ResourceDatabase";
+import { SpriteBrowserPanel } from "./ui/SpriteBrowser";
+import { Project } from "./project/Project";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
@@ -30,85 +30,83 @@ export async function activate(context: ExtensionContext) {
 		);
 	}
 
-	// setup geode
-	const res = await geode.setup();
-	if (res.isError()) {
+	// setup SDK
+	const resSdk = await GeodeSDK.setup();
+	if (resSdk.isError()) {
 		window.showErrorMessage(
-			`Geode: Unable to setup Geode extension: ${res.unwrapErr()}`,
+			`Geode: Unable to setup Geode extension: ${resSdk.unwrapErr()}`,
+		);
+		return;
+	}
+
+	// setup SDK
+	const resCLI = await GeodeCLI.setup();
+	if (resCLI.isError()) {
+		window.showErrorMessage(
+			`Geode: Unable to setup Geode extension: ${resCLI.unwrapErr()}`,
 		);
 		return;
 	}
 
 	// setup sprite browser
-	const res2 = browser.setup();
-	if (res2.isError()) {
+	const resBrowser = await ResourceDatabase.get().reloadAll();
+	if (resBrowser.isError()) {
 		window.showErrorMessage(
-			`Geode: Unable to setup Geode extension: ${res.unwrapErr()}`,
+			`Geode: Unable to setup Geode extension: ${resBrowser.unwrapErr()}`,
 		);
 		return;
 	}
 
-	// register commands
+	// Register commands
 	context.subscriptions.push(
 		commands.registerCommand("geode.launchGD", async () => {
 			channel.appendLine("Launching Geometry Dash...");
-			const res = await geode.gd.launchGD();
+			const cli = GeodeCLI.get();
+			if (!cli) {
+				window.showErrorMessage("Unable to launch GD: Geode CLI not found!");
+				return;
+			}
+			const profile = cli.getCurrentProfile();
+			if (!profile) {
+				window.showErrorMessage("Unable to launch GD: Geode CLI does not have a selected profile!");
+				return;
+			}
+			const res = await profile.launch();
 			if (res.isError()) {
-				window.showErrorMessage(
-					`Unable to launch GD: ${res.unwrapErr()}`,
-				);
+				window.showErrorMessage(`Unable to launch GD: ${res.unwrapErr()}`);
 			}
 		}),
 	);
-
 	context.subscriptions.push(
 		commands.registerCommand("geode.openSpriteBrowser", async () => {
-			browser.open();
+			SpriteBrowserPanel.show();
 		}),
 	);
-
-	context.subscriptions.push(
-		languages.registerColorProvider(
-			{ language: "cpp" },
-			new CCColor3bProvider(),
-		),
-	);
-	context.subscriptions.push(
-		languages.registerColorProvider(
-			{ language: "cpp" },
-			new CCColor4bProvider(),
-		),
-	);
-	context.subscriptions.push(
-		languages.registerHoverProvider(
-			{ language: "cpp" },
-			new SpriteHoverPreview(),
-		),
-	);
-	context.subscriptions.push(
-		languages.registerCompletionItemProvider(
-			{ language: "cpp" },
-			new ModifyClassMethodCompletion(),
-		),
-	);
-	context.subscriptions.push(
-		languages.registerCodeActionsProvider(
-			{ pattern: "**/mod.json" },
-			new ModJsonSuggestionsProvider(),
-		)
-	);
-
-	registerLinters(context);
-
-	getOutputChannel().appendLine(
-		`Open Geode projects: ${getOpenedProjects()
-			.map((p) => p.modJson.id)
-			.join(", ")}`,
-	);
-
 	// context.subscriptions.push(commands.registerCommand('geode.openDevTools', async () => {
 	// 	DevToolsPanel.show();
 	// }));
+
+	// Register providers
+	context.subscriptions.push(
+		languages.registerColorProvider({ language: "cpp" }, new CCColor3bProvider())
+	);
+	context.subscriptions.push(
+		languages.registerColorProvider({ language: "cpp" }, new CCColor4bProvider())
+	);
+	context.subscriptions.push(
+		languages.registerHoverProvider({ language: "cpp" }, new SpriteHoverPreview())
+	);
+	context.subscriptions.push(
+		languages.registerCompletionItemProvider({ language: "cpp" }, new ModifyClassMethodCompletion())
+	);
+	context.subscriptions.push(
+		languages.registerCodeActionsProvider({ pattern: "**/mod.json" }, new ModJsonSuggestionsProvider())
+	);
+	registerLinters(context);
+
+	getOutputChannel().appendLine(
+		`Open Geode projects: ${Project.getOpened().map(p => `${p.getModJson().name} (${p.getModJson().id})`).join(", ")}`,
+	);
 }
 
 export async function deactivate() {

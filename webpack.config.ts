@@ -12,7 +12,7 @@ class JsonValidationGenner {
 	apply(compiler: Compiler) {
 		compiler.hooks.compile.tap("generate mod.json validation", () => {
 			const schema = createGenerator({
-				path: "./src/project/mod.ts",
+				path: "./src/project/ModJson.ts",
 				tsconfig: "./tsconfig.json",
 				type: "ModJson",
 				markdownDescription: true,

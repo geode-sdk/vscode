@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { parse, PlistValue } from "plist";
 import * as sharp from "sharp";
-import { Err, Future, None, Ok, Option } from "../utils/monads";
+import { Err, Future, None, Ok, Option } from "../../utils/monads";
 
 interface SpriteFrame {
 	aliases: string[];
@@ -44,7 +44,7 @@ function textureFromFrame(frame: SpriteFrame): SpriteTexture {
 	};
 }
 
-export async function createCoverImage(sprites: sharp.Sharp[]): Future<string> {
+export async function createCoverImage(sprites: sharp.Sharp[]): Future<Buffer> {
 	const images = await Promise.all(
 		sprites.map(async (image, ix) => {
 			return {
@@ -68,7 +68,6 @@ export async function createCoverImage(sprites: sharp.Sharp[]): Future<string> {
 			.png()
 			.composite(images)
 			.toBuffer()
-			.then((b) => b.toString("base64")),
 	);
 }
 
@@ -115,7 +114,7 @@ export class Sheet {
 		);
 	}
 
-	async coverImage(): Future<string> {
+	async renderCoverImage(): Future<Buffer> {
 		const frameCount = Object.keys(this.#data.frames).length;
 		if (!frameCount) {
 			return Err("Empty sheet");
@@ -142,18 +141,23 @@ export class Sheet {
 		}
 	}
 
-	async extract(name: string): Future<string> {
+	async extract(name: string): Future<Buffer> {
 		return await (
 			await this.extractImage(name)
-		).awaitMap(async (v) => (await v.toBuffer()).toString("base64"));
+		).awaitMap(async v => await v.toBuffer());
 	}
 }
 
-export class SheetDatabase {
-	sheets: Sheet[] = [];
+export class SpriteSheetDatabase {
+	#sheets: Sheet[] = [];
+	static #sharedInstance = new SpriteSheetDatabase();
+
+	public static get(): SpriteSheetDatabase {
+		return this.#sharedInstance;
+	}
 
 	public async loadSheet(path: string): Future<Sheet> {
-		const loaded = this.sheets.find((sheet) => sheet.getPath() === path);
+		const loaded = this.#sheets.find((sheet) => sheet.getPath() === path);
 		if (loaded) {
 			return Ok(loaded);
 		}
@@ -161,12 +165,7 @@ export class SheetDatabase {
 		if (!sheet) {
 			return Err("Unable to load sheet");
 		}
-		this.sheets.push(sheet);
+		this.#sheets.push(sheet);
 		return Ok(sheet);
 	}
-}
-
-const DATABASE = new SheetDatabase();
-export function getSheetDatabase() {
-	return DATABASE;
 }

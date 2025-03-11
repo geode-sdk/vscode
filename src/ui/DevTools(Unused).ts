@@ -11,8 +11,8 @@ import {
 import { Column, PaddedDiv, Row } from "../widgets/Container";
 import { Button, Tabs } from "../widgets/Interactive";
 import { Panel, ScriptPackage } from "../widgets/Widget";
-import * as geode from "../geode/geode";
-import { RTModJson } from "../project/mod";
+import { ipc } from "../utils/ipc";
+import { RTModJson } from "../project/ModJson";
 
 export class DevToolsPanel extends Panel {
 	static #current?: DevToolsPanel;
@@ -53,7 +53,7 @@ export class DevToolsPanel extends Panel {
 					new Row().add(
 						new Button("Send Test Message", {
 							onClick: (_) => {
-								geode.ipc
+								ipc
 									.post("geode.loader", "ipc-test")
 									.then((res) => {
 										window.showInformationMessage(
