@@ -5,7 +5,7 @@ import { getExtConfig, getOutputChannel } from "../config";
 import { Option, Some, Result, Future, Err, Ok, None } from "../utils/monads";
 import * as semver from "semver";
 import { ModJson } from "./ModJson";
-import { Project } from "./Project";
+import { Project, ProjectDatabase } from "./Project";
 
 export class GeodeSDK {
 	#installedPath: string;
@@ -86,6 +86,6 @@ export class GeodeSDK {
 		return this.#version;
 	}
 	public getLoaderProject(): Option<Project> {
-		return Project.from(this.#installedPath);
+		return ProjectDatabase.get().loadProject(this.#installedPath);
 	}
 }

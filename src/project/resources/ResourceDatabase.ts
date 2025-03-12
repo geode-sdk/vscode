@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "fs";
 import { readdirRecursiveSync } from "../../utils/general";
 import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { GeodeCLI, Profile } from "../GeodeCLI";
-import { Project } from "../Project";
+import { Project, ProjectDatabase } from "../Project";
 import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, Source, ResourceSaveData, FileResource, SourceID, sourceID, UnknownResource } from "./Resource";
 import { basename, join as pathJoin } from "path";
 import { getPreferredQualityName, removeQualityDecorators } from "../../utils/resources";
@@ -350,11 +350,7 @@ export class ResourceDatabase {
         if (profile) {
             res.push(profile);
         }
-        let sdk = GeodeSDK.get()?.getLoaderProject();
-        if (sdk) {
-            res.push(sdk);
-        }
-        res = res.concat(...Project.getOpened().filter(p => p.hasResources()));
+        res = res.concat(...ProjectDatabase.get().getAll());
         return res;
     }
     public async reloadAll(): Future<undefined, string[]> {
@@ -376,6 +372,11 @@ export class ResourceDatabase {
         }
         const errors = (await Promise.all(promises)).map(r => r.getError()).filter(r => r !== None);
         return errors.length ? Err(errors) : Ok();
+    }
+    public async setup(): Future {
+        await this.reloadAll();
+        ProjectDatabase.get().onProjectsChange(() => this.reloadAll());
+        return Ok();
     }
 
     public loadUserOptions(data: UserSaveData) {
@@ -415,9 +416,9 @@ export class ResourceDatabase {
     public tryFindResourceFromUse(documentURI: Uri, modID: Option<string>, name: string, hasSprSuffix: boolean): Option<Resource> {
         if (hasSprSuffix) {
             if (!modID) {
-                const project = Project.forDocument(documentURI);
+                const project = ProjectDatabase.get().loadProjectOfDocument(documentURI);
                 if (!project) {
-                    return undefined;
+                    return None;
                 }
                 modID = project.getModJson().id;
             }

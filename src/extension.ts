@@ -14,7 +14,7 @@ import { GeodeSDK } from "./project/GeodeSDK";
 import { GeodeCLI } from "./project/GeodeCLI";
 import { ResourceDatabase } from "./project/resources/ResourceDatabase";
 import { SpriteBrowserPanel } from "./ui/SpriteBrowser";
-import { Project } from "./project/Project";
+import { Project, ProjectDatabase } from "./project/Project";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
@@ -44,6 +44,14 @@ export async function activate(context: ExtensionContext) {
 	if (resCLI.isError()) {
 		window.showErrorMessage(
 			`Geode: Unable to setup Geode extension: ${resCLI.unwrapErr()}`,
+		);
+		return;
+	}
+
+	const resProjects = await ProjectDatabase.get().setup(context);
+	if (resProjects.isError()) {
+		window.showErrorMessage(
+			`Geode: Unable to setup Geode extension: ${resProjects.unwrapErr()}`,
 		);
 		return;
 	}
@@ -103,10 +111,6 @@ export async function activate(context: ExtensionContext) {
 		languages.registerCodeActionsProvider({ pattern: "**/mod.json" }, new ModJsonSuggestionsProvider())
 	);
 	registerLinters(context);
-
-	getOutputChannel().appendLine(
-		`Open Geode projects: ${Project.getOpened().map(p => `${p.getModJson().name} (${p.getModJson().id})`).join(", ")}`,
-	);
 }
 
 export async function deactivate() {

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { None, Option } from "../utils/monads";
-import { Project } from "./Project";
+import { Project, ProjectDatabase } from "./Project";
 
 export interface CodegenData {
 	classes: CodegenClass[];
@@ -44,7 +44,7 @@ export function getActiveCodegenData(): Option<CodegenData> {
 		return CACHED_CODEGEN_DATA;
 	}
 
-	const project = Project.active();
+	const project = ProjectDatabase.get().getActive();
 	if (!project) {
 		return None;
 	}
