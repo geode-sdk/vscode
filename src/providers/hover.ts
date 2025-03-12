@@ -8,7 +8,7 @@ import {
 	TextDocument,
 } from "vscode";
 import { None, Option } from "../utils/monads";
-import { Resource, sourceID, SpriteFrameResource } from "../project/resources/Resource";
+import { Resource, RESOURCE_NAME_MATCH_REGEX, sourceID, SpriteFrameResource } from "../project/resources/Resource";
 import { Project } from "../project/Project";
 import { ResourceDatabase } from "../project/resources/ResourceDatabase";
 
@@ -51,42 +51,12 @@ export class SpriteHoverPreview implements HoverProvider {
 		position: Position,
 		token: CancellationToken,
 	): ProviderResult<Hover> {
-		const match = getMatch(
-			document,
-			position,
-			/"((?<modID>[a-z0-9\-_\.]+)\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g,
-		);
-
+		const match = getMatch(document, position, RESOURCE_NAME_MATCH_REGEX);
 		if (match) {
-			let resource: Option<Resource>;
 			let { modID, name, suffix } = match.groups;
-			name = name!; // name is a guaranteed-to-match group
 
-			if (suffix) {
-				if (!modID) {
-					const project = Project.forDocument(document.uri);
-					if (!project) {
-						return undefined;
-					}
-					modID = project.getModJson().id;
-				}
-				resource = ResourceDatabase.get()
-					.getCollectionForModID(modID)
-					?.findResourceByName(name);
-			}
-			else {
-				if (modID) {
-					resource = ResourceDatabase.get()
-						.getCollectionForModID(modID)
-						?.findResourceByName(name);
-				}
-				else {
-					resource = ResourceDatabase.get()
-						.getCollection("all")
-						?.findResourceByName(name);
-				}
-			}
-
+			// name is a guaranteed-to-match group
+			const resource = ResourceDatabase.get().tryFindResourceFromUse(document.uri, modID, name!, suffix !== undefined);
 			if (resource) {
 				return new Promise(async (resolve, _) => {
 					const res = await resource.fetchImageToMarkdown();

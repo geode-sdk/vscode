@@ -10,6 +10,7 @@ import G = require("glob");
 import { getOutputChannel } from "../../config";
 import { GeodeSDK } from "../GeodeSDK";
 import { ModJson } from "../ModJson";
+import { Uri } from "vscode";
 
 // todo: option to ignore custom songs / music library audio files
 
@@ -409,5 +410,32 @@ export class ResourceDatabase {
     }
     public getCollections(): ResourceCollection[] {
         return Object.values(this.#collections);
+    }
+
+    public tryFindResourceFromUse(documentURI: Uri, modID: Option<string>, name: string, hasSprSuffix: boolean): Option<Resource> {
+        if (hasSprSuffix) {
+            if (!modID) {
+                const project = Project.forDocument(documentURI);
+                if (!project) {
+                    return undefined;
+                }
+                modID = project.getModJson().id;
+            }
+            return ResourceDatabase.get()
+                .getCollectionForModID(modID)
+                ?.findResourceByName(name);
+        }
+        else {
+            if (modID) {
+                return ResourceDatabase.get()
+                    .getCollectionForModID(modID)
+                    ?.findResourceByName(name);
+            }
+            else {
+                return ResourceDatabase.get()
+                    .getCollection("all")
+                    ?.findResourceByName(name);
+            }
+        }
     }
 }

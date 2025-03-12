@@ -81,6 +81,8 @@ export function isResourceSaveData(obj: any): obj is ResourceSaveData {
 	return "isFavorite" in obj;
 }
 
+export const RESOURCE_NAME_MATCH_REGEX = /"((?<modID>[a-z0-9\-_\.]+)\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g;
+
 export abstract class Resource {
 	#source: Source;
 	#favorite: boolean = false;

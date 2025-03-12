@@ -24,7 +24,7 @@ import { parse as parsePath } from "path";
 import { getExtConfig } from "../config";
 import { ResourceDatabase } from "../project/resources/ResourceDatabase";
 import { Project } from "../project/Project";
-import { sourceID, sourceIDForModID } from "../project/resources/Resource";
+import { RESOURCE_NAME_MATCH_REGEX, sourceID, sourceIDForModID } from "../project/resources/Resource";
 import { None } from "../utils/monads";
 
 // type Binding = "inline" | "link" | number | null;
@@ -258,14 +258,10 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[],
         "unknown-resource",
         // Match resource-name-looking strings ("x.png", "thing.fnt" etc.)
         // todo: this method doesn't actually match mistakes like "thing" where you forget the file extension
-        /"((?<modID>[a-z0-9\-_\.]+)\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g,
+        RESOURCE_NAME_MATCH_REGEX,
         ({ groups: { modID, name, suffix }, range }) => {
-            name = name!;
-            const item = modID ? 
-                db.getCollectionForModID(modID)?.findResourceByName(name) :
-                db.getCollection("all")?.findResourceByName(name);
-
-            if (!item) {
+            const resource = ResourceDatabase.get().tryFindResourceFromUse(document.uri, modID, name!, suffix !== undefined);
+            if (!resource) {
                 if (modID && db.getCollectionForModID(modID) === undefined) {
                     return [{
                         level: DiagnosticSeverity.Warning,
@@ -280,14 +276,14 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[],
                 }];
             }
             else if (!modID) {
-                if (!suffix && item.getSource() instanceof Project) {
+                if (!suffix && resource.getSource() instanceof Project) {
                     return [{
                         level: DiagnosticSeverity.Warning,
                         msg: `Resource is missing _spr, perhaps you meant "${name}"_spr?`,
                         range,
                     }];
                 }
-                else if (suffix && !(item.getSource() instanceof Project)) {
+                else if (suffix && !(resource.getSource() instanceof Project)) {
                     return [{
                         level: DiagnosticSeverity.Warning,
                         msg: `Resource "${name}" was not found in mod.json`,
