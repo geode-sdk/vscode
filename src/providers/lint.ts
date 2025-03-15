@@ -26,6 +26,7 @@ import { ResourceDatabase } from "../project/resources/ResourceDatabase";
 import { Project, ProjectDatabase } from "../project/Project";
 import { RESOURCE_NAME_MATCH_REGEX, sourceID, sourceIDForModID } from "../project/resources/Resource";
 import { None } from "../utils/monads";
+import { getDependencies } from "../project/ModJson";
 
 // type Binding = "inline" | "link" | number | null;
 // type Bindings = {
@@ -168,7 +169,7 @@ function lintAlternative(document: MaybeDocument, diagnostics: Diagnostic[]) {
 }
 
 function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
-    const settings = ProjectDatabase.get().loadProjectOfDocument(document.uri)?.getModJson().settings;
+    const settings = ProjectDatabase.get().getProjectForDocument(document.uri)?.getModJson().settings;
     if (!settings) {
         return;
     }
@@ -229,28 +230,17 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
 // }
 
 function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[], initialRun: boolean) {
-    const mod = ProjectDatabase.get().loadProjectOfDocument(document.uri);
+    const mod = ProjectDatabase.get().getProjectForDocument(document.uri);
     if (!mod) {
         return;
     }
 
     const modJson = mod.getModJson();
     const db = ResourceDatabase.get();
-    const dependencies = ["geode.loader"];
 
     // Reload DB on filesave (in case new resources have been added to fix the issues)
     if (!initialRun) {
         db.getCollectionForModID(modJson.id)?.reload();
-    }
-
-    if (modJson.dependencies) {
-        // TODO: Deprecate
-        if (modJson.dependencies instanceof Array) {
-            dependencies.push(...modJson.dependencies.map((d) => d.id));
-        }
-        else {
-            dependencies.push(...Object.keys(modJson.dependencies));
-        }
     }
 
     lint(

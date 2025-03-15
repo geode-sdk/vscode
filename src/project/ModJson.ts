@@ -683,6 +683,27 @@ interface ModJsonWithMultiDevImpl extends ModJsonBase {
 }
 export type ModJson = ModJsonWithSingleDevImpl | ModJsonWithMultiDevImpl;
 
+/**
+ * Get dependencies, converting `LegacyDependencies` to the new format. Returns 
+ * an empty object if there are no dependencies
+ */
+export function getDependencies(json: ModJson): Dependencies {
+	if (json.dependencies instanceof Array) {
+		const res: Dependencies = {};
+		for (const dep of json.dependencies) {
+			res[dep.id] = {
+				importance: dep.importance,
+				version: dep.version,
+				platforms: dep.platforms,
+			};
+		}
+		return res;
+	}
+	else {
+		return json.dependencies ?? {};
+	}
+}
+
 // Mod runtime info, queried through loader IPC
 
 export interface RTHook {

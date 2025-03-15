@@ -57,7 +57,7 @@ export async function activate(context: ExtensionContext) {
 	}
 
 	// setup sprite browser
-	const resBrowser = await ResourceDatabase.get().reloadAll();
+	const resBrowser = await ResourceDatabase.get().setup();
 	if (resBrowser.isError()) {
 		window.showErrorMessage(
 			`Geode: Unable to setup Geode extension: ${resBrowser.unwrapErr()}`,

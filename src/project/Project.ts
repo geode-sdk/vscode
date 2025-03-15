@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
-import { join } from "path";
+import { join as pathJoin } from "path";
 import { ExtensionContext, TextDocument, TextEditor, Uri, window, workspace } from "vscode";
-import { Future, None, Ok, Option, Result, Some } from "../utils/monads";
-import { ModJson } from "./ModJson";
+import { Err, Future, None, Ok, Option, Result, Some } from "../utils/monads";
+import { getDependencies, ModJson } from "./ModJson";
 import { getOutputChannel } from "../config";
 import { removeFromArray } from "../utils/general";
 import { ResourceDatabase } from "./resources/ResourceDatabase";
@@ -11,25 +11,39 @@ import { GeodeSDK } from "./GeodeSDK";
 // todo: detect if mod.json changes and if so reload project
 
 export class Project {
+	#workspacePath: Option<string>;
 	#path: string;
 	#modJson: ModJson;
-	#dependencyOf: Option<Project>;
+	#dependencyOf: Project[] = [];
 	#dependencies: Project[] = [];
 
-	constructor(path: string, dependencyOf: Option<Project>) {
+	constructor(workspacePath: Option<string>, path: string) {
+		this.#workspacePath = workspacePath;
 		this.#path = path;
-		this.#modJson = JSON.parse(readFileSync(join(path, "mod.json")).toString());
-		this.#dependencyOf = dependencyOf;
+
+		// This will be overwrittenby the reload function immediately
+		this.#modJson = undefined as never;
+		this.reloadModJSON();
 	}
-	addDependency(dependency: Project) {
-		this.#dependencies.push(dependency);
+	makeDependencyFor(parent: Project) {
+		if (!parent.#dependencies.includes(this)) {
+			parent.#dependencies.push(this);
+			this.#dependencyOf.push(parent);
+		}
 	}
-	removeDependency(dependency: Project) {
-		removeFromArray(this.#dependencies, dependency);
+	removeDependency(parent: Project) {
+		removeFromArray(parent.#dependencies, this);
+		removeFromArray(this.#dependencyOf, parent);
+	}
+	reloadModJSON() {
+		this.#modJson = JSON.parse(readFileSync(pathJoin(this.#path, "mod.json")).toString());
 	}
 
 	public isActive(): boolean {
 		return this.#modJson.id === ProjectDatabase.get().getActive()?.getModJson().id;
+	}
+	public getWorkspacePath(): Option<string> {
+		return this.#workspacePath;
 	}
 	public getPath(): string {
 		return this.#path;
@@ -37,7 +51,7 @@ export class Project {
 	public getModJson(): ModJson {
 		return this.#modJson;
 	}
-	public getDependencyOf(): Option<Project> {
+	public getDependencyOf(): Project[] {
 		return this.#dependencyOf;
 	}
 	public getDependencies(): Project[] {
@@ -50,8 +64,7 @@ export class Project {
 
 export class ProjectDatabase {
 	#projects: Project[];
-	// todo: some sort of events system so we don't have to do these hooks manually
-	#onProjectsChangeHooks: (() => void)[] = [];
+	#onProjectsChangeHooks: ((modID: Option<Project>) => void)[] = [];
 	static #instance: ProjectDatabase = new ProjectDatabase();
 
 	private constructor() {
@@ -65,21 +78,42 @@ export class ProjectDatabase {
 	private async reloadProjects() {
 		getOutputChannel().appendLine("Reloading projects...");
 		this.#projects = [];
-		// Load loader project
-		GeodeSDK.get()?.getLoaderProject();
-		// Load any open projects
-		for (const folder of workspace.workspaceFolders ?? []) {
-			this.loadProject(folder.uri.fsPath);
+
+		// Collect potential project paths (SDK path + open workspace folders)
+		const projectPaths: [string, string][] = [];
+		const sdkPath = GeodeSDK.get()?.getPath();
+		if (sdkPath) {
+			projectPaths.push([sdkPath, pathJoin(sdkPath, "loader/resources")]);
 		}
-		// If no projects were loaded, we need to run the hooks, otherwise the 
-		// last loadProject() call will have done it for us
-		// God we need some sort of event/message system this could all be 
-		// handled automatically with that
-		if (this.#projects.length === 0) {
-			for (const hook of this.#onProjectsChangeHooks) {
-				hook();
+		for (const folder of workspace.workspaceFolders ?? []) {
+			const path = folder.uri.fsPath;
+			if (path !== sdkPath && existsSync(pathJoin(path, "mod.json"))) {
+				projectPaths.push([path, path]);
 			}
 		}
+
+		// Load workspace projects
+		for (const [workspacePath, path] of projectPaths) {
+			// Something here might fail (such as the project directory not 
+			// having a valid mod.json)
+			try {
+				this.#projects.push(new Project(workspacePath, path));
+			}
+			catch (e) {}
+		}
+
+		// Load dependencies for all the workspace projects
+		for (const project of this.#projects) {
+			// Note: This does parse mod.json again despite us just having done 
+			// that a moment ago
+			this.updateProject(project, false);
+		}
+
+		// Notify listeners that all projects have been reloaded
+		for (const hook of this.#onProjectsChangeHooks) {
+			hook(None);
+		}
+
 		getOutputChannel().appendLine(
 			`Found projects: ${
 				ProjectDatabase.get().getOpened()
@@ -88,7 +122,49 @@ export class ProjectDatabase {
 			}`,
 		);
 	}
-	onProjectsChange(hook: () => void) {
+	private async updateProject(project: Project, runHooks: boolean) {
+		// Start by reloading mod.json since it defines information for the rest 
+		// of the steps
+		project.reloadModJSON();
+
+		// Reload dependencies
+		for (const id of Object.keys(getDependencies(project.getModJson()))) {
+			// Don't let exceptions prevent us from loading the rest of the 
+			// dependencies
+			try {
+				const existing = this.getByID(id);
+				// If this dependency has already been loaded, just use the 
+				// existing instance
+				if (existing) {
+					existing.makeDependencyFor(project);
+					continue;
+				}
+				// Check that the dependency exists in the project's unzipped 
+				// dependencies that have been loaded by CLI
+				// SAFETY: We know `project.getWorkspacePath()` returns a 
+				// defined value because we have just created the entire 
+				// `this.#projects` array we are iterating before in this 
+				// function
+				const depPath = pathJoin(project.getWorkspacePath()!, "build/geode-deps", id);
+				if (!existsSync(pathJoin(depPath, "mod.json"))) {
+					continue;
+				}
+
+				// Create the dependency
+				const dep = new Project(None, depPath);
+				dep.makeDependencyFor(project);
+			}
+			catch (_) {}
+		}
+
+		// Run hooks for this mod
+		if (runHooks) {
+			for (const hook of this.#onProjectsChangeHooks) {
+				hook(project);
+			}
+		}
+	}
+	onProjectsChange(hook: (modID: Option<Project>) => void) {
 		this.#onProjectsChangeHooks.push(hook);
 	}
 	async setup(context: ExtensionContext): Future {
@@ -101,72 +177,20 @@ export class ProjectDatabase {
 		// Project.getModJson() although it might be bad to have that method do 
 		// a filesystem check every call
 		context.subscriptions.push(
-			workspace.onDidSaveTextDocument(e => {
+			workspace.onDidSaveTextDocument(async e => {
 				if (e.fileName === "mod.json") {
-					this.reloadProjects();
+					try {
+						const project = this.getByID(JSON.parse(e.getText())["id"]);
+						if (project) {
+							await this.updateProject(project, true);
+						}
+					}
+					catch (e) {}
 				}
 			})
 		);
 		await this.reloadProjects();
 		return Ok();
-	}
-
-	private loadProjectReal(path: string, dependencyOf: Option<Project>): Option<Project> {
-		try {
-			const project = new Project(path, dependencyOf);
-			this.#projects.push(project);
-
-			// Load dependencies (if this is not a dependency itself)
-			if (dependencyOf === None) {
-				const depsDir = join(path, "build/geode-deps");
-				try {
-					for (const dep of readdirSync(depsDir, { withFileTypes: true })) {
-						if (dep.isDirectory()) {
-							const depPro = this.loadProjectReal(join(depsDir, dep.name), project);
-							if (depPro) {
-								project.addDependency(depPro);
-							}
-						}
-					}
-				}
-				catch (_) {}
-
-				// Only run the hooks once after all dependencies are loaded
-				for (const hook of this.#onProjectsChangeHooks) {
-					hook();
-				}
-			}
-			return project;
-		}
-		// We don't really care about errors, if this function was called on a 
-		// invalid directory then just move on and say the project couldn't be 
-		// opened
-		catch (e) {
-			return None;
-		}
-	}
-	loadProject(path: string): Option<Project> {
-		// Detect Geode loader itself which has mod.json in `loader/resources`
-		for (const dir of ["./loader/resources", "."]) {
-			const dirPath = join(path, dir);
-			// Check if this project is already loaded
-			const existing = this.#projects.find(p => p.getPath() === dirPath);
-			if (existing !== None) {
-				return existing;
-			}
-			// Otherwise check if it looks like a real mod, if so load it
-			if (existsSync(join(dirPath, "mod.json"))) {
-				return this.loadProjectReal(dirPath, None);
-			}
-		}
-		return None;
-	}
-	loadProjectOfDocument(uri: Uri): Option<Project> {
-		const w = workspace.getWorkspaceFolder(uri);
-		if (w) {
-			return this.loadProject(w.uri.fsPath);
-		}
-		return None;
 	}
 
 	/**
@@ -175,17 +199,14 @@ export class ProjectDatabase {
 	 * moment
 	 */
 	getActive(): Option<Project> {
-		if (!workspace.workspaceFolders?.length) {
-			return None;
-		}
 		// If there is a text editor in focus, then return the project for that 
 		if (window.activeTextEditor) {
-			return this.loadProjectOfDocument(window.activeTextEditor.document.uri);
+			return this.#projects.find(p => p.getWorkspacePath() === window.activeTextEditor!.document.uri.fsPath);
 		}
 		// Otherwise if there is only one folder open in the workspace then 
 		// that's the only project that could be open
-		else if (workspace.workspaceFolders.length === 1) {
-			return this.loadProject(workspace.workspaceFolders[0].uri.fsPath);
+		if (workspace.workspaceFolders?.length === 1) {
+			return this.#projects.find(p => p.getWorkspacePath() === workspace.workspaceFolders![0].uri.fsPath);
 		}
 		return None;
 	}
@@ -193,14 +214,28 @@ export class ProjectDatabase {
 	 * Get all loaded projects, including dependencies of existing projects
 	 */
 	getAll(): Project[] {
-		return this.#projects;
+		return this.#projects.flatMap(p => [p, ...p.getDependencies()]);
 	}
 	/** 
 	 * Get all currently open projects in VSCode
 	 */
 	getOpened(): Project[] {
-		return this.#projects.filter(
-			p => workspace.workspaceFolders?.some(f => f.uri.fsPath === p.getPath())
-		);
+		return this.#projects;
+	}
+	/**
+	 * Get a `Project` by its mod ID
+	 * @param modID The ID of the mod whose `Project` to get
+	 * @param includeDependencies Whether to search through dependencies aswell
+	 * @returns The `Project` if found
+	 */
+	getByID(modID: string, includeDependencies: boolean = true): Option<Project> {
+		return (includeDependencies ? this.getAll() : this.getOpened())
+			.find(p => p.getModJson().id === modID);
+	}
+	getProjectForDocument(uri: Uri): Option<Project> {
+		const w = workspace.getWorkspaceFolder(uri);
+		// Dependencies don't have their codebase available so you can't find 
+		// those from a document
+		return this.#projects.find(p => p.getWorkspacePath() === w?.uri.fsPath);
 	}
 }

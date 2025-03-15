@@ -85,7 +85,4 @@ export class GeodeSDK {
 	public getVersion(): string {
 		return this.#version;
 	}
-	public getLoaderProject(): Option<Project> {
-		return ProjectDatabase.get().loadProject(this.#installedPath);
-	}
 }

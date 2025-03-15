@@ -328,7 +328,12 @@ class ModResourceCollection extends ActualResourceCollection<Project> {
         return makeModCollectionID(this.getSource().getModJson().id);
     }
     getDisplayName(): string {
-        return this.getSource().getModJson().name;
+        let name = this.getSource().getModJson().name;
+        const depOf = this.getSource().getDependencyOf();
+        if (depOf.length) {
+            name += ` (${depOf.map(p => p.getModJson().name).join(", ")})`;
+        }
+        return name;
     }
 }
 
@@ -375,7 +380,11 @@ export class ResourceDatabase {
     }
     public async setup(): Future {
         await this.reloadAll();
-        ProjectDatabase.get().onProjectsChange(() => this.reloadAll());
+        ProjectDatabase.get().onProjectsChange(
+            project => project ?
+                this.getCollectionForModID(project.getModJson().id)?.reload() :
+                this.reloadAll()
+        );
         return Ok();
     }
 
@@ -416,7 +425,7 @@ export class ResourceDatabase {
     public tryFindResourceFromUse(documentURI: Uri, modID: Option<string>, name: string, hasSprSuffix: boolean): Option<Resource> {
         if (hasSprSuffix) {
             if (!modID) {
-                const project = ProjectDatabase.get().loadProjectOfDocument(documentURI);
+                const project = ProjectDatabase.get().getProjectForDocument(documentURI);
                 if (!project) {
                     return None;
                 }
