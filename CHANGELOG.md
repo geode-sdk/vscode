@@ -3,6 +3,7 @@
 ## [1.20.0]
  - Sprite browser now shows resources for Geode and dependencies
  - Preview audio files in Sprite Browser
+ - Sprite browser is now a little more compact
  - Rewrite extension backend to use object-oriented paradigms
 
 ## [1.19.3]

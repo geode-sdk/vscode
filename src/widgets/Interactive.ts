@@ -486,7 +486,7 @@ export class AudioPlayback extends Widget {
 		js: /*javascript*/ ``,
 		css: /*css*/ `
 			audio {
-				transform: scale(75%);
+				transform: scale(60%);
 			}
 		`,
 	};

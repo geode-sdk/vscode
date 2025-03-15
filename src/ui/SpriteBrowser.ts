@@ -43,7 +43,8 @@ export class ResourceWidget extends Widget {
 		id: "ResourceWidget",
 		css: /*css*/ `
             .item {
-                padding: .1rem;
+				margin: 0px;
+                padding: .5rem;
                 display: flex;
                 flex-direction: column;
                 width: calc(100% - 1rem);
@@ -368,8 +369,8 @@ export class SpriteBrowserPanel extends Panel {
 		id: "SpriteBrowserPanel",
 		css: /*css*/ `
             :root {
-                --item-width:   minmax(13rem, 1fr);
-                --item-height:  15rem;
+                --item-width:   minmax(11rem, 1fr);
+                --item-height:  13rem;
             }
             
             html {
@@ -385,11 +386,11 @@ export class SpriteBrowserPanel extends Panel {
 
             main {
                 display: grid;
-                gap: 1rem;
+				gap: 0rem;
                 grid-template-columns: repeat(auto-fit, var(--item-width));
                 grid-auto-rows: var(--item-height);
                 overflow: auto;
-                align-self: strech;
+                align-self: stretch;
                 align-items: center;
             }
 
