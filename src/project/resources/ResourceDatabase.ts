@@ -268,8 +268,13 @@ class GDResourceCollection extends ActualResourceCollection<Profile> {
                 this.resources.push(new FontResource(this.getSource(), fontPath));
             }
             // Find audio
-            else if (file.endsWith(".ogg")) {
+            else if (file.endsWith(".ogg") || file.endsWith(".mp3")) {
                 const audioPath = getPreferredQualityName(file);
+                // If the filename is just an integer, it's probably a custom song or 
+                // audio library file and we don't want to pollute the browser with those
+                if (basename(audioPath).match(/[0-9]+\.(ogg|mp3)/)) {
+                    continue;
+                }
                 if (this.resources.some(r => r instanceof AudioResource && r.containedInPath(audioPath))) {
                     continue;
                 }
