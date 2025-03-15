@@ -204,7 +204,7 @@ class GDResourceCollection extends ActualResourceCollection<Profile> {
         let resourcesDir;
         if (process.platform === "darwin") {
             // macos is special, as always
-            resourcesDir = pathJoin(this.getSource().getExecutablePath(), "Resources");
+            resourcesDir = pathJoin(this.getSource().getExecutablePath(), "Contents", "Resources");
         }
         else {
             resourcesDir = pathJoin(this.getSource().getDirectory(), "Resources");
