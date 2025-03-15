@@ -1,8 +1,10 @@
-import { Widget, ScriptPackage, Panel, WidgetProps } from "./Widget";
+import { Widget, ScriptPackage, Panel, WidgetProps, AttrMode } from "./Widget";
 import { sha1 } from "object-hash";
 import { Codicon } from "./Icon";
-import { Option } from "../utils/monads";
-import { Badge } from "./Basic";
+import { None, Option, Result } from "../utils/monads";
+import { Badge, LoadingCircle } from "./Basic";
+import { Uri, window } from "vscode";
+import { rmSync } from "fs";
 
 export interface ButtonProps extends WidgetProps {
 	startIcon?: Codicon;
@@ -56,6 +58,11 @@ export class Button extends Widget {
 				this.addHandler("button-{id}", title.onClick);
 			}
 		}
+	}
+
+	setTitle(title: string) {
+		this.#title = title;
+		this.rebuild();
 	}
 
 	build(): string {
@@ -462,6 +469,56 @@ export class Input extends Widget {
 				}
                 ${super.build()}
             </vscode-text-field>
+        `;
+	}
+}
+
+export interface AudioPlaybackProps extends WidgetProps {
+	srcFile: string,
+}
+
+export class AudioPlayback extends Widget {
+	#srcFile: string;
+	#copiedWebviewUri: Option<Result<Uri>>;
+
+	static scripts: ScriptPackage = {
+		id: "AudioPlayback",
+		js: /*javascript*/ ``,
+		css: /*css*/ `
+			audio {
+				transform: scale(75%);
+			}
+		`,
+	};
+
+	constructor(props: AudioPlaybackProps) {
+		super(props);
+		this.#srcFile = props.srcFile;
+
+		// Cleanup temporary file on unmount
+		this.on("unmount", w => {
+			if (this.#copiedWebviewUri && this.#copiedWebviewUri.isValue()) {
+				try {
+					rmSync(this.#copiedWebviewUri.unwrap().fsPath);
+				}
+				catch (_) {}
+			}
+		});
+	}
+
+	build(): string {
+		this.#copiedWebviewUri = this.getPanel()?.copyAndGetWebviewFilePath(this.#srcFile);
+		return /*html*/ `
+			<div ${this.buildAttrs()}>
+				${
+					this.#copiedWebviewUri?.isValue() ? /*html*/ `
+						<audio controls>
+							<source src="${this.#copiedWebviewUri.unwrap()}">
+						</audio>
+					` : (this.#copiedWebviewUri ? /*html*/ `<p>Unable to load audio: ${this.#copiedWebviewUri?.unwrapErr()}</p>` : "")
+				}
+				${super.build()}
+			</div>
         `;
 	}
 }

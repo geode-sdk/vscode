@@ -31,14 +31,14 @@ function makeModCollectionID(modID: string) {
 function findModResources(src: Source, modJson: ModJson, resourcesDir: string): Resource[] {
     const resources: Resource[] = [];
 
-    const globOptions: G.IOptions = {
+    const globOptions: G.GlobOptions = {
         cwd: resourcesDir,
         absolute: true,
     };
 
     // Find sprites & audio files
     [...modJson.resources?.files ?? [], ...modJson.resources?.sprites ?? []]
-        .flatMap(f => G.glob.sync(f, globOptions))
+        .flatMap(f => G.glob.sync(f, globOptions).map(p => p.toString()))
         .forEach(file => {
             if (file.endsWith(".ogg") || file.endsWith(".mp3")) {
                 resources.push(new AudioResource(src, file));
@@ -54,7 +54,7 @@ function findModResources(src: Source, modJson: ModJson, resourcesDir: string): 
     // Find spritesheets & their contained sprites
     Object.entries(modJson.resources?.spritesheets ?? {})?.forEach(([sheetName, patterns]) => {
         const sheet = new SpriteSheetResource(src, sheetName);
-        for (const file of patterns.flatMap((p) => G.glob.sync(p, globOptions))) {
+        for (const file of patterns.flatMap((p) => G.glob.sync(p, globOptions).map(p => p.toString()))) {
             const frame = new SpriteFrameResource(src, sheet, file, true);
             resources.push(frame);
             sheet.addFrame(frame);

@@ -1,30 +1,34 @@
 import { Disposable, Uri, ViewColumn, Webview, WebviewPanel, window } from "vscode";
 import { getAsset } from "../config";
-import { None, Option, Some } from "../utils/monads";
+import { Err, Future, None, Ok, Option, Result, Some } from "../utils/monads";
 import { sha1 } from "object-hash";
 import { getExtContext } from "../config";
+import { copyFileSync, existsSync, mkdirSync, rmdirSync, rmSync } from "fs";
+import { basename, join } from "path";
 
-export function getWebviewUri(webview: Webview, pathList: string[]) {
+// todo: migrate to https://vscode-elements.github.io and maybe React?
+
+function getWebviewUri(webview: Webview, pathList: string[]) {
 	return webview.asWebviewUri(
 		Uri.joinPath(getExtContext().extensionUri, ...pathList),
 	);
 }
-export function getWebviewToolkitPath(webview: Webview) {
+function getWebviewToolkitPath(webview: Webview) {
 	return getWebviewUri(webview, [
 		"node_modules/@vscode/webview-ui-toolkit/dist/toolkit.min.js",
 	]);
 }
-export function importWebviewToolkit(webview: Webview) {
+function importWebviewToolkit(webview: Webview) {
 	return /*html*/ `
         <script type="module" src="${getWebviewToolkitPath(webview)}"></script>
     `;
 }
-export function getCodiconToolkitPath(webview: Webview) {
+function getCodiconToolkitPath(webview: Webview) {
 	return getWebviewUri(webview, [
 		"node_modules/@vscode/codicons/dist/codicon.css",
 	]);
 }
-export function importCodiconToolkit(webview: Webview) {
+function importCodiconToolkit(webview: Webview) {
 	return /*html*/ `
         <link href="${getCodiconToolkitPath(webview)}" rel="stylesheet" />
     `;
@@ -510,11 +514,9 @@ export abstract class Panel extends Widget {
 	addHandler(id: string, handler: Handler): void {
 		this.#handlers[id] = handler;
 	}
-
 	removeHandler(id: string): void {
 		delete this.#handlers[id];
 	}
-
 	private handleMessage(msg: Message) {
 		if (msg.cmd in this.#handlers) {
 			this.#handlers[msg.cmd](this, msg.args);
@@ -524,7 +526,6 @@ export abstract class Panel extends Widget {
 	}
 
 	protected onDispose?(): void;
-
 	private dispose() {
 		if (this.onDispose) {
 			this.onDispose();
@@ -532,7 +533,34 @@ export abstract class Panel extends Widget {
 		this.#panel.dispose();
 		this.disposables.forEach((d) => d.dispose());
 		this.disposables = [];
+
+		// Cleanup temporary files
+		try {
+			rmSync(this.getTempMediaPath().fsPath, { recursive: true });
+		}
+		catch(_) {}
 	}
+
+	private getTempMediaPath(): Uri {
+		return Uri.joinPath(getExtContext().extensionUri, "temp-media");
+	}
+	copyAndGetWebviewFilePath(path: string): Result<Uri> {
+		try {
+			// VSCode webviews can't play arbitary parths so we copy media files 
+			// to a whitelisted temporary directory and play from there
+			const newDir = this.getTempMediaPath();
+			const newPath = Uri.joinPath(newDir, basename(path));
+			if (!existsSync(newDir.fsPath)) {
+				mkdirSync(newDir.fsPath);
+			}
+			copyFileSync(path, newPath.fsPath);
+			return Ok(this.#panel.webview.asWebviewUri(newPath));
+		}
+		catch (e: any) {
+			return Err(e.toString());
+		}
+	}
+
 
 	show(where: ViewColumn): Panel {
 		if (!this.isBuilt()) {

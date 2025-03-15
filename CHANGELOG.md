@@ -1,8 +1,9 @@
 # Geode for VS Code Changelog
 
 ## [1.20.0]
+ - Sprite browser now shows resources for Geode and dependencies
+ - Preview audio files in Sprite Browser
  - Rewrite extension backend to use object-oriented paradigms
- - Sprite browser now shows Geode resources aswell
 
 ## [1.19.3]
  - More fixes to missing resources linting

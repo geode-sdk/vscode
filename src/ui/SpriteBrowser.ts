@@ -14,6 +14,7 @@ import {
 } from "../widgets/Basic";
 import { Column, Div, Grid, Row } from "../widgets/Container";
 import {
+	AudioPlayback,
 	Button,
 	Input,
 	Select,
@@ -227,6 +228,10 @@ export class ResourceWidget extends Widget {
 		);
 		this.add(new Text(this.#resource.getDisplayName()));
 
+		if (this.#resource instanceof AudioResource) {
+			this.add(new AudioPlayback({ srcFile: this.#resource.getFilePath() }));
+		}
+
 		const bottomBtns = new Div().attr("class", "buttons");
 		if (this.#resource instanceof SpriteSheetResource) {
 			bottomBtns.add(
@@ -435,6 +440,7 @@ export class SpriteBrowserPanel extends Panel {
 				scripts.globalClickListener,
 				Menu.scripts,
 				MenuItem.scripts,
+				AudioPlayback.scripts,
 				scripts.observer,
 			],
 		});
