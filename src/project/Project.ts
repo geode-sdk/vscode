@@ -7,6 +7,7 @@ import { getOutputChannel } from "../config";
 import { removeFromArray } from "../utils/general";
 import { ResourceDatabase } from "./resources/ResourceDatabase";
 import { GeodeSDK } from "./GeodeSDK";
+import isSubdir from "is-subdir";
 
 // todo: detect if mod.json changes and if so reload project
 
@@ -201,7 +202,7 @@ export class ProjectDatabase {
 	getActive(): Option<Project> {
 		// If there is a text editor in focus, then return the project for that 
 		if (window.activeTextEditor) {
-			return this.#projects.find(p => p.getWorkspacePath() === window.activeTextEditor!.document.uri.fsPath);
+			return this.#projects.find(p => isSubdir(p.getWorkspacePath()!, window.activeTextEditor!.document.uri.fsPath));
 		}
 		// Otherwise if there is only one folder open in the workspace then 
 		// that's the only project that could be open
