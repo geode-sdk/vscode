@@ -325,5 +325,10 @@
 		"plist": "^3.0.6",
 		"semver": "^7.5.4",
 		"sharp": "^0.33.4"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"sharp"
+		]
 	}
 }
