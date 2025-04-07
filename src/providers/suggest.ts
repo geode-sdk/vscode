@@ -13,7 +13,7 @@ import { getActiveCodegenData } from "../project/CodegenData";
 import { getExtConfig } from "../config";
 
 const MODIFY_CLASS_REGEX =
-	/^(?:class|struct)(?: \$modify\((?:\w+,)?\s?(\w+)\)|.+Modify\<(\w+)\>)/;
+	/^(?:class|struct)(?: \$modify\((?:\w+,)?\s?(\w+)\)|.+Modify\<.+?,\s*(\w+)\>)/;
 
 export class ModifyClassMethodCompletion implements CompletionItemProvider {
 	provideCompletionItems(
