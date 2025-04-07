@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { parse, PlistValue } from "plist";
-import * as sharp from "sharp";
+import sharp from "sharp";
 import { Err, Future, None, Ok, Option } from "../../utils/monads";
 
 interface SpriteFrame {

@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { Char, FontData, parseFnt } from "../../utils/fntData";
 import { dirname, join } from "path";
-import * as sharp from "sharp";
+import sharp from "sharp";
 import { Err, Future, Ok } from "../../utils/monads";
 
 function sharpFromClear(width: number, height: number) {
