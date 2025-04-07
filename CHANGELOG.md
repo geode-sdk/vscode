@@ -1,5 +1,11 @@
 # Geode for VS Code Changelog
 
+## [1.20.1]
+ - Fix MacOS sprite browser (#27)
+ - Fix sharp in CI build
+ - Fix modify class suggestions not working
+ - Search for codegen data in alternative build folders
+
 ## [1.20.0]
  - Sprite browser now shows resources for Geode and dependencies
  - Preview audio files in Sprite Browser
