@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { None, Option } from "../utils/monads";
 import { Project, ProjectDatabase } from "./Project";
+import { join } from "node:path";
+import { workspace } from "vscode";
 
 export interface CodegenData {
 	classes: CodegenClass[];
@@ -49,8 +51,21 @@ export function getActiveCodegenData(): Option<CodegenData> {
 		return None;
 	}
 
-	const codegenDataPath = `${project.getPath()}/build/bindings/bindings/Geode/CodegenData.json`;
-	if (!existsSync(codegenDataPath)) {
+	const jsonRelativePath = "bindings/bindings/Geode/CodegenData.json";
+	const codegenDataPath = [
+		`${project.getPath()}/build`,
+		`${project.getPath()}/build-android64`,
+		`${project.getPath()}/build-android32`,
+		`${project.getPath()}/build-win`,
+		`${project.getPath()}/build-mac`,
+		workspace.workspaceFolders?.length === 1
+			? `${workspace.workspaceFolders![0].uri.fsPath}/build`
+			: undefined,
+	]
+		.filter((x) => x)
+		.map((buildDir) => join(buildDir!, jsonRelativePath))
+		.find((path) => existsSync(path));
+	if (!codegenDataPath) {
 		return None;
 	}
 
