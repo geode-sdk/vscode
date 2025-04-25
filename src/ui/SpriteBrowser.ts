@@ -1,7 +1,7 @@
 import { Menu, MenuItem } from "../widgets/Menu";
-import { SnippetString, TextEditor, Uri, ViewColumn, window, workspace } from "vscode";
+import { SnippetString, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { getExtConfig } from "../config";
-import { Future, None, Option } from "../utils/monads";
+import { Option } from "../utils/monads";
 import {
 	Element,
 	Head,
@@ -28,7 +28,7 @@ import { insertSnippet } from "../utils/snippet";
 import { env } from "vscode";
 import Fuse from "fuse.js";
 import { ResourceDatabase, ResourceType } from "../project/resources/ResourceDatabase";
-import { AudioResource, FileResource, FontResource, Resource, SourceID, sourceID, SpriteFrameResource, SpriteResource, SpriteSheetResource } from "../project/resources/Resource";
+import { AudioResource, FileResource, Resource, sourceID, SpriteFrameResource, SpriteSheetResource } from "../project/resources/Resource";
 
 export class ResourceWidget extends Widget {
 	#resource: Resource;
@@ -341,7 +341,6 @@ export class SpriteBrowserPanel extends Panel {
 	#quality: Select;
 	#search: Input;
 	#searchResults: Text;
-	#contentObserver: scripts.Observer;
 	#searchTimeout?: NodeJS.Timeout;
 	#showCount: number = 0;
 	#loadMoreDiv?: Div;
@@ -530,7 +529,7 @@ export class SpriteBrowserPanel extends Panel {
 		this.add((this.#content = new Element("main")));
 		this.add((this.#searchResults = new Text("Loading...")));
 
-		this.#contentObserver = scripts.observer.createObserver(
+		scripts.observer.createObserver(
 			this,
 			this.#content,
 			(w, visible) => {

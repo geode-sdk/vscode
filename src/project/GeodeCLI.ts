@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "fs";
 import { join, dirname } from "path";
 import { ConfigurationTarget, Terminal, window } from "vscode";
 import { getExtConfig, getOutputChannel } from "../config";
-import { Option, None, Some, Result, Future, Err, Ok } from "../utils/monads";
+import { Option, None, Some, Future, Err, Ok } from "../utils/monads";
 import * as semver from "semver";
 
 export class Profile {

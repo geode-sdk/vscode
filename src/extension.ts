@@ -4,7 +4,7 @@ import {
 	commands,
 	languages,
 } from "vscode";
-import { getOutputChannel, loadData, saveData, setupConfig } from "./config";
+import { loadData, saveData, setupConfig } from "./config";
 import { CCColor3bProvider, CCColor4bProvider } from "./providers/color";
 import { SpriteHoverPreview } from "./providers/hover";
 import { registerLinters } from "./providers/lint";
@@ -14,7 +14,8 @@ import { GeodeSDK } from "./project/GeodeSDK";
 import { GeodeCLI } from "./project/GeodeCLI";
 import { ResourceDatabase } from "./project/resources/ResourceDatabase";
 import { SpriteBrowserPanel } from "./ui/SpriteBrowser";
-import { Project, ProjectDatabase } from "./project/Project";
+import { ProjectDatabase } from "./project/Project";
+import { DocsBrowserPaenl } from "./ui/DocsBrowser";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
@@ -67,7 +68,7 @@ export async function activate(context: ExtensionContext) {
 
 	// Register commands
 	context.subscriptions.push(
-		commands.registerCommand("geode.launchGD", async () => {
+        commands.registerCommand("geode.launchGD", async () => {
 			channel.appendLine("Launching Geometry Dash...");
 			const cli = GeodeCLI.get();
 			if (!cli) {
@@ -84,33 +85,20 @@ export async function activate(context: ExtensionContext) {
 				window.showErrorMessage(`Unable to launch GD: ${res.unwrapErr()}`);
 			}
 		}),
+		commands.registerCommand("geode.openSpriteBrowser", async () => SpriteBrowserPanel.show()),
+        commands.registerCommand("geode.openDocsBrowser", async () => DocsBrowserPaenl.show())
 	);
-	context.subscriptions.push(
-		commands.registerCommand("geode.openSpriteBrowser", async () => {
-			SpriteBrowserPanel.show();
-		}),
-	);
-	// context.subscriptions.push(commands.registerCommand('geode.openDevTools', async () => {
-	// 	DevToolsPanel.show();
-	// }));
 
 	// Register providers
 	context.subscriptions.push(
-		languages.registerColorProvider({ language: "cpp" }, new CCColor3bProvider())
-	);
-	context.subscriptions.push(
-		languages.registerColorProvider({ language: "cpp" }, new CCColor4bProvider())
-	);
-	context.subscriptions.push(
-		languages.registerHoverProvider({ language: "cpp" }, new SpriteHoverPreview())
-	);
-	context.subscriptions.push(
-		languages.registerCompletionItemProvider({ language: "cpp" }, new ModifyClassMethodCompletion())
-	);
-	context.subscriptions.push(
-		languages.registerCodeActionsProvider({ pattern: "**/mod.json" }, new ModJsonSuggestionsProvider())
-	);
-	registerLinters(context);
+        languages.registerColorProvider({ language: "cpp" }, new CCColor3bProvider()),
+        languages.registerColorProvider({ language: "cpp" }, new CCColor4bProvider()),
+        languages.registerHoverProvider({ language: "cpp" }, new SpriteHoverPreview()),
+        languages.registerCompletionItemProvider({ language: "cpp" }, new ModifyClassMethodCompletion()),
+        languages.registerCodeActionsProvider({ pattern: "**/mod.json" }, new ModJsonSuggestionsProvider())
+    );
+
+    registerLinters(context);
 }
 
 export async function deactivate() {
