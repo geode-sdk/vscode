@@ -14,7 +14,7 @@ export class DocsBrowserPanel extends Panel {
                 --item-width:   minmax(11rem, 1fr);
                 --item-height:  13rem;
             }
-            
+
             html {
                 height: 100%;
             }

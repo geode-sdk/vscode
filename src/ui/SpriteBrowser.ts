@@ -597,7 +597,6 @@ export class SpriteBrowserPanel extends Panel {
 			return;
 		}
 		const selectedTab = this.#collection.getSelected();
-		console.error(selectedTab);
 		const resources = selectedTab?.startsWith("sheet:") ?
 			collection.getFramesInSpriteSheet(selectedTab.substring(6)) :
 			collection.getResources(selectedTab as ResourceType);
