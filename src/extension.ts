@@ -15,7 +15,7 @@ import { GeodeCLI } from "./project/GeodeCLI";
 import { ResourceDatabase } from "./project/resources/ResourceDatabase";
 import { SpriteBrowserPanel } from "./ui/SpriteBrowser";
 import { ProjectDatabase } from "./project/Project";
-import { DocsBrowserPaenl } from "./ui/DocsBrowser";
+import { DocsBrowserPanel } from "./ui/DocsBrowser";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
@@ -86,7 +86,7 @@ export async function activate(context: ExtensionContext) {
 			}
 		}),
 		commands.registerCommand("geode.openSpriteBrowser", async () => SpriteBrowserPanel.show()),
-        commands.registerCommand("geode.openDocsBrowser", async () => DocsBrowserPaenl.show())
+        commands.registerCommand("geode.openDocsBrowser", async () => DocsBrowserPanel.show())
 	);
 
 	// Register providers

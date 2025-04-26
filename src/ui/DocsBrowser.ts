@@ -3,12 +3,12 @@ import { Panel, ScriptPackage } from "../widgets/Widget";
 import { scripts } from "../widgets/Scripts";
 import { IFrame } from "../widgets/Interactive";
 
-export class DocsBrowserPaenl extends Panel {
+export class DocsBrowserPanel extends Panel {
 
-    private static instance?: DocsBrowserPaenl;
+    private static instance?: DocsBrowserPanel;
 
     private static readonly scripts: ScriptPackage = {
-        id: "DocsBrowserPaenl",
+        id: "DocsBrowserPanel",
         css: /*css*/ `
             :root {
                 --item-width:   minmax(11rem, 1fr);
@@ -35,15 +35,15 @@ export class DocsBrowserPaenl extends Panel {
     };
 
     public static show() {
-        if (!DocsBrowserPaenl.instance) {
-            DocsBrowserPaenl.instance = new DocsBrowserPaenl();
+        if (!DocsBrowserPanel.instance) {
+            DocsBrowserPanel.instance = new DocsBrowserPanel();
         }
 
-        DocsBrowserPaenl.instance.show(ViewColumn.Beside);
+        DocsBrowserPanel.instance.show(ViewColumn.Beside);
 	}
 
     protected onDispose(): void {
-		DocsBrowserPaenl.instance = undefined;
+		DocsBrowserPanel.instance = undefined;
 	}
 
     private constructor() {
@@ -53,7 +53,7 @@ export class DocsBrowserPaenl extends Panel {
 			lightIcon: "blockman-light.svg",
 			darkIcon: "blockman-dark.svg",
 			scripts: [
-                DocsBrowserPaenl.scripts,
+                DocsBrowserPanel.scripts,
                 IFrame.scripts,
 				scripts.observer,
 			]
