@@ -1,5 +1,4 @@
 import { Widget, ScriptPackage, WidgetProps } from "./Widget";
-import { sha1 } from "object-hash";
 
 export class Head extends Widget {
 	#text: string;

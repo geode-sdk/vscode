@@ -522,3 +522,27 @@ export class AudioPlayback extends Widget {
         `;
 	}
 }
+
+export interface IFrameProps extends WidgetProps {
+    src: string;
+}
+
+export class IFrame extends Widget {
+    public static scripts: ScriptPackage = {
+        id: "IFrame"
+    };
+
+    constructor(props: IFrameProps) {
+        super(props);
+
+        this.attr("src", props.src);
+    }
+
+    public build(): string {
+        return /*html*/ `
+            <iframe ${this.buildAttrs()}>
+                ${super.build()}
+            </iframe>
+        `;
+    }
+}
