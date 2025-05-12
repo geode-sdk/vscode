@@ -3,12 +3,11 @@ import { readdirRecursiveSync } from "../../utils/general";
 import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { GeodeCLI, Profile } from "../GeodeCLI";
 import { Project, ProjectDatabase } from "../Project";
-import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, Source, ResourceSaveData, FileResource, SourceID, sourceID, UnknownResource } from "./Resource";
+import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, Source, ResourceSaveData, FileResource, UnknownResource } from "./Resource";
 import { basename, join as pathJoin } from "path";
 import { getPreferredQualityName, removeQualityDecorators } from "../../utils/resources";
 import G = require("glob");
 import { getOutputChannel } from "../../config";
-import { GeodeSDK } from "../GeodeSDK";
 import { ModJson } from "../ModJson";
 import { Uri } from "vscode";
 
@@ -270,7 +269,7 @@ class GDResourceCollection extends ActualResourceCollection<Profile> {
             // Find audio
             else if (file.endsWith(".ogg") || file.endsWith(".mp3")) {
                 const audioPath = getPreferredQualityName(file);
-                // If the filename is just an integer, it's probably a custom song or 
+                // If the filename is just an integer, it's probably a custom song or
                 // audio library file and we don't want to pollute the browser with those
                 if (basename(audioPath).match(/[0-9]+\.(ogg|mp3)/)) {
                     continue;
@@ -380,7 +379,7 @@ export class ResourceDatabase {
             }
             promises.push(this.#collections.at(-1)!.reload());
         }
-        const errors = (await Promise.all(promises)).map(r => r.getError()).filter(r => r !== None);
+        const errors = (await Promise.all(promises)).map(r => r.getError()).filter(r => r !== None) as string[];
         return errors.length ? Err(errors) : Ok();
     }
     public async setup(): Future {

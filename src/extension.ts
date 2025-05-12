@@ -13,25 +13,17 @@ import { ModJsonSuggestionsProvider } from "./project/ModJson";
 import { GeodeSDK } from "./project/GeodeSDK";
 import { GeodeCLI } from "./project/GeodeCLI";
 import { ResourceDatabase } from "./project/resources/ResourceDatabase";
-import { SpriteBrowserPanel } from "./ui/SpriteBrowser";
 import { ProjectDatabase } from "./project/Project";
-import { DocsBrowserPanel } from "./ui/DocsBrowser";
+import { DocsBrowser } from "./view/ui/DocsBrowser";
+import { SpriteBrowser } from "./view/ui/SpriteBrowser";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
 
-	// store globals
+	// Store globals
 	setupConfig(context, channel);
 
-	// load save data
-	const res0 = loadData();
-	if (res0.isError()) {
-		window.showErrorMessage(
-			`Geode: Unable to load Geode extension data: ${res0.unwrapErr()}`,
-		);
-	}
-
-	// setup SDK
+	// Setup SDK
 	const resSdk = await GeodeSDK.setup();
 	if (resSdk.isError()) {
 		window.showErrorMessage(
@@ -40,7 +32,7 @@ export async function activate(context: ExtensionContext) {
 		return;
 	}
 
-	// setup SDK
+	// Setup CLI
 	const resCLI = await GeodeCLI.setup();
 	if (resCLI.isError()) {
 		window.showErrorMessage(
@@ -57,7 +49,7 @@ export async function activate(context: ExtensionContext) {
 		return;
 	}
 
-	// setup sprite browser
+	//Ssetup sprite database
 	const resBrowser = await ResourceDatabase.get().setup();
 	if (resBrowser.isError()) {
 		window.showErrorMessage(
@@ -65,6 +57,20 @@ export async function activate(context: ExtensionContext) {
 		);
 		return;
 	}
+
+    // Load save data
+	const resSave = loadData();
+	if (resSave.isError()) {
+		window.showErrorMessage(
+			`Geode: Unable to load Geode extension save data: ${resSave.unwrapErr()}`,
+		);
+	}
+
+    // Webview views
+    context.subscriptions.push(
+        window.registerWebviewViewProvider("geode-tools.docs-browser", new DocsBrowser()),
+        window.registerWebviewViewProvider("geode-tools.sprite-browser", new SpriteBrowser())
+    );
 
 	// Register commands
 	context.subscriptions.push(
@@ -85,8 +91,6 @@ export async function activate(context: ExtensionContext) {
 				window.showErrorMessage(`Unable to launch GD: ${res.unwrapErr()}`);
 			}
 		}),
-		commands.registerCommand("geode.openSpriteBrowser", async () => SpriteBrowserPanel.show()),
-        commands.registerCommand("geode.openDocsBrowser", async () => DocsBrowserPanel.show())
 	);
 
 	// Register providers

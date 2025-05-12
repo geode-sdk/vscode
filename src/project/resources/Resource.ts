@@ -107,7 +107,7 @@ export abstract class Resource {
 
 	saveUserOptions(): ResourceSaveData {
 		return {
-			isFavorite: true
+			isFavorite: this.#favorite,
 		};
 	}
 	loadUserOptions(data: ResourceSaveData) {
@@ -241,8 +241,8 @@ export class SpriteResource extends FileResource {
 		const phBtnSpr = new Placeholder(`${formPlaceholderName(this.getDisplayName())}BtnSpr`);
 		const phCallback = new Placeholder("");
 		const phThis = new Placeholder("this");
-		const phText = new Placeholder('"Hi mom!');
-		const phFont = new Placeholder('"bigFont.fnt');
+		const phText = new Placeholder('"Hi mom!"');
+		const phFont = new Placeholder('"bigFont.fnt"');
 		return [
 			{
 				name: "Create CCSprite",
@@ -301,7 +301,7 @@ export class FontResource extends FileResource {
 		const phBtnSpr = new Placeholder(`${formPlaceholderName(this.getDisplayName())}BtnSpr`);
 		const phCallback = new Placeholder("");
 		const phThis = new Placeholder("this");
-		const phText = new Placeholder('"Hi mom!');
+		const phText = new Placeholder('"Hi mom!"');
 		const phButtonSprite = new Placeholder('"GJ_button_01.png"');
 		return [
 			{
