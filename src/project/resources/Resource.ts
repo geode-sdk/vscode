@@ -1,5 +1,4 @@
-import { readFileSync } from "fs";
-import { Err, Future, None, Ok, Option, Result } from "../../utils/monads";
+import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { basename } from "path";
 import { MarkdownString, SnippetString } from "vscode";
 import { Placeholder, snippet } from "../../utils/snippet";

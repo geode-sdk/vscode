@@ -1,11 +1,10 @@
-import { existsSync, readdirSync, readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { join as pathJoin } from "path";
-import { ExtensionContext, TextDocument, TextEditor, Uri, window, workspace } from "vscode";
-import { Err, Future, None, Ok, Option, Result, Some } from "../utils/monads";
+import { ExtensionContext, Uri, window, workspace } from "vscode";
+import { Future, None, Ok, Option } from "../utils/monads";
 import { getDependencies, ModJson } from "./ModJson";
 import { getOutputChannel } from "../config";
 import { removeFromArray } from "../utils/general";
-import { ResourceDatabase } from "./resources/ResourceDatabase";
 import { GeodeSDK } from "./GeodeSDK";
 import isSubdir from "is-subdir";
 

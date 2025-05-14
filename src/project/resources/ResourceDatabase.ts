@@ -62,7 +62,7 @@ function findModResources(src: Source, modJson: ModJson, resourcesDir: string): 
     });
 
     // Find fonts
-    Object.entries(modJson.resources?.fonts ?? {}).forEach(([name, font]) => {
+    Object.entries(modJson.resources?.fonts ?? {}).forEach(([_, font]) => {
         resources.push(new FontResource(src, pathJoin(resourcesDir, font.path)));
     });
 
@@ -235,26 +235,22 @@ class GDResourceCollection extends ActualResourceCollection<Profile> {
                 }
 
                 const frames: SpriteFrameResource[] = [];
-                const sheetName = removeQualityDecorators(basename(sheetPath));
                 const sheet = new SpriteSheetResource(this.getSource(), sheetPath);
+                const regex = /<key>(?<image>.+?\.png)<\/key>/g;
+                const sheetFile = readFileSync(sheetPath, "utf8");
+                let match;
 
-                // Read sheet data and find all *.png strings inside
-                readFileSync(sheetPath)
-                    .toString()
-                    .match(/\w+\.png/g)
-                    ?.forEach((match) => {
-                        match = removeQualityDecorators(match);
-                        if (
-                            // Check that this is not the same as the sheet (metadata field)
-                            match.replace(".png", ".plist") !== sheetName &&
-                            // Make sure sprite isn't already added to sheet
-                            !frames.some(spr => spr.getDisplayName() === match)
-                        ) {
-                            const frame = new SpriteFrameResource(this.getSource(), sheet, match);
-                            this.resources.push(frame);
-                            sheet.addFrame(frame);
-                        }
-                    });
+                while (match = regex.exec(sheetFile)) {
+                    const baseImageName = removeQualityDecorators(match.groups!.image);
+
+                    // Avoid duplicates
+                    if (!frames.some((spr) => spr.getDisplayName() == baseImageName)) {
+                        const frame = new SpriteFrameResource(this.getSource(), sheet, baseImageName);
+
+                        this.resources.push(frame);
+                        sheet.addFrame(frame);
+                    }
+                }
 
                 this.resources.push(sheet);
             }
