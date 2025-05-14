@@ -13,13 +13,11 @@ export class DocsBrowser extends ViewProvider {
     `);
 
     constructor() {
-        super({
-            children: [
-                new IFrame({
-                    id: "docs-frame",
-                    src: "https://docs.geode-sdk.org"
-                })
-            ]
-        });
+        super();
+
+        this.addChild(new IFrame({
+            id: "docs-frame",
+            src: "https://docs.geode-sdk.org"
+        }));
     }
 }

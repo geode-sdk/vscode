@@ -207,11 +207,11 @@ export class ResourceWidget extends Element {
 	}
 
 	private content(): void {
-        const bottomBtns = new Div({ class: "buttons" });
+        const bottomBtns = new Div({ className: "buttons" });
 
 		this.addChild(
 			this.topButtons = new Div({
-                class: "buttons top",
+                className: "buttons top",
                 style: {
                     "align-self": "flex-end"
                 }
@@ -254,7 +254,7 @@ export class ResourceWidget extends Element {
                     }
                 })
             ),
-            this.image = new Div({ class: "image-div" }).addChild(new LoadingCircle()),
+            this.image = new Div({ className: "image-div" }).addChild(new LoadingCircle()),
             new Text({ text: this.resource.getDisplayName() })
 		);
 

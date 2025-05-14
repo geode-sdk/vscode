@@ -260,7 +260,7 @@ export class SpriteBrowser extends ViewProvider {
             }
 
             this.content.addChild(this.loadMoreDiv = new Div({
-                class: "load-more"
+                className: "load-more"
             }).addChild(new Button({
                 title: `Load More (${showMoreText})`,
                 onClick: () => {

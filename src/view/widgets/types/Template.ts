@@ -1,6 +1,4 @@
-export type Split<T extends string, D extends string> = T extends `${infer P}${D}${infer R}` ? [P, ...Split<R, D>] : [T];
-
-export type FirstChar<T extends string> = T extends `${infer P}${string}` ? P : T;
+import { FirstChar, Split } from "./StringTypes";
 
 export type FilterTuple<T extends any[], F> = T extends [infer P, ...infer R] ?
     [P] extends [F] ?

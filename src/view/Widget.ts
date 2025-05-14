@@ -5,10 +5,11 @@ import { Err, Ok, Option, Result } from "../utils/monads";
 import { basename } from "path";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "fs";
 import { Package } from "./Package";
+import { BlacklistChars } from "./widgets/types/StringTypes";
 
 export interface WidgetProperties {
     id?: string;
-    class?: string;
+    className?: string;
     children?: Widget[];
     attributes?: Record<string, string>;
     style?: Record<string, string>;
@@ -19,6 +20,10 @@ export interface WidgetProperties {
 export type GetWidgetProperties<T extends abstract new(properties: any) => Widget> = NonNullable<ConstructorParameters<T>[0]>;
 
 export type MergeProperties<T1, T2 extends WidgetProperties = WidgetProperties> = T1 & T2;
+
+export type PropertyString<T extends string> = BlacklistChars<T, "\n" | " " | "\t">;
+
+export type StylePropertyString<T extends string> = BlacklistChars<T, "\n" | " " | "\t" | ":" | ";">;
 
 export enum UpdateType {
     ADDED_ATTRIBUTE = "added-attribute",
@@ -102,8 +107,8 @@ export abstract class Widget {
             this.setAttribute("id", properties.id);
         }
 
-        if (properties?.class) {
-            this.setAttribute("class", properties.class);
+        if (properties?.className) {
+            this.setAttribute("class", properties.className);
         }
 
         if (properties?.hoverText) {
@@ -121,11 +126,11 @@ export abstract class Widget {
         return this.package;
     }
 
-    public getAttribute(name: string): Option<string> {
+    public getAttribute<T extends string>(name: PropertyString<T>): Option<string> {
         return this.attributes.get(name);
     }
 
-    public setAttribute<T extends { toString: () => string }>(name: string, value?: T): this {
+    public setAttribute<T1 extends string, T2 extends { toString: () => string }>(name: PropertyString<T1>, value?: T2): this {
         if (typeof value != "undefined") {
             const stringValue = value.toString();
             this.attributes.set(name, stringValue);
@@ -139,7 +144,7 @@ export abstract class Widget {
         return this;
     }
 
-    public removeAttribute(name: string): this {
+    public removeAttribute<T extends string>(name: PropertyString<T>): this {
         if (this.attributes.has(name)) {
             this.attributes.delete(name);
 
@@ -151,11 +156,11 @@ export abstract class Widget {
         return this;
     }
 
-    public getStyleOverride(key: string): Option<string> {
+    public getStyleOverride<T extends string>(key: StylePropertyString<T>): Option<string> {
         return this.styleOverrides.get(key);
     }
 
-    public setStyleOverride(key: string, value: string): this {
+    public setStyleOverride<T1 extends string, T2 extends string>(key: StylePropertyString<T1>, value: BlacklistChars<T2, ";" | ":">): this {
         this.styleOverrides.set(key, value);
 
         return this.rebuild(UpdateType.ADDED_ATTRIBUTE, {
@@ -164,7 +169,7 @@ export abstract class Widget {
         });
     }
 
-    public removeStyleOverride(key: string): this {
+    public removeStyleOverride<T extends string>(key: StylePropertyString<T>): this {
         if (this.styleOverrides.has(key)) {
             this.styleOverrides.delete(key);
 
@@ -181,15 +186,15 @@ export abstract class Widget {
         return this.children;
     }
 
-    public getChildByWidgetID<T extends Widget>(id: string, recursive = false): Option<T> {
+    public getChildByWidgetID<T1 extends Widget, T2 extends string>(id: PropertyString<T2>, recursive = false): Option<T1> {
         for (const child of this.children) {
             if (child.getWidgetID() == id) {
-                return child as T;
+                return child as T1;
             } else if (recursive) {
                 const found = child.getChildByWidgetID(id, true);
 
                 if (found) {
-                    return found as T;
+                    return found as T1;
                 }
             }
         }
@@ -197,15 +202,15 @@ export abstract class Widget {
         return undefined;
     }
 
-    public getChildByID<T extends Widget>(id: string, recursive = false): Option<T> {
+    public getChildByID<T1 extends Widget, T2 extends string>(id: PropertyString<T2>, recursive = false): Option<T1> {
         for (const child of this.children) {
             if (child.getID() == id) {
-                return child as T;
+                return child as T1;
             } else if (recursive) {
                 const found = child.getChildByID(id, true);
 
                 if (found) {
-                    return found as T;
+                    return found as T1;
                 }
             }
         }
@@ -280,7 +285,7 @@ export abstract class Widget {
         return this.getAttribute("id");
     }
 
-    public setID(id?: string): this {
+    public setID<T extends string>(id?: PropertyString<T>): this {
         if (id) {
             return this.setAttribute("id", id);
         } else {
@@ -294,7 +299,7 @@ export abstract class Widget {
             .filter((part) => part.length);
     }
 
-    public addClass(className: string): this {
+    public addClass<T extends string>(className: PropertyString<T>): this {
         const attribute = this.getAttribute("class");
 
         if (attribute) {
@@ -404,7 +409,7 @@ export abstract class Widget {
         return this;
     }
 
-    protected addRegistrationID(id: string): this {
+    protected addRegistrationID<T extends string>(id: BlacklistChars<T, ",">): this {
         if (!this.registrationID.includes(id)) {
             this.registrationID.push(id);
         }
