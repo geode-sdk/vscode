@@ -1,5 +1,6 @@
 import { Option } from "../utils/monads";
 import { Widget } from "./Widget";
+import { AnyCharacterOf } from "./widgets/types/StringTypes";
 import { Template } from "./widgets/types/Template";
 
 export type WidgetClass = abstract new (...args: any[]) => Widget;
@@ -26,10 +27,10 @@ export class Resources {
     }
 
     public static fromJSTemplate<T extends string>(template: T, ...args: Template<T>): Resources {
-        return new Resources(undefined, template.replace(/%[ojdifs]/g, () => {
+        return new Resources(undefined, template.replace(/%([ojdfislba])/g, (_, type: AnyCharacterOf<"ojdfislba">) => {
             const arg = args.shift();
 
-            if (typeof arg == "string") {
+            if (type == "o" && typeof arg == "string") {
                 return arg;
             } else {
                 return JSON.stringify(arg);

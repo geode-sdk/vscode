@@ -20,8 +20,8 @@ export type EventHandler = Handler<EventHandlerObject>;
 export abstract class EventWidget extends Widget {
 
     public static readonly TEMPLATE = `
-        onRegister("%s", (widget) => widget.addEventListener("%s", (event) => post("%s-" + getWidgetID(widget), {
-            value: %s
+        onRegister(%s, (widget) => widget.addEventListener(%s, (event) => post(\`%l-\${getWidgetID(widget)}\`, {
+            value: %l
         })));
     `;
 

@@ -21,9 +21,9 @@ export type GetWidgetProperties<T extends abstract new(properties: any) => Widge
 
 export type MergeProperties<T1, T2 extends WidgetProperties = WidgetProperties> = T1 & T2;
 
-export type PropertyString<T extends string> = BlacklistChars<T, "\n" | " " | "\t">;
+export type PropertyString<T extends string> = BlacklistChars<T, " \t\n">;
 
-export type StylePropertyString<T extends string> = BlacklistChars<T, "\n" | " " | "\t" | ":" | ";">;
+export type StylePropertyString<T extends string> = BlacklistChars<T, " \t\n:;">;
 
 export enum UpdateType {
     ADDED_ATTRIBUTE = "added-attribute",
@@ -160,7 +160,7 @@ export abstract class Widget {
         return this.styleOverrides.get(key);
     }
 
-    public setStyleOverride<T1 extends string, T2 extends string>(key: StylePropertyString<T1>, value: BlacklistChars<T2, ";" | ":">): this {
+    public setStyleOverride<T1 extends string, T2 extends string>(key: StylePropertyString<T1>, value: BlacklistChars<T2, ":;">): this {
         this.styleOverrides.set(key, value);
 
         return this.rebuild(UpdateType.ADDED_ATTRIBUTE, {
