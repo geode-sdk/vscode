@@ -1,4 +1,4 @@
-import { CancellationToken, Uri, Webview, WebviewView, WebviewViewProvider, WebviewViewResolveContext } from "vscode";
+import { Uri, Webview, WebviewView, WebviewViewProvider } from "vscode";
 import { getExtContext } from "../config";
 import { Widget, WidgetProperties } from "./Widget";
 import { Option } from "../utils/monads";
@@ -334,7 +334,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         `;
     }
 
-    public resolveWebviewView(webviewView: WebviewView, _0: WebviewViewResolveContext<unknown>, _1: CancellationToken): void | Thenable<void> {
+    public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
         this.view = webviewView;
         this.view.webview.options = {
             enableScripts: true

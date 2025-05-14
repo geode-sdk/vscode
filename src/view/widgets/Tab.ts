@@ -119,7 +119,7 @@ export class Tabs extends EventWidget {
 
     private static readonly EVENT_NAME = "tabs";
 
-    public static readonly RESOURCES = EventWidget.constructResources(Tabs.EVENT_NAME, "change", "e.srcElement._activeid");
+    public static readonly RESOURCES = EventWidget.constructResources(Tabs.EVENT_NAME, "change", "event.srcElement._activeid");
 
     protected history: string[];
 

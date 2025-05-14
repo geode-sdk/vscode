@@ -1,10 +1,10 @@
 import { Codicon } from "./types/Icon";
 import { Option, Result } from "../../utils/monads";
-import { Element } from "./Basic";
 import { Uri } from "vscode";
 import { MergeProperties, UpdateType, Widget } from "../Widget";
 import { Handler, ViewProvider } from "../ViewProvider";
 import { Resources } from "../Package";
+import { Element } from "./Basic";
 
 export interface SelectItem {
     id: string;
@@ -20,7 +20,7 @@ export type EventHandler = Handler<EventHandlerObject>;
 export abstract class EventWidget extends Widget {
 
     public static readonly TEMPLATE = `
-        onRegister("%s", (w) => w.addEventListener("%s", (e) => post("%s-" + getWidgetID(w), {
+        onRegister("%s", (widget) => widget.addEventListener("%s", (event) => post("%s-" + getWidgetID(widget), {
             value: %s
         })));
     `;
@@ -51,7 +51,7 @@ export class Select extends EventWidget {
 
     private static readonly EVENT_NAME = "select";
 
-    public static readonly RESOURCES = EventWidget.constructResources(Select.EVENT_NAME, "change", "e.target.value");
+    public static readonly RESOURCES = EventWidget.constructResources(Select.EVENT_NAME, "change", "event.target.value");
 	
     protected items: SelectItem[];
 
@@ -114,7 +114,7 @@ export class Input extends EventWidget {
 
     private static readonly EVENT_NAME = "input";
 
-    public static readonly RESOURCES = EventWidget.constructResources(Input.EVENT_NAME, "input", "e.target.value");
+    public static readonly RESOURCES = EventWidget.constructResources(Input.EVENT_NAME, "input", "event.target.value");
 
     protected label?: string;
 
