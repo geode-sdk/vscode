@@ -273,6 +273,8 @@ export class AudioPlayback extends Widget {
     }
 }
 
+// I know that the redirecting in this sucks,
+// I tried to fix it but someone at VSCode decided to dial the content security policy to 11 so I can't access anything which allows me to catch redirects.
 export class IFrame extends Element {
 
     constructor(properties: MergeProperties<{
