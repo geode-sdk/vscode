@@ -30,7 +30,7 @@ export class Resources {
         return new Resources(undefined, template.replace(/%([ojdfislba])/g, (_, type: AnyCharacterOf<"ojdfislba">) => {
             const arg = args.shift();
 
-            if (type == "o" && typeof arg == "string") {
+            if (type == "l" && typeof arg == "string") {
                 return arg;
             } else {
                 return JSON.stringify(arg);
