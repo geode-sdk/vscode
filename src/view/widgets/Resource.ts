@@ -2,7 +2,7 @@ import { SnippetString, env, window } from "vscode";
 import { AudioResource, FileResource, Resource, SpriteFrameResource, SpriteSheetResource, sourceID } from "../../project/resources/Resource";
 import { Resources } from "../Package";
 import { ViewProvider } from "../ViewProvider";
-import { MergeProperties } from "../Widget";
+import { MergeProperties, Widget } from "../Widget";
 import { SpriteBrowser } from "../ui/SpriteBrowser";
 import { Element, Image, LoadingCircle } from "./Basic";
 import { Button, IconButton } from "./Button";
@@ -11,7 +11,6 @@ import { insertSnippet } from "../../utils/snippet";
 import { Menu } from "./Menu";
 import { Text } from "./Text";
 import { AudioPlayback } from "./Interactive";
-import { ResourceDatabase } from "../../project/resources/ResourceDatabase";
 import { saveData } from "../../config";
 
 export class ResourceWidget extends Element {
@@ -107,7 +106,9 @@ export class ResourceWidget extends Element {
     protected imageDataClearTimeout?: NodeJS.Timeout;
 
 	constructor(properties: MergeProperties<{ resource: Resource }>) {
-		super(Element.tagProperties("article", properties));
+		super(Widget.mergeProperties({
+            tag: "article"
+        }, properties));
 
 		this.resource = properties.resource;
 

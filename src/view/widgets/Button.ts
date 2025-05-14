@@ -1,6 +1,6 @@
 import { Option } from "../../utils/monads";
 import { ViewProvider } from "../ViewProvider";
-import { GetWidgetProperties, MergeProperties, UpdateType } from "../Widget";
+import { GetWidgetProperties, MergeProperties, UpdateType, Widget } from "../Widget";
 import { Codicon } from "./types/Icon";
 import { EventWidget } from "./Interactive";
 
@@ -13,11 +13,10 @@ export abstract class BaseButton extends EventWidget {
     constructor(properties: MergeProperties<{
         onClick?: (provider: ViewProvider) => any
     }>) {
-        super({
-            ...properties,
+        super(Widget.mergeProperties({
             eventName: BaseButton.EVENT_NAME,
             onEvent: properties.onClick
-        });
+        }, properties));
     }
 
     public override build(): string {

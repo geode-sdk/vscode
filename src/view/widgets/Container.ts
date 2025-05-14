@@ -1,5 +1,5 @@
 import { Resources } from "../Package";
-import { MergeProperties, WidgetProperties } from "../Widget";
+import { MergeProperties, Widget, WidgetProperties } from "../Widget";
 import { Element } from "./Basic";
 import { Size, SizeUnit, getSizeString } from "./types/Size";
 
@@ -18,7 +18,9 @@ export type LayoutProperties = MergeProperties<{
 export class Div extends Element {
 
     constructor(properties?: WidgetProperties) {
-        super(Element.tagProperties("div", properties));
+        super(Widget.mergeProperties({
+            tag: "div"
+        }, properties));
     }
 }
 

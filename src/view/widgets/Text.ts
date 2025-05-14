@@ -1,5 +1,5 @@
 import { Resources } from "../Package";
-import { MergeProperties, UpdateType } from "../Widget";
+import { MergeProperties, UpdateType, Widget } from "../Widget";
 import { Element, ElementProperties } from "./Basic";
 
 export type CustomTextElementProperties = MergeProperties<{
@@ -13,10 +13,6 @@ export type TextProperties = MergeProperties<{
 export type HeadRange = 1 | 2 | 3 | 4 | 5 | 6;
 
 export abstract class CustomTextElement extends Element {
-
-    public static tagProperties(tag: string, properties: TextProperties): CustomTextElementProperties {
-        return { tag, ...properties };
-    }
 
     protected text: string;
 
@@ -49,7 +45,9 @@ export abstract class CustomTextElement extends Element {
 export class Text extends CustomTextElement {
 
 	constructor(properties: TextProperties) {
-		super(CustomTextElement.tagProperties("p", properties));
+		super(Widget.mergeProperties({
+            tag: "p"
+        }, properties));
 	}
 }
 
@@ -60,7 +58,9 @@ export class Head extends CustomTextElement {
 	constructor(properties: MergeProperties<{
         size?: HeadRange
     }, TextProperties>) {
-		super(CustomTextElement.tagProperties(`h${properties.size ??= 1}`, properties));
+		super(Widget.mergeProperties({
+            tag: `h${properties.size ??= 1}`
+        }, properties));
 
 		this.size = properties.size;
 	}
@@ -80,7 +80,9 @@ export class Label extends CustomTextElement {
     `);
 
 	constructor(properties: TextProperties) {
-		super(CustomTextElement.tagProperties("text", properties));
+		super(Widget.mergeProperties({
+            tag: "text"
+        }, properties));
 
         this.addClass("label");
 	}

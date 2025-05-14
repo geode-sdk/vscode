@@ -1,5 +1,5 @@
 import { Resources } from "../Package";
-import { GetWidgetProperties, MergeProperties } from "../Widget";
+import { GetWidgetProperties, MergeProperties, Widget } from "../Widget";
 import { Button } from "./Button";
 import { Column } from "./Container";
 
@@ -75,10 +75,9 @@ export class Menu extends Column {
 	constructor(properties: MergeProperties<{
         items: GetWidgetProperties<typeof MenuItem>[],
     }, GetWidgetProperties<typeof Column>>) {
-		super({
-            ...properties,
+		super(Widget.mergeProperties({
             children: properties.items.map((item) => new MenuItem(item))
-        });
+        }, properties));
 
         this.addClass("menu");
         this.addRegistrationID("menu");

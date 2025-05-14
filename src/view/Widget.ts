@@ -19,7 +19,7 @@ export interface WidgetProperties {
 
 export type GetWidgetProperties<T extends abstract new(properties: any) => Widget> = NonNullable<ConstructorParameters<T>[0]>;
 
-export type MergeProperties<T1, T2 extends WidgetProperties = WidgetProperties> = T1 & T2;
+export type MergeProperties<T1, T2 extends WidgetProperties | undefined = WidgetProperties> = T1 & T2;
 
 export type PropertyString<T extends string> = BlacklistChars<T, " \t\n">;
 
@@ -57,6 +57,11 @@ export abstract class Widget {
     private static ID_ITERATOR = 0;
 
     private static OBSERVER_ITERATOR = 0;
+
+    public static mergeProperties<T1, T2 extends WidgetProperties | undefined>(object: T1, properties: T2): MergeProperties<T1, T2> {
+        return { ...object, ...properties };
+
+    }
 
     private readonly widgetID: string;
 

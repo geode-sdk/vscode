@@ -6,10 +6,6 @@ export type ElementProperties = MergeProperties<{
 
 export class Element extends Widget {
 
-    public static tagProperties(tag: string, properties?: WidgetProperties): ElementProperties {
-        return { tag, ...properties };
-    }
-
 	protected readonly tag: string;
 
 	constructor(properties: ElementProperties) {
@@ -38,7 +34,9 @@ export class Image extends Element {
 	constructor(properties: MergeProperties<{
         data: string
     }>) {
-		super(Element.tagProperties("img", properties));
+		super(Widget.mergeProperties({
+            tag: "img"
+        }, properties));
 
         this.data = properties.data;
 
@@ -59,14 +57,18 @@ export class Image extends Element {
 export class LoadingCircle extends Element {
 
 	constructor(properties?: WidgetProperties) {
-		super(Element.tagProperties("vscode-progress-ring", properties));
+		super(Widget.mergeProperties({
+            tag: "vscode-progress-ring"
+        }, properties));
 	}
 }
 
 export class Separator extends Element {
 
 	constructor(properties?: WidgetProperties) {
-		super(Element.tagProperties("hr", properties));
+		super(Widget.mergeProperties({
+            tag: "hr"
+        }, properties));
 	}
 }
 

@@ -31,7 +31,9 @@ export class Tab extends CustomTextElement {
         closable?: boolean,
         content?: Widget
     }>) {
-		super(CustomTextElement.tagProperties("vscode-panel-tab", properties));
+		super(Widget.mergeProperties({
+            tag: "vscode-panel-tab"
+        }, properties));
 
         if (properties.content) {
             this.content = properties.content;
@@ -111,7 +113,9 @@ export class Tab extends CustomTextElement {
 class TabPanel extends Element {
 
     constructor(tab: Tab) {
-        super(Element.tagProperties("vscode-panel-view", { id: tab.getWidgetID() }));
+        super(Widget.mergeProperties({
+            tag: "vscode-panel-view"
+        }, { id: tab.getWidgetID() }));
     }
 }
 
@@ -130,11 +134,10 @@ export class Tabs extends EventWidget {
         selected?: string,
         onChange?: EventHandler
     }>) {
-        super({
-            ...properties,
+        super(Widget.mergeProperties({
             eventName: Tabs.EVENT_NAME,
             onEvent: (_, args) => this.setSelected(args.value)
-        });
+        }, properties));
 
         this.history = [];
         this.onChange = properties.onChange;

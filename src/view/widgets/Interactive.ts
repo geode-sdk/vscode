@@ -60,15 +60,14 @@ export class Select extends EventWidget {
         selected?: string,
         onChange?: (provider: ViewProvider, value: string) => void
     }>) {
-		super({
-            ...properties,
+		super(Widget.mergeProperties({
             eventName: Select.EVENT_NAME,
             onEvent: (provider, args) => {
                 this.setAttribute("value", args.value);
 
                 properties.onChange?.(provider, args.value);
             }
-        });
+        }, properties));
 
         this.items = [];
 
@@ -133,14 +132,13 @@ export class Input extends EventWidget {
         value?: string,
         onChange?: EventHandler
     }>) {
-		super({
-            ...properties,
+		super(Widget.mergeProperties({
             eventName: Input.EVENT_NAME,
             onEvent: (provider, args) => {
                 this.setAttribute("value", args.value);
                 properties?.onChange?.(provider, args);
             }
-        });
+        }, properties));
 
 		this.label = properties?.label;
 		this.startIcon = properties?.startIcon;
@@ -280,7 +278,9 @@ export class IFrame extends Element {
     constructor(properties: MergeProperties<{
         src: string
     }>) {
-        super(Element.tagProperties("iframe", properties));
+        super(Widget.mergeProperties({
+            tag: "iframe"
+        }, properties));
 
         this.setAttribute("src", properties.src);
     }
