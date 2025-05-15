@@ -63,10 +63,6 @@ export class ResourceWidget extends Element {
             gap: .4rem;
         }
 
-        .item > .buttons {
-            margin: 0;
-        }
-
         .item > .hover-item {
             display: none;
             align-self: flex-end;

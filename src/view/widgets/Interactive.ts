@@ -233,6 +233,15 @@ export class AudioPlayback extends Widget {
         audio {
             transform: scale(60%);
         }
+
+        audio::-webkit-media-controls-enclosure {
+            background-color: var(--button-secondary-background);
+            border-radius: calc(var(--corner-radius-round) * 1px);
+        }
+
+        .vscode-dark audio {
+            color-scheme: dark;
+        }
     `);
 
     protected readonly src: string;
