@@ -336,9 +336,9 @@ export class SpriteSheetResource extends FileResource {
         if (this.getSource() instanceof Project) {
             const images = await Promise.all([
                 0,
-                Math.floor(this.frames.length / 3),
-                Math.floor(this.frames.length / 2),
-                Math.floor(this.frames.length / 1.5),
+                Math.floor(this.frames.length * 0.25),
+                Math.floor(this.frames.length * 0.5),
+                Math.floor(this.frames.length * 0.75)
             ].map(async (index) => (await this.frames[index].fetchImage()).map((image) => sharp(image))));
 
             for (const img of images) {
