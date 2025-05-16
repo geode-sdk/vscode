@@ -230,7 +230,15 @@ export class Input extends EventWidget {
 export class AudioPlayback extends Widget {
 
     public static readonly RESOURCES = Resources.fromCSS(`
+        .audio-playback {
+            width: 100%;
+        }
+
         audio {
+            margin-left: calc(-100% / 3);
+            /* Force the correct scale without screwing up the control sizes */
+            min-width: calc(100% / 0.6);
+            max-width: calc(100% / 0.6);
             transform: scale(60%);
         }
 
@@ -254,6 +262,7 @@ export class AudioPlayback extends Widget {
 		super(properties);
 
 		this.src = properties.src;
+        this.addClass("audio-playback");
 	}
 
     public getSrc(): string {
