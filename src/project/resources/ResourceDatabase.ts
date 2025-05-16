@@ -3,14 +3,14 @@ import { readdirRecursiveSync } from "../../utils/general";
 import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { GeodeCLI, Profile } from "../GeodeCLI";
 import { Project, ProjectDatabase } from "../Project";
-import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, Source, ResourceSaveData, FileResource, SourceID, sourceID, UnknownResource } from "./Resource";
+import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, ResourceSaveData, FileResource, UnknownResource } from "./Resource";
 import { basename, join as pathJoin } from "path";
 import { getPreferredQualityName, removeQualityDecorators } from "../../utils/resources";
 import G = require("glob");
 import { getOutputChannel } from "../../config";
-import { GeodeSDK } from "../GeodeSDK";
 import { ModJson } from "../ModJson";
 import { Uri } from "vscode";
+import { Source } from "./SourceID";
 
 // todo: option to ignore custom songs / music library audio files
 
@@ -63,7 +63,7 @@ function findModResources(src: Source, modJson: ModJson, resourcesDir: string): 
     });
 
     // Find fonts
-    Object.entries(modJson.resources?.fonts ?? {}).forEach(([name, font]) => {
+    Object.entries(modJson.resources?.fonts ?? {}).forEach(([_, font]) => {
         resources.push(new FontResource(src, pathJoin(resourcesDir, font.path)));
     });
 
@@ -236,26 +236,22 @@ class GDResourceCollection extends ActualResourceCollection<Profile> {
                 }
 
                 const frames: SpriteFrameResource[] = [];
-                const sheetName = removeQualityDecorators(basename(sheetPath));
                 const sheet = new SpriteSheetResource(this.getSource(), sheetPath);
+                const regex = /<key>(?<image>.+?\.png)<\/key>/g;
+                const sheetFile = readFileSync(sheetPath, "utf8");
+                let match;
 
-                // Read sheet data and find all *.png strings inside
-                readFileSync(sheetPath)
-                    .toString()
-                    .match(/\w+\.png/g)
-                    ?.forEach((match) => {
-                        match = removeQualityDecorators(match);
-                        if (
-                            // Check that this is not the same as the sheet (metadata field)
-                            match.replace(".png", ".plist") !== sheetName &&
-                            // Make sure sprite isn't already added to sheet
-                            !frames.some(spr => spr.getDisplayName() === match)
-                        ) {
-                            const frame = new SpriteFrameResource(this.getSource(), sheet, match);
-                            this.resources.push(frame);
-                            sheet.addFrame(frame);
-                        }
-                    });
+                while (match = regex.exec(sheetFile)) {
+                    const baseImageName = removeQualityDecorators(match.groups!.image);
+
+                    // Avoid duplicates
+                    if (!frames.some((spr) => spr.getDisplayName() == baseImageName)) {
+                        const frame = new SpriteFrameResource(this.getSource(), sheet, baseImageName);
+
+                        this.resources.push(frame);
+                        sheet.addFrame(frame);
+                    }
+                }
 
                 this.resources.push(sheet);
             }
@@ -270,7 +266,7 @@ class GDResourceCollection extends ActualResourceCollection<Profile> {
             // Find audio
             else if (file.endsWith(".ogg") || file.endsWith(".mp3")) {
                 const audioPath = getPreferredQualityName(file);
-                // If the filename is just an integer, it's probably a custom song or 
+                // If the filename is just an integer, it's probably a custom song or
                 // audio library file and we don't want to pollute the browser with those
                 if (basename(audioPath).match(/[0-9]+\.(ogg|mp3)/)) {
                     continue;
@@ -380,7 +376,7 @@ export class ResourceDatabase {
             }
             promises.push(this.#collections.at(-1)!.reload());
         }
-        const errors = (await Promise.all(promises)).map(r => r.getError()).filter(r => r !== None);
+        const errors = (await Promise.all(promises)).map(r => r.getError()).filter(r => r !== None) as string[];
         return errors.length ? Err(errors) : Ok();
     }
     public async setup(): Future {

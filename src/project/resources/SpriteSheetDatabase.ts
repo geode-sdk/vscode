@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
-import { parse, PlistValue } from "plist";
+import { parse } from "plist";
 import sharp from "sharp";
-import { Err, Future, None, Ok, Option } from "../../utils/monads";
+import { Err, Future, Ok } from "../../utils/monads";
 
 interface SpriteFrame {
 	aliases: string[];

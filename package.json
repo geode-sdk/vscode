@@ -32,25 +32,7 @@
 			{
 				"title": "Geode: Launch Geometry Dash",
 				"command": "geode.launchGD"
-			},
-			{
-				"title": "Geode: Open Sprite Browser",
-				"command": "geode.openSpriteBrowser"
-			},
-      {
-        "title": "Geode: Open Docs Browser",
-        "command": "geode.openDocsBrowser"
-      }
-		],
-		"keybindings": [
-			{
-				"command": "geode.openSpriteBrowser",
-				"key": "Ctrl+Alt+B"
-			},
-      {
-        "command": "geode.openDocsBrowser",
-        "key": "Ctrl+Alt+D"
-      }
+			}
 		],
 		"languages": [
 			{
@@ -88,6 +70,31 @@
 				"path": "./src/broma/bro.inject.json"
 			}
 		],
+    "views": {
+      "geode-tools": [
+        {
+          "type": "webview",
+          "id": "geode-tools.docs-browser",
+          "name": "Docs Browser",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "geode-tools.sprite-browser",
+          "name": "Sprite Browser",
+          "visibility": "collapsed"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "geode-tools",
+          "title": "Geode",
+          "icon": "assets/geode.svg"
+        }
+      ]
+    },
 		"configurationDefaults": {
 			"editor.tokenColorCustomizations": {
 				"textMateRules": [

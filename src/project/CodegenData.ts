@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { None, Option } from "../utils/monads";
-import { Project, ProjectDatabase } from "./Project";
+import { ProjectDatabase } from "./Project";
 import { join } from "node:path";
 import { workspace } from "vscode";
 

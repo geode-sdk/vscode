@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, CodeActionProvider, Command, commands, languages, Position, ProviderResult, Range, Selection, TextDocument, WorkspaceEdit } from "vscode";
-import { createScanner, getNodeValue, parseTree } from "jsonc-parser";
-import { getOutputChannel } from "../config";
+import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, CodeActionProvider, Command, ProviderResult, Range, Selection, TextDocument, WorkspaceEdit } from "vscode";
+import { getNodeValue, parseTree } from "jsonc-parser";
 
 export interface Font {
 	/**

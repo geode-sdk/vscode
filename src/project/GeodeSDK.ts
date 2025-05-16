@@ -1,11 +1,9 @@
 import { existsSync, readFileSync } from "fs";
 import { join as pathJoin } from "path";
-import { ConfigurationTarget, window } from "vscode";
+import { ConfigurationTarget } from "vscode";
 import { getExtConfig, getOutputChannel } from "../config";
-import { Option, Some, Result, Future, Err, Ok, None } from "../utils/monads";
+import { Option, Future, Err, Ok, None } from "../utils/monads";
 import * as semver from "semver";
-import { ModJson } from "./ModJson";
-import { Project, ProjectDatabase } from "./Project";
 
 export class GeodeSDK {
 	#installedPath: string;
@@ -45,8 +43,8 @@ export class GeodeSDK {
 		// Verify that the found path contains a valid SDK
 		if (!existsSync(pathJoin(path, "VERSION"))) {
 			return Err(
-				`Geode SDK installation seems to be broken (Path '${path}' does ` + 
-					`not seem to point to Geode). ` + 
+				`Geode SDK installation seems to be broken (Path '${path}' does ` +
+					`not seem to point to Geode). ` +
 					"Try updating SDK path in extension settings"
 			);
 		}
