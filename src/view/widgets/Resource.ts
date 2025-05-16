@@ -278,7 +278,7 @@ export class ResourceWidget extends Element {
                 style: {
                     "flex": "4"
                 },
-                onClick: () => Snippet.from(this.resource.getUsageCode())
+                onClick: () => Snippet.from(this.resource.getUsageCode()).insert(SpriteBrowser.getTargetEditor())
             }));
 
 			if (this.resource.getSnippetOptions?.().length) {
