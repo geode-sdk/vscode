@@ -229,28 +229,39 @@ export class Input extends EventWidget {
 
 export class AudioPlayback extends Widget {
 
-    public static readonly RESOURCES = Resources.fromCSS(`
-        .audio-playback {
-            width: 100%;
-        }
+    public static readonly RESOURCES = Resources.fromResources({
+        js: `
+            onRegister("audio-playback", (widget) => {
+                widget.getElementsByTagName("audio")[0]?.addEventListener("play", (event) => {
+                    Array.from(document.getElementsByTagName("audio"))
+                        .filter((audio) => audio != event.target)
+                        .forEach((audio) => audio.pause());
+                });
+            });
+        `,
+        css: `
+            .audio-playback {
+                width: 100%;
+            }
 
-        audio {
-            margin-left: calc(-100% / 3);
-            /* Force the correct scale without screwing up the control sizes */
-            min-width: calc(100% / 0.6);
-            max-width: calc(100% / 0.6);
-            transform: scale(60%);
-        }
+            audio {
+                margin-left: calc(-100% / 3);
+                /* Force the correct scale without screwing up the control sizes */
+                min-width: calc(100% / 0.6);
+                max-width: calc(100% / 0.6);
+                transform: scale(60%);
+            }
 
-        audio::-webkit-media-controls-enclosure {
-            background-color: var(--button-secondary-background);
-            border-radius: calc(var(--corner-radius-round) * 1px);
-        }
+            audio::-webkit-media-controls-enclosure {
+                background-color: var(--button-secondary-background);
+                border-radius: calc(var(--corner-radius-round) * 1px);
+            }
 
-        .vscode-dark audio {
-            color-scheme: dark;
-        }
-    `);
+            .vscode-dark audio {
+                color-scheme: dark;
+            }
+        `
+    });
 
     protected readonly src: string;
 
@@ -263,6 +274,7 @@ export class AudioPlayback extends Widget {
 
 		this.src = properties.src;
         this.addClass("audio-playback");
+        this.addRegistrationID("audio-playback");
 	}
 
     public getSrc(): string {
