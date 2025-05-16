@@ -20,13 +20,10 @@ import {
     WorkspaceEdit,
 } from "vscode";
 import { readFile } from "fs/promises";
-import { parse as parsePath } from "path";
 import { getExtConfig } from "../config";
 import { ResourceDatabase } from "../project/resources/ResourceDatabase";
 import { Project, ProjectDatabase } from "../project/Project";
-import { RESOURCE_NAME_MATCH_REGEX, sourceID, sourceIDForModID } from "../project/resources/Resource";
-import { None } from "../utils/monads";
-import { getDependencies } from "../project/ModJson";
+import { Resource } from "../project/resources/Resource";
 
 // type Binding = "inline" | "link" | number | null;
 // type Bindings = {
@@ -248,7 +245,7 @@ function lintUnknownResource(document: MaybeDocument, diagnostics: Diagnostic[],
         "unknown-resource",
         // Match resource-name-looking strings ("x.png", "thing.fnt" etc.)
         // todo: this method doesn't actually match mistakes like "thing" where you forget the file extension
-        RESOURCE_NAME_MATCH_REGEX,
+        Resource.RESOURCE_NAME_MATCH_REGEX,
         ({ groups: { modID, name, suffix }, range }) => {
             const resource = ResourceDatabase.get().tryFindResourceFromUse(document.uri, modID, name!, suffix !== undefined);
             if (!resource) {

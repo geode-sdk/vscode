@@ -3,13 +3,14 @@ import { readdirRecursiveSync } from "../../utils/general";
 import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { GeodeCLI, Profile } from "../GeodeCLI";
 import { Project, ProjectDatabase } from "../Project";
-import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, Source, ResourceSaveData, FileResource, UnknownResource } from "./Resource";
+import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, ResourceSaveData, FileResource, UnknownResource } from "./Resource";
 import { basename, join as pathJoin } from "path";
 import { getPreferredQualityName, removeQualityDecorators } from "../../utils/resources";
 import G = require("glob");
 import { getOutputChannel } from "../../config";
 import { ModJson } from "../ModJson";
 import { Uri } from "vscode";
+import { Source } from "./SourceID";
 
 // todo: option to ignore custom songs / music library audio files
 

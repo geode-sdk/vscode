@@ -1,5 +1,5 @@
-import { SnippetString, env, window } from "vscode";
-import { AudioResource, FileResource, Resource, SpriteFrameResource, SpriteSheetResource, sourceID } from "../../project/resources/Resource";
+import { env, window } from "vscode";
+import { AudioResource, FileResource, Resource, SpriteFrameResource, SpriteSheetResource } from "../../project/resources/Resource";
 import { Resources } from "../Package";
 import { ViewProvider } from "../ViewProvider";
 import { MergeProperties, Widget } from "../Widget";
@@ -7,11 +7,12 @@ import { SpriteBrowser } from "../ui/SpriteBrowser";
 import { Element, Image, LoadingCircle } from "./Basic";
 import { Button, IconButton } from "./Button";
 import { Div } from "./Container";
-import { insertSnippet } from "../../utils/snippet";
 import { Menu } from "./Menu";
 import { Text } from "./Text";
 import { AudioPlayback } from "./Interactive";
 import { saveData } from "../../config";
+import { SourceID } from "../../project/resources/SourceID";
+import { Snippet } from "../../utils/Snippet";
 
 export class ResourceWidget extends Element {
 
@@ -154,22 +155,20 @@ export class ResourceWidget extends Element {
                 style: {
                     "color": "yellow"
                 },
-				onClick: (provider) => this.toggleFavorite(provider)
+				onClick: (provider) => this.toggleFavorite(provider, false)
 			});
 		} else {
 			this.favoriteButton = new IconButton({
 				icon: "star-add",
 				hoverText: "Add favorite",
-				onClick: (provider) => this.toggleFavorite(provider)
+				onClick: (provider) => this.toggleFavorite(provider, true)
 			});
 		}
 
 		this.topButtons?.addChild(this.favoriteButton);
 	}
 
-    private toggleFavorite(provider: ViewProvider): void {
-        const state = !this.resource.isFavorite();
-
+    private toggleFavorite(provider: ViewProvider, state: boolean): void {
         this.resource.setFavorite(state);
         this.updateFavoritesButton();
 
@@ -179,6 +178,17 @@ export class ResourceWidget extends Element {
 
         saveData();
     }
+
+	// a member function instead of inline arrow function to avoid ridiculous
+	// indentation
+	private onMoreUseOptions(): void {
+		this.addChild(new Menu({
+            items: this.resource.getSnippetOptions?.().map((option) => ({
+                title: option.name,
+                onClick: () => option.snippet.insert(SpriteBrowser.getTargetEditor())
+            })) ?? []
+        }));
+	}
 
     private clearTimeouts(): void {
         if (this.contentTimeout) {
@@ -191,17 +201,6 @@ export class ResourceWidget extends Element {
             this.imageDataClearTimeout = undefined;
         }
     }
-
-	// a member function instead of inline arrow function to avoid ridiculous
-	// indentation
-	private onMoreUseOptions(): void {
-		this.addChild(new Menu({
-            items: this.resource.getSnippetOptions().map((option) => ({
-                title: option.name,
-                onClick: async () => this.insertSnippetIntoEditor(option.snippet)
-            }))
-        }));
-	}
 
 	private content(): void {
         const bottomBtns = new Div({ className: "buttons" });
@@ -231,7 +230,7 @@ export class ResourceWidget extends Element {
                             `Name: ${this.resource.getDisplayName()}\n` +
                             `Path: ${path}\n` +
                             `Type: ${this.resource.constructor.name}\n` +
-                            `Source: ${sourceID(this.resource.getSource())}\n`
+                            `Source: ${SourceID.from(this.resource.getSource())}\n`
                         );
                     }
                 }),
@@ -279,10 +278,10 @@ export class ResourceWidget extends Element {
                 style: {
                     "flex": "4"
                 },
-                onClick: () => this.insertSnippetIntoEditor(new SnippetString(this.resource.getUsageCode()))
+                onClick: () => Snippet.from(this.resource.getUsageCode())
             }));
 
-			if (this.resource.getSnippetOptions().length) {
+			if (this.resource.getSnippetOptions?.().length) {
 				bottomBtns.addChild(new IconButton({
                     icon: "ellipsis",
                     hoverText: "More snippet options",
@@ -314,12 +313,4 @@ export class ResourceWidget extends Element {
 			});
 		}
 	}
-
-    private async insertSnippetIntoEditor(snippet: SnippetString): Promise<void> {
-        const res = await insertSnippet(snippet, SpriteBrowser.getTargetEditor());
-
-        if (res.isError()) {
-            window.showErrorMessage(res.unwrapErr());
-        }
-    }
 }
