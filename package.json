@@ -1,75 +1,75 @@
 {
-	"name": "geode",
-	"displayName": "Geode",
-	"description": "Utilities for the Geode Geometry Dash modding framework",
-	"version": "1.20.1",
-	"engines": {
-		"vscode": "^1.72.0"
-	},
-	"packageManager": "pnpm@10.6.3",
-	"author": {
-		"name": "Geode Team",
-		"url": "https://github.com/geode-sdk"
-	},
-	"publisher": "GeodeSDK",
-	"categories": [
-		"Other"
-	],
-	"repository": {
-		"url": "https://github.com/geode-sdk/vscode"
-	},
-	"activationEvents": [
-		"workspaceContains:**/loader/",
-		"workspaceContains:**/mod.json"
-	],
-	"galleryBanner": {
-		"theme": "dark",
-		"color": "#24222B"
-	},
-	"main": "./dist/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"title": "Geode: Launch Geometry Dash",
-				"command": "geode.launchGD"
-			}
-		],
-		"languages": [
-			{
-				"id": "bro",
-				"aliases": [
-					"Broma"
-				],
-				"extensions": [
-					".bro"
-				],
-				"configuration": "./src/broma/language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"injectTo": [
-					"source.cpp",
-					"source.hpp",
-					"source.c",
-					"source.h"
-				],
-				"scopeName": "source.geode-flalert-literal",
-				"path": "./assets/flalert-colors.json"
-			},
-			{
-				"language": "bro",
-				"scopeName": "source.bro",
-				"path": "./src/broma/bro.tmLanguage.json"
-			},
-			{
-				"injectTo": [
-					"source.bro"
-				],
-				"scopeName": "source.bro-extra",
-				"path": "./src/broma/bro.inject.json"
-			}
-		],
+  "name": "geode",
+  "displayName": "Geode",
+  "description": "Utilities for the Geode Geometry Dash modding framework",
+  "version": "1.20.1",
+  "engines": {
+    "vscode": "^1.72.0"
+  },
+  "packageManager": "pnpm@10.6.3",
+  "author": {
+    "name": "Geode Team",
+    "url": "https://github.com/geode-sdk"
+  },
+  "publisher": "GeodeSDK",
+  "categories": [
+    "Other"
+  ],
+  "repository": {
+    "url": "https://github.com/geode-sdk/vscode"
+  },
+  "activationEvents": [
+    "workspaceContains:**/loader/",
+    "workspaceContains:**/mod.json"
+  ],
+  "galleryBanner": {
+    "theme": "dark",
+    "color": "#24222B"
+  },
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "title": "Geode: Launch Geometry Dash",
+        "command": "geode.launchGD"
+      }
+    ],
+    "languages": [
+      {
+        "id": "bro",
+        "aliases": [
+          "Broma"
+        ],
+        "extensions": [
+          ".bro"
+        ],
+        "configuration": "./src/broma/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "injectTo": [
+          "source.cpp",
+          "source.hpp",
+          "source.c",
+          "source.h"
+        ],
+        "scopeName": "source.geode-flalert-literal",
+        "path": "./assets/flalert-colors.json"
+      },
+      {
+        "language": "bro",
+        "scopeName": "source.bro",
+        "path": "./src/broma/bro.tmLanguage.json"
+      },
+      {
+        "injectTo": [
+          "source.bro"
+        ],
+        "scopeName": "source.bro-extra",
+        "path": "./src/broma/bro.inject.json"
+      }
+    ],
     "views": {
       "geode-tools": [
         {
@@ -95,256 +95,255 @@
         }
       ]
     },
-		"configurationDefaults": {
-			"editor.tokenColorCustomizations": {
-				"textMateRules": [
-					{
-						"scope": "geode.flalert.ca",
-						"settings": {
-							"foreground": "#9632ff"
-						}
-					},
-					{
-						"scope": "geode.flalert.cb",
-						"settings": {
-							"foreground": "#4a52e1"
-						}
-					},
-					{
-						"scope": "geode.flalert.cc",
-						"settings": {
-							"foreground": "#ffff96"
-						}
-					},
-					{
-						"scope": "geode.flalert.cd",
-						"settings": {
-							"foreground": "#ff96ff"
-						}
-					},
-					{
-						"scope": "geode.flalert.cf",
-						"settings": {
-							"foreground": "#96ffff"
-						}
-					},
-					{
-						"scope": "geode.flalert.cg",
-						"settings": {
-							"foreground": "#40e348"
-						}
-					},
-					{
-						"scope": "geode.flalert.cj",
-						"settings": {
-							"foreground": "#32c8ff"
-						}
-					},
-					{
-						"scope": "geode.flalert.cl",
-						"settings": {
-							"foreground": "#60abef"
-						}
-					},
-					{
-						"scope": "geode.flalert.co",
-						"settings": {
-							"foreground": "#ffa54b"
-						}
-					},
-					{
-						"scope": "geode.flalert.cp",
-						"settings": {
-							"foreground": "#ff00ff"
-						}
-					},
-					{
-						"scope": "geode.flalert.cr",
-						"settings": {
-							"foreground": "#ff5a5a"
-						}
-					},
-					{
-						"scope": "geode.flalert.cs",
-						"settings": {
-							"foreground": "#ffdc41"
-						}
-					},
-					{
-						"scope": "geode.flalert.cy",
-						"settings": {
-							"foreground": "#ffff00"
-						}
-					},
-					{
-						"scope": "geode.flalert.blue",
-						"settings": {
-							"foreground": "#4a52e1"
-						}
-					},
-					{
-						"scope": "geode.flalert.green",
-						"settings": {
-							"foreground": "#40e348"
-						}
-					},
-					{
-						"scope": "geode.flalert.aqua",
-						"settings": {
-							"foreground": "#60abef"
-						}
-					},
-					{
-						"scope": "geode.flalert.cyan",
-						"settings": {
-							"foreground": "#32c8ff"
-						}
-					},
-					{
-						"scope": "geode.flalert.yellow",
-						"settings": {
-							"foreground": "#ffff00"
-						}
-					},
-					{
-						"scope": "geode.flalert.orange",
-						"settings": {
-							"foreground": "#ffa54b"
-						}
-					},
-					{
-						"scope": "geode.flalert.red",
-						"settings": {
-							"foreground": "#ff5a5a"
-						}
-					},
-					{
-						"scope": "geode.flalert.pink",
-						"settings": {
-							"foreground": "#ff00ff"
-						}
-					},
-					{
-						"scope": "geode.flalert.purple",
-						"settings": {
-							"foreground": "#9632ff"
-						}
-					}
-				]
-			}
-		},
-		"configuration": {
-			"title": "Geode",
-			"properties": {
-				"geode.geodeCliPath": {
-					"type": "string",
-					"default": "",
-					"description": "Path to the Geode CLI executable"
-				},
-				"geode.geodeSdkPath": {
-					"type": "string",
-					"default": "",
-					"description": "Path to the Geode SDK"
-				},
-				"geode.textureQuality": {
-					"type": "string",
-					"enum": [
-						"High",
-						"Medium",
-						"Low"
-					],
-					"default": "Medium",
-					"description": "Quality of the graphics to show on the Sprite Browser"
-				},
-				"geode.defaultSpriteShowCount": {
-					"type": "integer",
-					"default": 350,
-					"description": "How many items to show in the Sprite Browser at once by default"
-				},
-				"geode.showCountIncrement": {
-					"type": "integer",
-					"default": 250,
-					"description": "How many items to add in the Sprite Browser when you click 'Load More'"
-				},
-				"geode.modifyClassSuggestions.enable": {
-					"type": "boolean",
-					"default": true,
-					"description": "Enable suggestions for Modify classes"
-				},
-				"geode.modifyClassSuggestions.stripCocosNamespace": {
-					"type": "boolean",
-					"default": true,
-					"description": "Whether to automatically remove `cocos2d::` from included code"
-				},
-				"geode.modifyClassSuggestions.addOverrideMacro": {
-					"type": "boolean",
-					"default": false,
-					"description": "Add $override to the beginning of the included code"
-				},
-				"geode.lints.enable": {
-					"type": "boolean",
-					"default": true,
-					"description": "Enable Geode lints"
-				}
-			}
-		},
-		"jsonValidation": [
-			{
-				"fileMatch": "mod.json",
-				"url": "./dist/validation/mod.json"
-			}
-		]
-	},
-	"icon": "assets/geode-circle-no-gradient.png",
-	"scripts": {
-		"vscode:prepublish": "pnpm run package",
-		"compile": "webpack",
-		"watch": "webpack --watch",
-		"package": "webpack --mode production --devtool hidden-source-map",
-		"compile-tests": "tsc -p . --outDir out",
-		"watch-tests": "tsc -p . -w --outDir out",
-		"pretest": "npm run compile-tests && npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"format": "prettier --write src/**/*.ts"
-	},
-	"devDependencies": {
-		"@types/glob": "8.1.0",
-		"@types/mocha": "10.0.10",
-		"@types/node": "22.13.10",
-		"@types/object-hash": "3.0.6",
-		"@types/plist": "^3.0.2",
-		"@types/semver": "^7.3.13",
-		"@types/sharp": "^0.31.0",
-		"@types/vscode": "^1.72.0",
-		"@typescript-eslint/eslint-plugin": "8.26.1",
-		"@typescript-eslint/parser": "8.26.1",
-		"@vscode/test-electron": "2.4.1",
-		"eslint": "9.22.0",
-		"glob": "11.0.1",
-		"mocha": "11.1.0",
-		"prettier": "^3.3.2",
-		"ts-json-schema-generator": "^2.3.0",
-		"ts-loader": "^9.5.1",
-		"ts-node": "^10.9.2",
-		"typescript": "^5.8.2",
-		"webpack": "^5.72.1",
-		"webpack-cli": "6.0.1"
-	},
-	"dependencies": {
-		"@vscode/codicons": "^0.0.32",
-		"@vscode/webview-ui-toolkit": "^1.1.0",
-		"camelcase": "^7.0.0",
-		"fuse.js": "^6.6.2",
-		"is-subdir": "^1.2.0",
-		"jsonc-parser": "^3.3.1",
-		"object-hash": "^3.0.0",
-		"plist": "^3.0.6",
-		"semver": "^7.5.4",
-		"sharp": "^0.33.4"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"sharp"
-		]
-	}
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "scope": "geode.flalert.ca",
+            "settings": {
+              "foreground": "#9632ff"
+            }
+          },
+          {
+            "scope": "geode.flalert.cb",
+            "settings": {
+              "foreground": "#4a52e1"
+            }
+          },
+          {
+            "scope": "geode.flalert.cc",
+            "settings": {
+              "foreground": "#ffff96"
+            }
+          },
+          {
+            "scope": "geode.flalert.cd",
+            "settings": {
+              "foreground": "#ff96ff"
+            }
+          },
+          {
+            "scope": "geode.flalert.cf",
+            "settings": {
+              "foreground": "#96ffff"
+            }
+          },
+          {
+            "scope": "geode.flalert.cg",
+            "settings": {
+              "foreground": "#40e348"
+            }
+          },
+          {
+            "scope": "geode.flalert.cj",
+            "settings": {
+              "foreground": "#32c8ff"
+            }
+          },
+          {
+            "scope": "geode.flalert.cl",
+            "settings": {
+              "foreground": "#60abef"
+            }
+          },
+          {
+            "scope": "geode.flalert.co",
+            "settings": {
+              "foreground": "#ffa54b"
+            }
+          },
+          {
+            "scope": "geode.flalert.cp",
+            "settings": {
+              "foreground": "#ff00ff"
+            }
+          },
+          {
+            "scope": "geode.flalert.cr",
+            "settings": {
+              "foreground": "#ff5a5a"
+            }
+          },
+          {
+            "scope": "geode.flalert.cs",
+            "settings": {
+              "foreground": "#ffdc41"
+            }
+          },
+          {
+            "scope": "geode.flalert.cy",
+            "settings": {
+              "foreground": "#ffff00"
+            }
+          },
+          {
+            "scope": "geode.flalert.blue",
+            "settings": {
+              "foreground": "#4a52e1"
+            }
+          },
+          {
+            "scope": "geode.flalert.green",
+            "settings": {
+              "foreground": "#40e348"
+            }
+          },
+          {
+            "scope": "geode.flalert.aqua",
+            "settings": {
+              "foreground": "#60abef"
+            }
+          },
+          {
+            "scope": "geode.flalert.cyan",
+            "settings": {
+              "foreground": "#32c8ff"
+            }
+          },
+          {
+            "scope": "geode.flalert.yellow",
+            "settings": {
+              "foreground": "#ffff00"
+            }
+          },
+          {
+            "scope": "geode.flalert.orange",
+            "settings": {
+              "foreground": "#ffa54b"
+            }
+          },
+          {
+            "scope": "geode.flalert.red",
+            "settings": {
+              "foreground": "#ff5a5a"
+            }
+          },
+          {
+            "scope": "geode.flalert.pink",
+            "settings": {
+              "foreground": "#ff00ff"
+            }
+          },
+          {
+            "scope": "geode.flalert.purple",
+            "settings": {
+              "foreground": "#9632ff"
+            }
+          }
+        ]
+      }
+    },
+    "configuration": {
+      "title": "Geode",
+      "properties": {
+        "geode.geodeCliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Geode CLI executable"
+        },
+        "geode.geodeSdkPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Geode SDK"
+        },
+        "geode.textureQuality": {
+          "type": "string",
+          "enum": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "default": "Medium",
+          "description": "Quality of the graphics to show on the Sprite Browser"
+        },
+        "geode.defaultSpriteShowCount": {
+          "type": "integer",
+          "default": 350,
+          "description": "How many items to show in the Sprite Browser at once by default"
+        },
+        "geode.showCountIncrement": {
+          "type": "integer",
+          "default": 250,
+          "description": "How many items to add in the Sprite Browser when you click 'Load More'"
+        },
+        "geode.modifyClassSuggestions.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable suggestions for Modify classes"
+        },
+        "geode.modifyClassSuggestions.stripCocosNamespace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to automatically remove `cocos2d::` from included code"
+        },
+        "geode.modifyClassSuggestions.addOverrideMacro": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add $override to the beginning of the included code"
+        },
+        "geode.lints.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Geode lints"
+        }
+      }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": "mod.json",
+        "url": "./dist/validation/mod.json"
+      }
+    ]
+  },
+  "icon": "assets/geode-circle-no-gradient.png",
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "devDependencies": {
+    "@types/glob": "8.1.0",
+    "@types/mocha": "10.0.10",
+    "@types/node": "22.13.10",
+    "@types/object-hash": "3.0.6",
+    "@types/plist": "^3.0.2",
+    "@types/semver": "^7.3.13",
+    "@types/sharp": "^0.31.0",
+    "@types/vscode": "^1.72.0",
+    "@typescript-eslint/eslint-plugin": "8.26.1",
+    "@typescript-eslint/parser": "8.26.1",
+    "@vscode/test-electron": "2.4.1",
+    "eslint": "9.22.0",
+    "glob": "11.0.1",
+    "mocha": "11.1.0",
+    "prettier": "^3.3.2",
+    "ts-json-schema-generator": "^2.3.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.72.1",
+    "webpack-cli": "6.0.1"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.32",
+    "@vscode/webview-ui-toolkit": "^1.1.0",
+    "fuse.js": "^6.6.2",
+    "is-subdir": "^1.2.0",
+    "jsonc-parser": "^3.3.1",
+    "object-hash": "^3.0.0",
+    "plist": "^3.0.6",
+    "semver": "^7.5.4",
+    "sharp": "^0.33.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  }
 }

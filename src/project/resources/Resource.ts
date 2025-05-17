@@ -2,7 +2,6 @@ import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { basename } from "path";
 import { MarkdownString } from "vscode";
 import { Placeholder, Snippet, Tabstop } from "../../utils/Snippet";
-import camelCase from "camelcase";
 import { Project } from "../Project";
 import { getAsset } from "../../config";
 import { BMFontDatabase } from "./BMFontDatabase";
@@ -27,11 +26,17 @@ export abstract class Resource {
     public static readonly RESOURCE_NAME_MATCH_REGEX = /"((?<modID>[a-z0-9\-_\.]+)\/)?(?<name>\.?([\w\-\s]+\.)+(png|fnt|ogg|mp3))"(?<suffix>_spr)?/g;
 
     public static formPlaceholderName(name: string) {
-        // Remove number part like _001
+        // Remove number parts like _001
         // Remove leading prefix like GJ_ if one exists
-        // Remove all file extensions & -hd and -uhd suffixes
-        // Remove extra GJ or number parts
-        return camelCase(name.replace(/^gj_?|(?:_?\d+)*(?:-u?hd)?\..*?$/gmi, ""));
+        // Remove all file extensions
+        // Remove -hd and -uhd suffixes
+        // Remove extra number parts
+        const cleanName = name.replace(/^gj_?|(?:_\d+)|\d*(?:-u?hd)?\..*?$/gmi, "")
+            // If a dash or underscore is found, remove it and capitalize the next character if it exists
+            // If a digit is followed by a non-digit, capitalize the next character 
+            .replace(/[-_](.)?|(?<=\d)([^\d])/g, (_, char1: string, char2: string) => (char1 ?? char2).toUpperCase());
+
+        return cleanName.charAt(0).toLowerCase() + cleanName.slice(1);
     }
 
     protected readonly source: Source;
