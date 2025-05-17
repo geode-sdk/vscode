@@ -17,8 +17,8 @@ export interface SnippetOption {
     snippet: Snippet;
 }
 
-export type ResourceSaveData = {
-    isFavorite: boolean,
+export interface ResourceSaveData {
+    isFavorite: boolean;
 }
 
 export abstract class Resource {
@@ -83,7 +83,7 @@ export abstract class Resource {
 
     public saveUserOptions(): ResourceSaveData {
         return {
-            isFavorite: this.favorite,
+            isFavorite: this.favorite
         };
     }
 

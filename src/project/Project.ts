@@ -1,13 +1,12 @@
 import { existsSync, readFileSync } from "fs";
-import { join as pathJoin } from "path";
+import { join } from "path";
 import { ExtensionContext, Uri, window, workspace } from "vscode";
 import { Future, None, Ok, Option } from "../utils/monads";
 import { getDependencies, ModJson } from "./ModJson";
 import { getOutputChannel } from "../config";
 import { removeFromArray } from "../utils/general";
 import { GeodeSDK } from "./GeodeSDK";
-import isSubdir from "is-subdir";
-
+ 
 // todo: detect if mod.json changes and if so reload project
 
 export class Project {
@@ -36,7 +35,7 @@ export class Project {
 		removeFromArray(this.#dependencyOf, parent);
 	}
 	reloadModJSON() {
-		this.#modJson = JSON.parse(readFileSync(pathJoin(this.#path, "mod.json")).toString());
+		this.#modJson = JSON.parse(readFileSync(join(this.#path, "mod.json")).toString());
 	}
 
 	public isActive(): boolean {
@@ -83,11 +82,11 @@ export class ProjectDatabase {
 		const projectPaths: [string, string][] = [];
 		const sdkPath = GeodeSDK.get()?.getPath();
 		if (sdkPath) {
-			projectPaths.push([sdkPath, pathJoin(sdkPath, "loader/resources")]);
+			projectPaths.push([sdkPath, join(sdkPath, "loader/resources")]);
 		}
 		for (const folder of workspace.workspaceFolders ?? []) {
 			const path = folder.uri.fsPath;
-			if (path !== sdkPath && existsSync(pathJoin(path, "mod.json"))) {
+			if (path !== sdkPath && existsSync(join(path, "mod.json"))) {
 				projectPaths.push([path, path]);
 			}
 		}
@@ -145,8 +144,8 @@ export class ProjectDatabase {
 				// defined value because we have just created the entire 
 				// `this.#projects` array we are iterating before in this 
 				// function
-				const depPath = pathJoin(project.getWorkspacePath()!, "build/geode-deps", id);
-				if (!existsSync(pathJoin(depPath, "mod.json"))) {
+				const depPath = join(project.getWorkspacePath()!, "build/geode-deps", id);
+				if (!existsSync(join(depPath, "mod.json"))) {
 					continue;
 				}
 
@@ -201,7 +200,7 @@ export class ProjectDatabase {
 	getActive(): Option<Project> {
 		// If there is a text editor in focus, then return the project for that 
 		if (window.activeTextEditor) {
-			return this.#projects.find(p => isSubdir(p.getWorkspacePath()!, window.activeTextEditor!.document.uri.fsPath));
+			return this.#projects.find((project) => window.activeTextEditor!.document.uri.fsPath.startsWith(project.getWorkspacePath()!));
 		}
 		// Otherwise if there is only one folder open in the workspace then 
 		// that's the only project that could be open
