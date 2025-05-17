@@ -107,7 +107,7 @@ export class GeodeCLI {
 		// Try to auto-detect path if the user hasn't provided it by iterating 
 		// the environment PATH and checking if the CLI executable can be found 
 		// in any of the directories
-		if (!path) {
+		if (!path || !existsSync(path)) {
 			const PATH = process.env["PATH"];
 			if (PATH) {
 				for (let path of PATH.split(";")) {

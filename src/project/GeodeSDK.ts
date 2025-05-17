@@ -23,8 +23,8 @@ export class GeodeSDK {
 		// Get the SDK path from extension settings
 		let path = getExtConfig().get<string>("geodeSdkPath");
 
-		// If no path has been set, try to guess from environment variables
-		if (!path) {
+		// If no path has been set or the current path doesn't exist, try to guess from environment variables
+		if (!path || !existsSync(path)) {
 			path = process.env["GEODE_SDK"];
 			// If we succesfully detect it, then store that result for future reference
 			if (path) {
