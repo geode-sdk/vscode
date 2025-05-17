@@ -38,15 +38,13 @@ function findModResources(src: Source, modJson: ModJson, resourcesDir: string): 
 
     // Find sprites & audio files
     [...modJson.resources?.files ?? [], ...modJson.resources?.sprites ?? []]
-        .flatMap(f => glob.sync(f, globOptions).map(p => p.toString()))
-        .forEach(file => {
+        .flatMap((file) => glob.sync(file, globOptions).map((path) => path.toString()))
+        .forEach((file) => {
             if (file.endsWith(".ogg") || file.endsWith(".mp3")) {
                 resources.push(new AudioResource(src, file));
-            }
-            else if (file.endsWith(".png") || file.endsWith(".jpg")) {
+            } else if (file.endsWith(".png") || file.endsWith(".jpg")) {
                 resources.push(new SpriteResource(src, file));
-            }
-            else {
+            } else {
                 resources.push(new UnknownResource(src, file));
             }
         });
@@ -54,7 +52,8 @@ function findModResources(src: Source, modJson: ModJson, resourcesDir: string): 
     // Find spritesheets & their contained sprites
     Object.entries(modJson.resources?.spritesheets ?? {})?.forEach(([sheetName, patterns]) => {
         const sheet = new SpriteSheetResource(src, sheetName);
-        for (const file of patterns.flatMap((p) => glob.sync(p, globOptions).map(p => p.toString()))) {
+
+        for (const file of patterns.flatMap((pattern) => glob.sync(pattern, globOptions).map((path) => path.toString()))) {
             const frame = new SpriteFrameResource(src, sheet, file, true);
             resources.push(frame);
             sheet.addFrame(frame);
@@ -381,11 +380,12 @@ export class ResourceDatabase {
     }
     public async setup(): Future {
         await this.reloadAll();
-        ProjectDatabase.get().onProjectsChange(
-            project => project ?
-                this.getCollectionForModID(project.getModJson().id)?.reload() :
-                this.reloadAll()
+
+        ProjectDatabase.get().onProjectsChange((project) => project ?
+            this.getCollectionForModID(project.getModJson().id)?.reload() :
+            this.reloadAll()
         );
+
         return Ok();
     }
 
@@ -394,9 +394,12 @@ export class ResourceDatabase {
         for (const [id, collection] of Object.entries(this.#collections)) {
             if (id in this.#loadedUserOptionsData) {
                 for (const resource of collection.getResources()) {
-                    resource.loadUserOptions(
-                        this.#loadedUserOptionsData[id][resource.getID()]
-                    );
+                    const resourceID = resource.getID();
+
+                    // If a new existing project is loaded, make sure new resources are added to the loaded data
+                    this.#loadedUserOptionsData[id][resourceID] ??= { isFavorite: false };
+
+                    resource.loadUserOptions(this.#loadedUserOptionsData[id][resourceID]);
                 }
             }
         }

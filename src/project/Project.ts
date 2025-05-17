@@ -63,7 +63,7 @@ export class Project {
 
 export class ProjectDatabase {
 	#projects: Project[];
-	#onProjectsChangeHooks: ((modID: Option<Project>) => void)[] = [];
+	#onProjectsChangeHooks: ((modID: Option<Project>) => any)[] = [];
 	static #instance: ProjectDatabase = new ProjectDatabase();
 
 	private constructor() {
@@ -145,30 +145,29 @@ export class ProjectDatabase {
 				// `this.#projects` array we are iterating before in this 
 				// function
 				const depPath = join(project.getWorkspacePath()!, "build/geode-deps", id);
+
 				if (!existsSync(join(depPath, "mod.json"))) {
 					continue;
 				}
 
 				// Create the dependency
-				const dep = new Project(None, depPath);
-				dep.makeDependencyFor(project);
-			}
-			catch (_) {}
+				new Project(None, depPath).makeDependencyFor(project);
+			} catch (_) {}
 		}
 
 		// Run hooks for this mod
 		if (runHooks) {
 			for (const hook of this.#onProjectsChangeHooks) {
-				hook(project);
+				await hook(project);
 			}
 		}
 	}
-	onProjectsChange(hook: (modID: Option<Project>) => void) {
+	onProjectsChange(hook: (modID: Option<Project>) => any) {
 		this.#onProjectsChangeHooks.push(hook);
 	}
 	async setup(context: ExtensionContext): Future {
 		context.subscriptions.push(
-			workspace.onDidChangeWorkspaceFolders(e => this.reloadProjects())
+			workspace.onDidChangeWorkspaceFolders(() => this.reloadProjects())
 		);
 		// todo: this is kind of a bad way to check for mod.json changes but it 
 		// gets the job done ig
