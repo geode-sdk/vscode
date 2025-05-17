@@ -6,7 +6,7 @@ import { Project, ProjectDatabase } from "../Project";
 import { AudioResource, FontResource, SpriteFrameResource, SpriteResource, SpriteSheetResource, Resource, ResourceSaveData, FileResource, UnknownResource } from "./Resource";
 import { basename, join as pathJoin } from "path";
 import { getPreferredQualityName, removeQualityDecorators } from "../../utils/resources";
-import G = require("glob");
+import { glob, GlobOptions } from "glob";
 import { getOutputChannel } from "../../config";
 import { ModJson } from "../ModJson";
 import { Uri } from "vscode";
@@ -31,14 +31,14 @@ function makeModCollectionID(modID: string) {
 function findModResources(src: Source, modJson: ModJson, resourcesDir: string): Resource[] {
     const resources: Resource[] = [];
 
-    const globOptions: G.GlobOptions = {
+    const globOptions: GlobOptions = {
         cwd: resourcesDir,
         absolute: true,
     };
 
     // Find sprites & audio files
     [...modJson.resources?.files ?? [], ...modJson.resources?.sprites ?? []]
-        .flatMap(f => G.glob.sync(f, globOptions).map(p => p.toString()))
+        .flatMap(f => glob.sync(f, globOptions).map(p => p.toString()))
         .forEach(file => {
             if (file.endsWith(".ogg") || file.endsWith(".mp3")) {
                 resources.push(new AudioResource(src, file));
@@ -54,7 +54,7 @@ function findModResources(src: Source, modJson: ModJson, resourcesDir: string): 
     // Find spritesheets & their contained sprites
     Object.entries(modJson.resources?.spritesheets ?? {})?.forEach(([sheetName, patterns]) => {
         const sheet = new SpriteSheetResource(src, sheetName);
-        for (const file of patterns.flatMap((p) => G.glob.sync(p, globOptions).map(p => p.toString()))) {
+        for (const file of patterns.flatMap((p) => glob.sync(p, globOptions).map(p => p.toString()))) {
             const frame = new SpriteFrameResource(src, sheet, file, true);
             resources.push(frame);
             sheet.addFrame(frame);

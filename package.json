@@ -320,7 +320,6 @@
     "@typescript-eslint/parser": "8.26.1",
     "@vscode/test-electron": "2.4.1",
     "eslint": "9.22.0",
-    "glob": "11.0.1",
     "mocha": "11.1.0",
     "prettier": "^3.3.2",
     "ts-json-schema-generator": "^2.3.0",
@@ -334,8 +333,8 @@
     "@vscode/codicons": "^0.0.32",
     "@vscode/webview-ui-toolkit": "^1.1.0",
     "fuse.js": "^6.6.2",
+    "glob": "^11.0.2",
     "jsonc-parser": "^3.3.1",
-    "object-hash": "^3.0.0",
     "plist": "^3.0.6",
     "semver": "^7.5.4",
     "sharp": "^0.33.4"
