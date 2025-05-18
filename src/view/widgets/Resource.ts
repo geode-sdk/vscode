@@ -10,7 +10,6 @@ import { Div } from "./Container";
 import { Menu } from "./Menu";
 import { Text } from "./Text";
 import { AudioPlayback } from "./Interactive";
-import { saveData } from "../../config";
 import { SourceID } from "../../project/resources/SourceID";
 import { Snippet } from "../../utils/Snippet";
 
@@ -180,8 +179,6 @@ export class ResourceWidget extends Element {
         if (provider instanceof SpriteBrowser) {
             provider.favoritedItem(state);
         }
-
-        saveData();
     }
 
     // a member function instead of inline arrow function to avoid ridiculous
