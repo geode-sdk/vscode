@@ -28,11 +28,12 @@ export class ResourceWidget extends Element {
             align-items: center;
         }
 
-        .item > text {
+        .item > p {
             word-break: break-all;
             max-width: 100%;
-            margin-top: 2px;
-            margin-bottom: 2px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
         }
 
         .item > .image-div {
@@ -42,6 +43,10 @@ export class ResourceWidget extends Element {
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .item > .audio-playback {
+            margin-bottom: 1rem;
         }
 
         .item > .buttons {

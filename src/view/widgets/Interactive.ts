@@ -245,7 +245,7 @@ export class AudioPlayback extends Widget {
             }
 
             audio {
-                margin-left: calc(-100% / 3);
+                margin: calc(-100% / 12) calc(-100% / 3);
                 /* Force the correct scale without screwing up the control sizes */
                 min-width: calc(100% / 0.6);
                 max-width: calc(100% / 0.6);
