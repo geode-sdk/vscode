@@ -309,7 +309,15 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         return this;
     }
 
-    public override init(provider: ViewProvider) {
+    public reload(): this {
+        if (this.view) {
+            this.getChildren().forEach((child) => this.replaceChild(child, child));
+        }
+
+        return this;
+    }
+
+    public override init(provider: ViewProvider): string {
         try {
             return super.init(provider);
         } catch (error) {

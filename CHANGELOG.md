@@ -1,5 +1,11 @@
 # Geode for VS Code Changelog
 
+## [1.21.2]
+ - Upgraded the VSCode engine to 1.85.0
+ - Added a reload button to the docs browser
+ - Added a guaranteed disposal of view providers
+ - Added a better activation event for views
+
 ## [1.21.1]
  - Increase webview registration stability
  - Fix favorites accidentally being added in mass upon disposing the sprite browser

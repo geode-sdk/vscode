@@ -2,9 +2,9 @@
   "name": "geode",
   "displayName": "Geode",
   "description": "Utilities for the Geode Geometry Dash modding framework",
-  "version": "1.21.1",
+  "version": "1.21.2",
   "engines": {
-    "vscode": "^1.89.0"
+    "vscode": "^1.85.0"
   },
   "packageManager": "pnpm@10.6.3",
   "author": {
@@ -32,6 +32,11 @@
       {
         "title": "Geode: Launch Geometry Dash",
         "command": "geode.launchGD"
+      },
+      {
+        "title": "Docs Browser Refresh",
+        "icon": "$(refresh)",
+        "command": "geode-tools.refresh"
       }
     ],
     "languages": [
@@ -70,6 +75,15 @@
         "path": "./src/broma/bro.inject.json"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "geode-tools.refresh",
+          "group": "navigation@1",
+          "when": "view == geode-tools.docs-browser"
+        }
+      ]
+    },
     "views": {
       "geode-tools": [
         {
@@ -314,7 +328,7 @@
     "@types/node": "22.13.10",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.3.13",
-    "@types/vscode": "^1.89.0",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "8.26.1",
     "@typescript-eslint/parser": "8.26.1",
     "eslint": "9.22.0",

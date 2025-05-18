@@ -6,6 +6,7 @@ export class DocsBrowser extends ViewProvider {
 
     public static readonly RESOURCES = Resources.fromCSS(`
         #docs-frame {
+            margin-top: .5rem;
             width: 100%;
             height: 100%;
             border: none;

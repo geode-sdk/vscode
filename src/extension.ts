@@ -113,6 +113,7 @@ export async function activate(context: ExtensionContext) {
 				window.showErrorMessage(`Unable to launch GD: ${res.unwrapErr()}`);
 			}
 		}),
+        commands.registerCommand("geode-tools.refresh", () => ViewProvider.INSTANCES.find((view) => view instanceof DocsBrowser)?.reload())
 	);
 
 	// Register providers
