@@ -5,6 +5,7 @@ import { basename } from "path";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "fs";
 import { Package } from "./Package";
 import { BlacklistChars } from "./widgets/types/StringTypes";
+import { getExtContext } from "../config";
 
 export interface WidgetProperties {
     id?: string;
@@ -438,7 +439,7 @@ export abstract class Widget {
     }
 
     protected getTempMediaPath(): Uri {
-		return ViewProvider.MEDIA_PATH;
+		return Uri.joinPath(getExtContext().extensionUri, "temp-media");
 	}
 
     protected generateTempCopy(path: string): Result<Uri> {

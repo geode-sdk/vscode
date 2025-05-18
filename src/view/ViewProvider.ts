@@ -13,8 +13,6 @@ export type Handler<T> = (provider: ViewProvider, args: T) => any;
 
 export class ViewProvider extends Widget implements WebviewViewProvider {
 
-    public static readonly MEDIA_PATH = Uri.joinPath(getExtContext().extensionUri, "temp-media");
-
     public static readonly RESOURCES = Resources.fromResources({
         css: `
             :root {
@@ -347,8 +345,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
         this.view = webviewView;
         this.view.webview.options = {
-            enableScripts: true,
-            localResourceRoots: [ ViewProvider.MEDIA_PATH ]
+            enableScripts: true
         };
 
         this.view.onDidDispose(this.dispose, this);
