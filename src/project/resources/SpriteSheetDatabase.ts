@@ -29,22 +29,34 @@ interface SpriteSheetPlist {
 export class Sheet {
 
     public static async createSheetCoverImage(count: number, imageCallback: (index: number) => Promise<JimpReadInstance>): Promise<Buffer> {
+        const targetSize = 100;
+        const partSize = targetSize / 2;
         const cover = new Jimp({
-            width: 100,
-            height: 100,
+            width: targetSize,
+            height: targetSize,
             color: 0x00000000
         });
 
         return Promise.all((count <= 4 ? [...Array(count).keys()] : Array(4).fill(0).map((_, i) => Math.floor(count * 0.25 * i)))
             .map(imageCallback)
-            .map(async (image, index) => cover.composite(
-                (await image).resize({
-                    w: 50,
-                    h: 50
-                }),
-                index % 2 * 50, // X = 0 on even and 50 on odd
-                Math.floor(index / 2) * 50 // Y = Increments by 50 on every second image
-            )))
+            .map((loadingImage, index) => loadingImage.then((image) => {
+                // Resize the image to preserve the aspect ratio
+                const resize: { w: number, h: number } = image.width > image.height ? {
+                    w: partSize,
+                    h: partSize * (image.height / image.width)
+                } : {
+                    w: partSize * (image.width / image.height),
+                    h: partSize
+                };
+
+                return cover.composite(
+                    image.resize(resize),
+                    // X = 0 on even and partSize on odd, divide the delta width by 2 to center the image once added
+                    index % 2 * partSize + (partSize - resize.w) / 2,
+                    // Y = Increments by partSize on every second image, divide the delta height by 2 to center the image once added
+                    Math.floor(index / 2) * partSize + (partSize - resize.h) / 2
+                );
+            })))
             .then(() => cover.getBuffer("image/png"));
     }
     
