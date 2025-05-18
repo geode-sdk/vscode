@@ -1,5 +1,23 @@
 # Geode for VS Code Changelog
 
+## [1.21.0]
+ - Added the docs browser for quick Geode documentation access
+ - Added styling to the audio element in the sprite browser
+ - Added support for multiple sheet tabs being open at once
+ - Added better music controls
+ - Replaced sharp with jimp for more stability
+ - Reworked the UI system to use more native solutions
+ - Improved resource caching
+ - Added better tabstop support in sprite browser snippets
+ - Fixed several race conditions
+ - Fixed font alignment
+ - Fixed missing font characters
+ - Fixed cached paths persisting when the file no longer exists
+ - Fixed snippets missing quotes
+ - Fixed random sprites showing up in the sprite browser due to false positives
+ - Fixed audio elements scaling incorrectly
+ - Cleaned up dependencies
+
 ## [1.20.1]
  - Fix MacOS sprite browser (#27)
  - Fix sharp in CI build
