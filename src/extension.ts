@@ -19,6 +19,11 @@ import { SpriteBrowser } from "./view/ui/SpriteBrowser";
 
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
+    const viewOptions: Parameters<typeof window["registerWebviewViewProvider"]>[2] = {
+        webviewOptions: {
+            retainContextWhenHidden: true,
+        }
+    };
 
 	// Store globals
 	setupConfig(context, channel);
@@ -68,8 +73,8 @@ export async function activate(context: ExtensionContext) {
 
     // Webview views
     context.subscriptions.push(
-        window.registerWebviewViewProvider("geode-tools.docs-browser", new DocsBrowser()),
-        window.registerWebviewViewProvider("geode-tools.sprite-browser", new SpriteBrowser())
+        window.registerWebviewViewProvider("geode-tools.docs-browser", new DocsBrowser(), viewOptions),
+        window.registerWebviewViewProvider("geode-tools.sprite-browser", new SpriteBrowser(), viewOptions)
     );
 
 	// Register commands

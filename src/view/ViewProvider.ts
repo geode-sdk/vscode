@@ -344,20 +344,12 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
 
     public resolveWebviewView(webviewView: WebviewView): void | Thenable<void> {
         this.view = webviewView;
-        this.view.webview.options = {
+        webviewView.webview.options = {
             enableScripts: true
         };
 
-        this.view.onDidDispose(this.dispose, this);
-        this.view.onDidChangeVisibility(() => {
-            if (this.view?.visible) {
-                this.view.webview.html = this.init(this);
-            } else {
-                // When the webview is closed it doesn't call onDidDispose while it disposes of it... thx VSCode
-                this.dispose();
-            }
-        });
-        this.view.webview.onDidReceiveMessage((message: Message) => {
+        webviewView.onDidDispose(this.dispose, this);
+        webviewView.webview.onDidReceiveMessage((message: Message) => {
             // I sure do hope this comes before everything else...
             if (message.cmd == "ready") {
                 this.ready = true;
@@ -370,7 +362,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
             }
         });
 
-        this.view.webview.html = this.init(this);
+        webviewView.webview.html = this.init(this);
     }
 
     public getView(): Option<WebviewView> {
