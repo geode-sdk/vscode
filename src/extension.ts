@@ -3,6 +3,7 @@ import {
 	ExtensionContext,
 	commands,
 	languages,
+    workspace,
 } from "vscode";
 import { loadData, saveData, setupConfig } from "./config";
 import { CCColor3bProvider, CCColor4bProvider } from "./providers/color";
@@ -17,6 +18,14 @@ import { ProjectDatabase } from "./project/Project";
 import { DocsBrowser } from "./view/ui/DocsBrowser";
 import { SpriteBrowser } from "./view/ui/SpriteBrowser";
 
+async function setState() {
+    commands.executeCommand(
+        "setContext",
+        "geode-tools:active",
+        (await workspace.findFiles("**/mod.json", null, 1)).length || (await workspace.findFiles("**/loader/CMakeLists.txt", null, 0)).length
+    );
+}
+
 export async function activate(context: ExtensionContext) {
 	const channel = window.createOutputChannel("Geode");
     const viewOptions: Parameters<typeof window["registerWebviewViewProvider"]>[2] = {
@@ -24,6 +33,13 @@ export async function activate(context: ExtensionContext) {
             retainContextWhenHidden: true,
         }
     };
+
+    // Set the activation state
+    setState();
+    workspace.onDidCreateFiles(() => setState()); 
+    workspace.onDidDeleteFiles(() => setState());
+    workspace.onDidRenameFiles(() => setState());
+    workspace.onDidChangeWorkspaceFolders(() => setState());
 
 	// Store globals
 	setupConfig(context, channel);

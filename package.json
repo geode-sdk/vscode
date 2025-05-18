@@ -4,7 +4,7 @@
   "description": "Utilities for the Geode Geometry Dash modding framework",
   "version": "1.21.1",
   "engines": {
-    "vscode": "^1.72.0"
+    "vscode": "^1.89.0"
   },
   "packageManager": "pnpm@10.6.3",
   "author": {
@@ -19,7 +19,7 @@
     "url": "https://github.com/geode-sdk/vscode"
   },
   "activationEvents": [
-    "workspaceContains:**/loader/",
+    "workspaceContains:**/loader/CMakeLists.txt",
     "workspaceContains:**/mod.json"
   ],
   "galleryBanner": {
@@ -76,13 +76,15 @@
           "type": "webview",
           "id": "geode-tools.docs-browser",
           "name": "Docs Browser",
-          "visibility": "collapsed"
+          "visibility": "collapsed",
+          "when": "geode-tools:active"
         },
         {
           "type": "webview",
           "id": "geode-tools.sprite-browser",
           "name": "Sprite Browser",
-          "visibility": "collapsed"
+          "visibility": "collapsed",
+          "when": "geode-tools:active"
         }
       ]
     },
@@ -314,7 +316,7 @@
     "@types/object-hash": "3.0.6",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.3.13",
-    "@types/vscode": "^1.72.0",
+    "@types/vscode": "^1.89.0",
     "@typescript-eslint/eslint-plugin": "8.26.1",
     "@typescript-eslint/parser": "8.26.1",
     "@vscode/test-electron": "2.4.1",
