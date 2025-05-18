@@ -121,7 +121,7 @@ export class ResourceWidget extends Element {
         this.clearTimeouts();
 
         if (this.visible = visible) {
-            this.contentTimeout = setTimeout(() => this.content(), 75);
+            this.contentTimeout = setTimeout(() => this.content(), 20);
         } else {
             // Clear image data after a while to save memory
             this.imageDataClearTimeout = setTimeout(() => this.imageData = undefined, 5000);
