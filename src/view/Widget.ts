@@ -1,6 +1,5 @@
 import { Disposable, Uri, Webview, WebviewView } from "vscode";
 import { ViewProvider, Handler } from "./ViewProvider";
-import { getExtContext } from "../config";
 import { Err, Ok, Option, Result } from "../utils/monads";
 import { basename } from "path";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "fs";

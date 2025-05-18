@@ -308,6 +308,14 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         return this;
     }
 
+    public override init(provider: ViewProvider) {
+        try {
+            return super.init(provider);
+        } catch (error) {
+            return `<body><h1>Critical Error: Unable to load view</h1><p>${error}</p></body>`;
+        }
+    }
+
     public override build(): string {
         const widgetPackage = this.getPackage();
 
