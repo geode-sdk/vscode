@@ -1,5 +1,9 @@
 # Geode for VS Code Changelog
 
+## [1.21.1]
+ - Increase webview registration stability
+ - Fix favorites accidentally being added in mass upon disposing the sprite browser
+
 ## [1.21.0]
  - Added the docs browser for quick Geode documentation access
  - Added styling to the audio element in the sprite browser
