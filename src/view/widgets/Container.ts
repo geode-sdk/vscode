@@ -4,9 +4,9 @@ import { Element } from "./Basic";
 import { Size, SizeUnit, getSizeString } from "./types/Size";
 
 export enum Alignment {
-	START = "start",
-	CENTER = "center",
-	END = "end",
+    START = "start",
+    CENTER = "center",
+    END = "end",
 }
 
 export type LayoutProperties = MergeProperties<{
@@ -32,11 +32,11 @@ export class PaddedDiv extends Div {
         }
     `);
 
-	constructor(properties?: WidgetProperties) {
-		super(properties);
+    constructor(properties?: WidgetProperties) {
+        super(properties);
 
         this.addClass("padded-div");
-	}
+    }
 }
 
 export class Column extends Div {
@@ -72,8 +72,8 @@ export class Column extends Div {
         }
     `);
 
-	constructor(properties?: LayoutProperties) {
-		super(properties);
+    constructor(properties?: LayoutProperties) {
+        super(properties);
 
         this.addClass("column");
 
@@ -88,7 +88,7 @@ export class Column extends Div {
         if (properties?.spacing) {
             this.setStyleOverride("gap", getSizeString(properties.spacing));
         }
-	}
+    }
 }
 
 export class Row extends Div {
@@ -129,8 +129,8 @@ export class Row extends Div {
         }
     `);
 
-	constructor(properties?: LayoutProperties) {
-		super(properties);
+    constructor(properties?: LayoutProperties) {
+        super(properties);
 
         this.addClass("row");
 
@@ -145,7 +145,7 @@ export class Row extends Div {
         if (properties?.spacing) {
             this.setStyleOverride("gap", getSizeString(properties.spacing));
         }
-	}
+    }
 }
 
 export class Spacer extends Div {
@@ -154,14 +154,14 @@ export class Spacer extends Div {
 
     protected height: Size;
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         width: Size,
         height?: Size
     } | {
         width?: Size,
         height: Size
     }>) {
-		super(properties);
+        super(properties);
 
         const defaultSize: Size = {
             amount: 0,
@@ -173,7 +173,7 @@ export class Spacer extends Div {
 
         this.setStyleOverride("width", getSizeString(this.width));
         this.setStyleOverride("height", getSizeString(this.height));
-	}
+    }
 
     public getWidth(): Size {
         return this.width;

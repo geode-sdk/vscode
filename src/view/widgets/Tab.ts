@@ -18,20 +18,20 @@ export class Tab extends CustomTextElement {
         js: `onMessage("delete-panel-view", ({ id }) => document.getElementById(id).remove());`
     });
 
-	protected badge?: Badge;
+    protected badge?: Badge;
 
     protected closeButton?: IconButton;
 
     protected readonly content?: Widget;
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         id: string,
         text: string,
         count?: number,
         closable?: boolean,
         content?: Widget
     }>) {
-		super(Widget.mergeProperties({
+        super(Widget.mergeProperties({
             tag: "vscode-panel-tab"
         }, properties));
 
@@ -40,13 +40,13 @@ export class Tab extends CustomTextElement {
         }
 
         if (properties.count) {
-			this.setBadge(properties.count);
+            this.setBadge(properties.count);
         }
 
         if (properties.closable) {
             this.addCloseButton();
         }
-	}
+    }
 
     public getBadge(): Option<Badge> {
         return this.badge;
@@ -129,7 +129,7 @@ export class Tabs extends EventWidget {
 
     protected onChange?: EventHandler;
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         tabs: GetWidgetProperties<typeof Tab>[],
         selected?: string,
         onChange?: EventHandler
@@ -144,7 +144,7 @@ export class Tabs extends EventWidget {
 
         this.setAttribute("activeindicator", false);
         this.setTabs(properties.tabs, properties.selected);
-	}
+    }
 
     public getTabs(): Tab[] {
         return this.getChildren().filter((tab) => tab instanceof Tab) as Tab[];
@@ -154,12 +154,12 @@ export class Tabs extends EventWidget {
         return this.getChildren().find((tab) => tab instanceof Tab && tab.getID() == tabID) as Option<Tab>;
     }
 
-	public setTabs(tabs: GetWidgetProperties<typeof Tab>[], selected?: string): this {
-		this.clear();
-		tabs.forEach((tab) => this.addChild(new Tab(tab)));
+    public setTabs(tabs: GetWidgetProperties<typeof Tab>[], selected?: string): this {
+        this.clear();
+        tabs.forEach((tab) => this.addChild(new Tab(tab)));
 
         return this.setSelected(selected);
-	}
+    }
 
     public override addChild(...children: Widget[]): this {
         return super.addChild(...children.reduce<Widget[]>((acc, child) => {
@@ -177,7 +177,7 @@ export class Tabs extends EventWidget {
         return this.getAttribute("activeid");
     }
 
-	public setSelected(id?: string): this {
+    public setSelected(id?: string): this {
         const tabs = this.getChildren().filter((tab) => tab instanceof Tab) as Tab[];
         const provider = this.getProvider();
 
@@ -186,22 +186,22 @@ export class Tabs extends EventWidget {
         } else if (!id || tabs.every((tab) => tab.getID() != id)) {
             id = undefined;
 
-			while (this.history.length) {
-				const back = this.history.at(-1)!;
+            while (this.history.length) {
+                const back = this.history.at(-1)!;
 
-				if (tabs.some((tab) => tab.getID() == back)) {
-					id = back;
+                if (tabs.some((tab) => tab.getID() == back)) {
+                    id = back;
 
                     break;
-				} else {
+                } else {
                     this.history.pop();
                 }
-			}
+            }
 
             if (!id) {
                 this.history.push(id = tabs[0].getID()!);
             }
-		} else {
+        } else {
             this.history.push(id);            
         }
 
@@ -213,12 +213,12 @@ export class Tabs extends EventWidget {
             tab.setAttribute("aria-selected", isSelected).setAttribute("tabindex", isSelected ? 0 : -1);
         });
 
-		if (provider) {
-			this.onChange?.(provider, { value: id });
-		}
+        if (provider) {
+            this.onChange?.(provider, { value: id });
+        }
 
-		return this;
-	}
+        return this;
+    }
 
     public getText(tabID: string): Option<string> {
         return this.getTab(tabID)?.getText();
@@ -228,11 +228,11 @@ export class Tabs extends EventWidget {
         return this.getTab(tabID)?.getBadge()?.getCount();
     }
 
-	public setBadgeCount(tabID: string, newCount: number): this {
+    public setBadgeCount(tabID: string, newCount: number): this {
         this.getTab(tabID)?.setBadge(newCount);
 
         return this;
-	}
+    }
 
     public removeBadge(tabID: string): this {
         this.getTab(tabID)?.removeBadge();
@@ -260,7 +260,7 @@ export class Tabs extends EventWidget {
         return this.getTab(tabID)?.getContent();
     }
 
-	public override build(): string {
+    public override build(): string {
         return /*html*/ `
             <vscode-panels ${this.getFormattedAttributes()}>
                 ${this.buildChildren()}

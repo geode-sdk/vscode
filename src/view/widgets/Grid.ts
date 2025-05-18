@@ -16,36 +16,36 @@ export class Grid extends Div {
         }
     `)
 
-	constructor(properties?: WidgetProperties) {
-		super(properties);
+    constructor(properties?: WidgetProperties) {
+        super(properties);
 
         this.addClass("grid");
-	}
+    }
 }
 
 export class DataGrid extends Element {
 
-	constructor(properties?: WidgetProperties) {
-		super(Widget.mergeProperties({
+    constructor(properties?: WidgetProperties) {
+        super(Widget.mergeProperties({
             tag: "vscode-data-grid"
         }, properties));
-	}
+    }
 }
 
 export class DataGridRow extends Element {
 
-	constructor(properties?: WidgetProperties) {
-		super(Widget.mergeProperties({
+    constructor(properties?: WidgetProperties) {
+        super(Widget.mergeProperties({
             tag: "vscode-data-grid-row"
         }, properties));
-	}
+    }
 }
 
 export class DataGridCell extends CustomTextElement {
 
-	constructor(properties: TextProperties) {
-		super(Widget.mergeProperties({
+    constructor(properties: TextProperties) {
+        super(Widget.mergeProperties({
             tag: "vscode-data-grid-cell"
         }, properties));
-	}
+    }
 }

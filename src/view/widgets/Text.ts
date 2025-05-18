@@ -44,26 +44,26 @@ export abstract class CustomTextElement extends Element {
 
 export class Text extends CustomTextElement {
 
-	constructor(properties: TextProperties) {
-		super(Widget.mergeProperties({
+    constructor(properties: TextProperties) {
+        super(Widget.mergeProperties({
             tag: "p"
         }, properties));
-	}
+    }
 }
 
 export class Head extends CustomTextElement {
 
-	protected readonly size: HeadRange;
+    protected readonly size: HeadRange;
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         size?: HeadRange
     }, TextProperties>) {
-		super(Widget.mergeProperties({
+        super(Widget.mergeProperties({
             tag: `h${properties.size ??= 1}`
         }, properties));
 
-		this.size = properties.size;
-	}
+        this.size = properties.size;
+    }
 
     public getSize(): HeadRange {
         return this.size;
@@ -79,11 +79,11 @@ export class Label extends CustomTextElement {
         }
     `);
 
-	constructor(properties: TextProperties) {
-		super(Widget.mergeProperties({
+    constructor(properties: TextProperties) {
+        super(Widget.mergeProperties({
             tag: "text"
         }, properties));
 
         this.addClass("label");
-	}
+    }
 }

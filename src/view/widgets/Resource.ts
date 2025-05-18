@@ -86,51 +86,51 @@ export class ResourceWidget extends Element {
         }
     `);
 
-	protected resource: Resource;
+    protected resource: Resource;
 
-	protected image?: Div;
+    protected image?: Div;
 
-	protected favoriteButton?: IconButton;
+    protected favoriteButton?: IconButton;
 
-	protected topButtons?: Div;
+    protected topButtons?: Div;
 
-	protected visible?: boolean;
+    protected visible?: boolean;
 
-	protected imageData?: string;
+    protected imageData?: string;
 
     protected contentTimeout?: NodeJS.Timeout;
 
     protected imageDataClearTimeout?: NodeJS.Timeout;
 
-	constructor(properties: MergeProperties<{ resource: Resource }>) {
-		super(Widget.mergeProperties({
+    constructor(properties: MergeProperties<{ resource: Resource }>) {
+        super(Widget.mergeProperties({
             tag: "article"
         }, properties));
 
-		this.resource = properties.resource;
+        this.resource = properties.resource;
 
-		this.addClass("item");
-	}
+        this.addClass("item");
+    }
 
     public toggleVisibility(visible: boolean) {
-		if (this.visible == visible) {
-			return;
-		}
+        if (this.visible == visible) {
+            return;
+        }
 
         // If the user scrolls really quickly, we don't want to waste time sending a massive amount of rebuilds
         this.clearTimeouts();
 
         if (this.visible = visible) {
             this.contentTimeout = setTimeout(() => this.content(), 75);
-		} else {
-			// Clear image data after a while to save memory
-			this.imageDataClearTimeout = setTimeout(() => this.imageData = undefined, 5000);
-			this.favoriteButton = undefined;
-			this.topButtons = undefined;
+        } else {
+            // Clear image data after a while to save memory
+            this.imageDataClearTimeout = setTimeout(() => this.imageData = undefined, 5000);
+            this.favoriteButton = undefined;
+            this.topButtons = undefined;
 
-			this.clear();
-		}
-	}
+            this.clear();
+        }
+    }
 
     protected override dispose(): this {
         this.clearTimeouts();
@@ -145,28 +145,28 @@ export class ResourceWidget extends Element {
         return super.dispose();
     }
 
-	private updateFavoritesButton(): void {
-		this.topButtons?.removeChild(this.favoriteButton);
+    private updateFavoritesButton(): void {
+        this.topButtons?.removeChild(this.favoriteButton);
 
-		if (this.resource.isFavorite()) {
-			this.favoriteButton = new IconButton({
-				icon: "star-delete",
-				hoverText: "Remove favorite",
+        if (this.resource.isFavorite()) {
+            this.favoriteButton = new IconButton({
+                icon: "star-delete",
+                hoverText: "Remove favorite",
                 style: {
                     "color": "yellow"
                 },
-				onClick: (provider) => this.toggleFavorite(provider, false)
-			});
-		} else {
-			this.favoriteButton = new IconButton({
-				icon: "star-add",
-				hoverText: "Add favorite",
-				onClick: (provider) => this.toggleFavorite(provider, true)
-			});
-		}
+                onClick: (provider) => this.toggleFavorite(provider, false)
+            });
+        } else {
+            this.favoriteButton = new IconButton({
+                icon: "star-add",
+                hoverText: "Add favorite",
+                onClick: (provider) => this.toggleFavorite(provider, true)
+            });
+        }
 
-		this.topButtons?.addChild(this.favoriteButton);
-	}
+        this.topButtons?.addChild(this.favoriteButton);
+    }
 
     private toggleFavorite(provider: ViewProvider, state: boolean): void {
         this.resource.setFavorite(state);
@@ -179,16 +179,16 @@ export class ResourceWidget extends Element {
         saveData();
     }
 
-	// a member function instead of inline arrow function to avoid ridiculous
-	// indentation
-	private onMoreUseOptions(): void {
-		this.addChild(new Menu({
+    // a member function instead of inline arrow function to avoid ridiculous
+    // indentation
+    private onMoreUseOptions(): void {
+        this.addChild(new Menu({
             items: this.resource.getSnippetOptions?.().map((option) => ({
                 title: option.name,
                 onClick: () => option.snippet.insert(SpriteBrowser.getTargetEditor())
             })) ?? []
         }));
-	}
+    }
 
     private clearTimeouts(): void {
         if (this.contentTimeout) {
@@ -202,11 +202,11 @@ export class ResourceWidget extends Element {
         }
     }
 
-	private content(): void {
+    private content(): void {
         const bottomBtns = new Div({ className: "buttons" });
 
-		this.addChild(
-			this.topButtons = new Div({
+        this.addChild(
+            this.topButtons = new Div({
                 className: "buttons top",
                 style: {
                     "align-self": "flex-end"
@@ -252,14 +252,14 @@ export class ResourceWidget extends Element {
             ),
             this.image = new Div({ className: "image-div" }).addChild(new LoadingCircle()),
             new Text({ text: this.resource.getDisplayName() })
-		);
+        );
 
-		if (this.resource instanceof AudioResource) {
-			this.addChild(new AudioPlayback({ src: this.resource.getFilePath() }));
-		}
+        if (this.resource instanceof AudioResource) {
+            this.addChild(new AudioPlayback({ src: this.resource.getFilePath() }));
+        }
 
-		if (this.resource instanceof SpriteSheetResource) {
-			bottomBtns.addChild(new Button({
+        if (this.resource instanceof SpriteSheetResource) {
+            bottomBtns.addChild(new Button({
                 title: "View",
                 startIcon: "eye",
                 style: {
@@ -271,8 +271,8 @@ export class ResourceWidget extends Element {
                     }
                 }
             }));
-		} else {
-			bottomBtns.addChild(new Button({
+        } else {
+            bottomBtns.addChild(new Button({
                 title: "Use",
                 startIcon: "tools",
                 style: {
@@ -281,36 +281,34 @@ export class ResourceWidget extends Element {
                 onClick: () => Snippet.from(this.resource.getUsageCode()).insert(SpriteBrowser.getTargetEditor())
             }));
 
-			if (this.resource.getSnippetOptions?.().length) {
-				bottomBtns.addChild(new IconButton({
+            if (this.resource.getSnippetOptions?.().length) {
+                bottomBtns.addChild(new IconButton({
                     icon: "ellipsis",
                     hoverText: "More snippet options",
                     onClick: () => this.onMoreUseOptions()
                 }));
-			}
-		}
+            }
+        }
 
-		this.addChild(bottomBtns);
-		this.updateFavoritesButton();
+        this.addChild(bottomBtns);
+        this.updateFavoritesButton();
 
-		if (this.imageData) {
-			this.image.clear();
-			this.image.addChild(new Image({ data: this.imageData }));
-		} else {
-			this.resource.fetchImage().then((data) => {
-				if (this.image) {
-					this.image.clear();
-
-					if (data.isValue()) {
-						const imgData = data.unwrap().toString("base64");
-
-						this.image.addChild(new Image({ data: imgData }));
-						this.imageData = imgData;
-					} else {
-						this.image.addChild(new Text({ text: data.unwrapErr() }));
-					}
-				}
-			});
-		}
-	}
+        if (this.imageData) {
+            this.image.clear();
+            this.image.addChild(new Image({ data: this.imageData }));
+        } else {
+            this.resource.fetchImageToBase64()
+                .then((data) => {
+                    if (this.image) {
+                        this.image.clear();
+                        this.image.addChild(new Image({ data }));
+                        this.imageData = data;
+                    }
+                })
+                .catch((error) => {
+                    this.image?.clear();
+                    this.image?.addChild(new Text({ text: `Unable to load image: ${error}` }))
+                })
+        }
+    }
 }

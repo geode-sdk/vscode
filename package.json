@@ -314,7 +314,6 @@
     "@types/object-hash": "3.0.6",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.3.13",
-    "@types/sharp": "^0.31.0",
     "@types/vscode": "^1.72.0",
     "@typescript-eslint/eslint-plugin": "8.26.1",
     "@typescript-eslint/parser": "8.26.1",
@@ -334,14 +333,9 @@
     "@vscode/webview-ui-toolkit": "^1.1.0",
     "fuse.js": "^6.6.2",
     "glob": "^11.0.2",
+    "jimp": "^1.6.0",
     "jsonc-parser": "^3.3.1",
     "plist": "^3.0.6",
-    "semver": "^7.5.4",
-    "sharp": "^0.33.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp"
-    ]
+    "semver": "^7.5.4"
   }
 }

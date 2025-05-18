@@ -1,16 +1,15 @@
-import { Err, Future, None, Ok, Option } from "../../utils/monads";
 import { basename } from "path";
 import { MarkdownString } from "vscode";
 import { Placeholder, Snippet, Tabstop } from "../../utils/Snippet";
 import { Project } from "../Project";
 import { getAsset } from "../../config";
 import { BMFontDatabase } from "./BMFontDatabase";
-import { createCoverImage, SpriteSheetDatabase } from "./SpriteSheetDatabase";
-import sharp = require("sharp");
+import { Sheet, SpriteSheetDatabase } from "./SpriteSheetDatabase";
 import { readFile } from "fs/promises";
 import { removeQualityDecorators } from "../../utils/resources";
 import { GeodeSDK } from "../GeodeSDK";
 import { Source } from "./SourceID";
+import { Jimp } from "jimp";
 
 export interface SnippetOption {
     name: string;
@@ -64,7 +63,7 @@ export abstract class Resource {
      * Fetch the image data for this resource as base64
      * @returns Future that resolves to resource's image data as base64, or an error
      */
-    public abstract fetchImage(): Future<Buffer>;
+    public abstract fetchImage(): Promise<Buffer>;
 
     /**
      * Get the source of this resource
@@ -91,18 +90,14 @@ export abstract class Resource {
         this.favorite = data.isFavorite;
     }
 
-    public async fetchImageToBase64(): Future<string> {
-        const buffer = await this.fetchImage();
-
-        return buffer.isError() ? Err(buffer.unwrapErr()) : Ok(buffer.unwrap().toString("base64"));
+    public async fetchImageToBase64(): Promise<string> {
+        return this.fetchImage()
+            .then((image) => image.toString("base64"));
     }
 
-    public async fetchImageToMarkdown(): Future<MarkdownString> {
-        const base64 = await this.fetchImageToBase64();
-
-        return base64.isError() ?
-            Err(base64.unwrapErr()) :
-            Ok(new MarkdownString(`![Preview of ${this.getDisplayName()}](data:image/png;base64,${base64.unwrap()})`));
+    public async fetchImageToMarkdown(): Promise<MarkdownString> {
+        return this.fetchImageToBase64()
+            .then((base64) => new MarkdownString(`![Preview of ${this.getDisplayName()}](data:image/png;base64,${base64})`));
     }
 
     /**
@@ -171,12 +166,8 @@ export class UnknownResource extends FileResource {
         super(source, path);
     }
 
-    public override async fetchImage(): Future<Buffer> {
-        try {
-            return Ok(await readFile(getAsset("unknown-{theme}.png")));
-        } catch (error) {
-            return Err(`Unable to read file: ${error}`);
-        }
+    public override async fetchImage(): Promise<Buffer> {
+        return readFile(getAsset("unknown-{theme}.png"));
     }
 }
 
@@ -186,12 +177,8 @@ export class SpriteResource extends FileResource {
         super(source, path);
     }
 
-    public override async fetchImage(): Future<Buffer> {
-        try {
-            return Ok(await readFile(this.getFilePath()));
-        } catch (error) {
-            return Err(`Unable to read file: ${error}`);
-        }
+    public override async fetchImage(): Promise<Buffer> {
+        return readFile(this.getFilePath());
     }
 
     public override getSnippetOptions(): SnippetOption[] {
@@ -248,10 +235,8 @@ export class FontResource extends FileResource {
         super(source, path);
     }
 
-    public override async fetchImage(): Future<Buffer> {
-        const font = await BMFontDatabase.get().loadFont(this.getFilePath());
-
-        return font.isError() ? Err(font.unwrapErr()) : await font.unwrap().render("Abc123");
+    public override async fetchImage(): Promise<Buffer> {
+        return BMFontDatabase.get().loadFont(this.getFilePath()).render("Abc123");
     }
 
     public override getSnippetOptions(): SnippetOption[] {
@@ -297,12 +282,8 @@ export class AudioResource extends FileResource {
         super(source, path);
     }
 
-    public override async fetchImage(): Future<Buffer> {
-        try {
-            return Ok(await readFile(getAsset("audio-{theme}.png")));
-        } catch (error) {
-            return Err(`Unable to read file: ${error}`);
-        }
+    public override async fetchImage(): Promise<Buffer> {
+        return readFile(getAsset("audio-{theme}.png"));
     }
 
     public override getSnippetOptions(): SnippetOption[] {
@@ -319,6 +300,8 @@ export class SpriteSheetResource extends FileResource {
 
     private readonly frames: SpriteFrameResource[];
 
+    private coverCache?: Promise<Buffer>;
+
     constructor(source: Source, path: string) {
         super(source, path);
 
@@ -333,31 +316,26 @@ export class SpriteSheetResource extends FileResource {
         this.frames.push(frame);
     }
 
-    public override async fetchImage(): Future<Buffer> {
+    public override async fetchImage(): Promise<Buffer> {
+        if (this.coverCache) {
+            return this.coverCache;
+        }
+
         // If this is a sheet from a mod, then it won't be an actual spritesheet 
         // but instead just a list of image files that CLI will later combine 
         // into a spritesheet
         // So we need to manually construct the image in that case
         if (this.getSource() instanceof Project) {
-            const images = await Promise.all([
-                0,
-                Math.floor(this.frames.length * 0.25),
-                Math.floor(this.frames.length * 0.5),
-                Math.floor(this.frames.length * 0.75)
-            ].map(async (index) => (await this.frames[index].fetchImage()).map((image) => sharp(image))));
-
-            for (const img of images) {
-                if (img.isError()) {
-                    return Err(img.unwrapErr());
-                }
-            }
-
-            return await createCoverImage(images.map((image) => image.unwrap()));
-        } else { // Otherwise do actually let the spritesheet itself deal with this
-            const sheet = await SpriteSheetDatabase.get().loadSheet(this.getFilePath());
-
-            return sheet.isError() ? Err(sheet.unwrapErr()) : await sheet.unwrap().renderCoverImage();
+            this.coverCache = Sheet.createSheetCoverImage(
+                this.frames.length,
+                (index) => this.frames[index].fetchImage().then((image) => Jimp.read(image))
+            );
+        } else { // Otherwise let the spritesheet itself deal with this
+            this.coverCache = SpriteSheetDatabase.get()
+                .loadSheet(this.getFilePath()).then((sheet) => sheet.renderCoverImage());
         }
+
+        return this.coverCache!;
     }
 }
 
@@ -389,29 +367,11 @@ export class SpriteFrameResource extends Resource {
         return this.isPath ? removeQualityDecorators(basename(this.frameOrPath)) : this.frameOrPath;
     }
 
-    public override async fetchImage(): Future<Buffer> {
+    public override async fetchImage(): Promise<Buffer> {
         if (this.isPath) {
-            try {
-                return Ok(await readFile(this.frameOrPath));
-            } catch (error) {
-                return Err(`Unable to read file: ${error}`);
-            }
+            return readFile(this.frameOrPath);
         } else {
-            const sheet = await SpriteSheetDatabase.get().loadSheet(this.sheet.getFilePath());
-
-            if (sheet.isError()) {
-                return Err(sheet.unwrapErr());
-            }
-
-            const res = await sheet.unwrap().extract(this.frameOrPath);
-
-            if (res.isValue()) {
-                const val = res.unwrap();
-
-                return val ? Ok(val) : Err("Unable to load image");
-            } else {
-                return Err(res.unwrapErr());
-            }
+            return SpriteSheetDatabase.get().loadSheet(this.sheet.getFilePath()).then((sheet) => sheet.extract(this.frameOrPath));
         }
     }
 
@@ -454,7 +414,7 @@ export class SpriteFrameResource extends Resource {
         return this.sheet;
     }
 
-    public getFilePath(): Option<string> {
-        return this.isPath ? this.frameOrPath : None;
+    public getFilePath(): string | undefined {
+        return this.isPath ? this.frameOrPath : undefined;
     }
 }

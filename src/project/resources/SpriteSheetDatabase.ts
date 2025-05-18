@@ -1,171 +1,145 @@
 import { readFileSync } from "fs";
 import { parse } from "plist";
-import sharp from "sharp";
-import { Err, Future, Ok } from "../../utils/monads";
+import { Jimp } from "jimp";
+
+type JimpReadInstance = Awaited<ReturnType<typeof Jimp["read"]>>;
 
 interface SpriteFrame {
-	aliases: string[];
-	spriteOffset: string;
-	spriteSize: string;
-	spriteSourceSize: string;
-	textureRect: string;
-	textureRotated: boolean;
-	frame: string;
+    aliases: string[];
+    spriteOffset: string;
+    spriteSize: string;
+    spriteSourceSize: string;
+    textureRect: string;
+    textureRotated: boolean;
+    frame: string;
 }
 
 interface SpriteTexture {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-	rotated: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotated: boolean;
 }
 
 interface SpriteSheetPlist {
-	frames: { [name: string]: SpriteFrame };
-}
-
-function textureFromFrame(frame: SpriteFrame): SpriteTexture {
-	// since the textureRect is formatted as {{x, y}, {w, h}}
-	// we can just convert the {} to [] and parse it into an array lol
-	const rect = (
-		JSON.parse(
-			(frame.textureRect ?? frame.frame)
-				.replace(/{/g, "[")
-				.replace(/}/g, "]"),
-		) as number[][]
-	).flat();
-	return {
-		x: rect[0],
-		y: rect[1],
-		width: frame.textureRotated ? rect[3] : rect[2],
-		height: frame.textureRotated ? rect[2] : rect[3],
-		rotated: frame.textureRotated,
-	};
-}
-
-export async function createCoverImage(sprites: sharp.Sharp[]): Future<Buffer> {
-	const images = await Promise.all(
-		sprites.map(async (image, ix) => {
-			return {
-				input: await sharp(await image.toBuffer())
-					.resize(50, 50, { fit: "inside" })
-					.toBuffer(),
-				left: (ix % 2) * 50,
-				top: ix > 1 ? 50 : 0,
-			};
-		}),
-	);
-	return Ok(
-		await sharp({
-			create: {
-				width: 100,
-				height: 100,
-				channels: 4,
-				background: { r: 0, g: 0, b: 0, alpha: 0 },
-			},
-		})
-			.png()
-			.composite(images)
-			.toBuffer()
-	);
+    frames: { [name: string]: SpriteFrame };
 }
 
 export class Sheet {
-	#data: SpriteSheetPlist;
-	#path: string;
 
-	constructor(data: SpriteSheetPlist, path: string) {
-		this.#data = data;
-		this.#path = path;
-	}
+    public static async createSheetCoverImage(count: number, imageCallback: (index: number) => Promise<JimpReadInstance>): Promise<Buffer> {
+        const cover = new Jimp({
+            width: 100,
+            height: 100,
+            color: 0x00000000
+        });
 
-	getPath(): string {
-		return this.#path;
-	}
+        return Promise.all((count <= 4 ? [...Array(count).keys()] : Array(4).fill(0).map((_, i) => Math.floor(count * 0.25 * i)))
+            .map(imageCallback)
+            .map(async (image, index) => cover.composite(
+                (await image).resize({
+                    w: 50,
+                    h: 50
+                }),
+                index % 2 * 50, // X = 0 on even and 50 on odd
+                Math.floor(index / 2) * 50 // Y = Increments by 50 on every second image
+            )))
+            .then(() => cover.getBuffer("image/png"));
+    }
+    
+    public static createFromFile(path: string): Sheet {
+        const plistData = readFileSync(path).toString();
+        // todo: make this safe
+        return new Sheet(parse(plistData) as unknown as SpriteSheetPlist, path);
+    }
 
-	static createFromFile(path: string): Sheet {
-		const plistData = readFileSync(path).toString();
-		// todo: make this safe
-		return new Sheet(parse(plistData) as unknown as SpriteSheetPlist, path);
-	}
+    private readonly data: SpriteSheetPlist;
 
-	private async extractImage(name: string): Future<sharp.Sharp> {
-		const file = readFileSync(this.#path.replace(".plist", ".png"));
-		let frameData: SpriteFrame | null = null;
-		for (const frame in this.#data.frames) {
-			if (frame === name) {
-				frameData = this.#data.frames[frame];
-			}
-		}
-		if (!frameData) {
-			return Err(`Frame '${name}' not found`);
-		}
-		const tex = textureFromFrame(frameData);
-		return Ok(
-			sharp(file)
-				.extract({
-					left: tex.x,
-					top: tex.y,
-					width: tex.width,
-					height: tex.height,
-				})
-				.rotate(tex.rotated ? -90 : 0),
-		);
-	}
+    private readonly path: string;
 
-	async renderCoverImage(): Future<Buffer> {
-		const frameCount = Object.keys(this.#data.frames).length;
-		if (!frameCount) {
-			return Err("Empty sheet");
-		}
-		try {
-			const images = await Promise.all(
-				[
-					0,
-					Math.floor(frameCount / 3),
-					Math.floor(frameCount / 2),
-					Math.floor(frameCount / 1.5),
-				]
-					.map(
-						async (img) =>
-							await this.extractImage(
-								Object.keys(this.#data.frames)[img],
-							),
-					)
-					.map(async (img) => (await img).try()),
-			);
-			return await createCoverImage(images);
-		} catch (err: any) {
-			return Err(err.toString());
-		}
-	}
+    private readonly sheetCache: Promise<JimpReadInstance>;
 
-	async extract(name: string): Future<Buffer> {
-		return await (
-			await this.extractImage(name)
-		).awaitMap(async v => await v.toBuffer());
-	}
+    constructor(data: SpriteSheetPlist, path: string) {
+        this.data = data;
+        this.path = path;
+        this.sheetCache = Jimp.read(readFileSync(path.replace(/\.plist$/, ".png")));
+    }
+
+    public getPath(): string {
+        return this.path;
+    }
+
+    public async renderCoverImage(): Promise<Buffer> {
+        const frames = Object.keys(this.data.frames);
+        const frameCount = frames.length;
+
+        if (!frameCount) {
+            throw new Error("Empty sheet");
+        }
+
+        return Sheet.createSheetCoverImage(frameCount, (index) => this.extractImage(frames[index]));
+    }
+
+    public async extract(name: string): Promise<Buffer> {
+        return this.extractImage(name).then((image) => image.getBuffer("image/png"));
+    }
+
+    private async extractImage(name: string): Promise<JimpReadInstance> {
+        for (const frame in this.data.frames) {
+            if (frame == name) {
+                const texture = this.textureFromFrame(this.data.frames[frame]);
+
+                return (await this.sheetCache).clone().crop({
+                    x: texture.x,
+                    y: texture.y,
+                    w: texture.width,
+                    h: texture.height
+                }).rotate(texture.rotated ? 90 : 0) as JimpReadInstance;
+            }
+        }
+
+        throw new Error(`Frame '${name}' not found`);
+    }
+
+    private textureFromFrame(frame: SpriteFrame): SpriteTexture {
+        // Since the textureRect is formatted as {{x, y}, {w, h}}
+        // We can just convert the {} to [] and parse it into an array lol
+        const rect = (JSON.parse((frame.textureRect ?? frame.frame).replace(/{/g, "[").replace(/}/g, "]")) as number[][]).flat();
+
+        return {
+            x: rect[0],
+            y: rect[1],
+            width: frame.textureRotated ? rect[3] : rect[2],
+            height: frame.textureRotated ? rect[2] : rect[3],
+            rotated: frame.textureRotated
+        };
+    }
 }
 
 export class SpriteSheetDatabase {
-	#sheets: Sheet[] = [];
-	static #sharedInstance = new SpriteSheetDatabase();
 
-	public static get(): SpriteSheetDatabase {
-		return this.#sharedInstance;
-	}
+    private static readonly sharedInstance = new SpriteSheetDatabase();
 
-	public async loadSheet(path: string): Future<Sheet> {
-		const loaded = this.#sheets.find((sheet) => sheet.getPath() === path);
-		if (loaded) {
-			return Ok(loaded);
-		}
-		const sheet = Sheet.createFromFile(path);
-		if (!sheet) {
-			return Err("Unable to load sheet");
-		}
-		this.#sheets.push(sheet);
-		return Ok(sheet);
-	}
+    public static get(): SpriteSheetDatabase {
+        return this.sharedInstance;
+    }
+
+    private readonly sheets = new Map<string, Sheet>();
+
+    public async loadSheet(path: string): Promise<Sheet> {
+        if (this.sheets.has(path)) {
+            return this.sheets.get(path)!;
+        }
+
+        const sheet = Sheet.createFromFile(path);
+
+        if (sheet) {
+            this.sheets.set(path, sheet);
+
+            return sheet;
+        } else {
+            throw Error("Unable to load sheet");
+        }
+    }
 }

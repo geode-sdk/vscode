@@ -52,15 +52,15 @@ export class Select extends EventWidget {
     private static readonly EVENT_NAME = "select";
 
     public static readonly RESOURCES = EventWidget.constructResources(Select.EVENT_NAME, "change", "event.target.value");
-	
+    
     protected items: SelectItem[];
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         items: (string | SelectItem)[],
         selected?: string,
         onChange?: (provider: ViewProvider, value: string) => void
     }>) {
-		super(Widget.mergeProperties({
+        super(Widget.mergeProperties({
             eventName: Select.EVENT_NAME,
             onEvent: (provider, args) => {
                 this.setAttribute("value", args.value);
@@ -73,40 +73,40 @@ export class Select extends EventWidget {
 
         this.setAttribute("value", properties.selected);
         this.setItems(properties.items);
-	}
+    }
 
     public getSelected(): Option<string> {
-		return this.getAttribute("value");
-	}
+        return this.getAttribute("value");
+    }
 
     public setSelected(id?: string): this {
         id ??= this.items.at(0)?.id;
 
-		if (id && this.items.some((item) => item.id == id)) {
+        if (id && this.items.some((item) => item.id == id)) {
             return this.setAttribute("value", id);
-		} else {
+        } else {
             return this.removeAttribute("value");
         }
-	}
+    }
 
     public getItems(): SelectItem[] {
         return this.items;
     }
 
-	public setItems(items: (string | SelectItem)[]): this {
-		this.items = items.map((item) => typeof item == "string" ? { id: item, name: item } : item);
+    public setItems(items: (string | SelectItem)[]): this {
+        this.items = items.map((item) => typeof item == "string" ? { id: item, name: item } : item);
 
-		return this.setSelected(this.getSelected());
-	}
+        return this.setSelected(this.getSelected());
+    }
 
-	public override build(): string {
-		return /*html*/ `
+    public override build(): string {
+        return /*html*/ `
             <vscode-dropdown ${this.getFormattedAttributes()}>
                 ${this.items.map((item) => /*html*/ `<vscode-option value="${item.id}">${item.name}</vscode-option>`).join("")}
                 ${this.buildChildren()}
             </vscode-dropdown>
         `;
-	}
+    }
 }
 
 export class Input extends EventWidget {
@@ -121,7 +121,7 @@ export class Input extends EventWidget {
 
     protected readonly endIcon?: Codicon;
 
-	constructor(properties?: MergeProperties<{
+    constructor(properties?: MergeProperties<{
         label?: string,
         startIcon?: Codicon,
         endIcon?: Codicon,
@@ -132,7 +132,7 @@ export class Input extends EventWidget {
         value?: string,
         onChange?: EventHandler
     }>) {
-		super(Widget.mergeProperties({
+        super(Widget.mergeProperties({
             eventName: Input.EVENT_NAME,
             onEvent: (provider, args) => {
                 this.setAttribute("value", args.value);
@@ -140,16 +140,16 @@ export class Input extends EventWidget {
             }
         }, properties));
 
-		this.label = properties?.label;
-		this.startIcon = properties?.startIcon;
-		this.endIcon = properties?.endIcon;
+        this.label = properties?.label;
+        this.startIcon = properties?.startIcon;
+        this.endIcon = properties?.endIcon;
 
-		this.setAttribute("autofocus", properties?.focus ?? false);
-		this.setAttribute("maxlength", properties?.maxlength ?? 255);
-		this.setAttribute("placeholder", properties?.placeholder);
-		this.setAttribute("size", properties?.size);
-		this.setAttribute("value", properties?.value);
-	}
+        this.setAttribute("autofocus", properties?.focus ?? false);
+        this.setAttribute("maxlength", properties?.maxlength ?? 255);
+        this.setAttribute("placeholder", properties?.placeholder);
+        this.setAttribute("size", properties?.size);
+        this.setAttribute("value", properties?.value);
+    }
 
     public getLabel(): Option<string> {
         return this.label;
@@ -207,16 +207,16 @@ export class Input extends EventWidget {
         return this.setAttribute("size", size);
     }
 
-	public getValue(): Option<string> {
-		return this.getAttribute("value");
-	}
+    public getValue(): Option<string> {
+        return this.getAttribute("value");
+    }
 
     public setValue(value: string): this {
         return this.setAttribute("value", value);
     }
 
-	public override build(): string {
-		return /*html*/ `
+    public override build(): string {
+        return /*html*/ `
             <vscode-text-field ${this.getFormattedAttributes()}>
                 ${this.label ?? ""}
                 ${this.startIcon ? `<span slot="start" class="codicon codicon-${this.startIcon}"></span>` : ""}
@@ -224,7 +224,7 @@ export class Input extends EventWidget {
                 ${this.buildChildren()}
             </vscode-text-field>
         `;
-	}
+    }
 }
 
 export class AudioPlayback extends Widget {
@@ -267,34 +267,34 @@ export class AudioPlayback extends Widget {
 
     protected copiedWebviewUri?: Result<Uri>;
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         src: string
     }>) {
-		super(properties);
+        super(properties);
 
-		this.src = properties.src;
+        this.src = properties.src;
         this.addClass("audio-playback");
         this.addRegistrationID("audio-playback");
-	}
+    }
 
     public getSrc(): string {
         return this.src;
     }
 
-	public override build(): string {
-		return /*html*/ `
-			<div ${this.getFormattedAttributes()}>
-				${this.copiedWebviewUri?.isValue() ? /*html*/ `
+    public override build(): string {
+        return /*html*/ `
+            <div ${this.getFormattedAttributes()}>
+                ${this.copiedWebviewUri?.isValue() ? /*html*/ `
                     <audio controls>
                         <source src="${this.copiedWebviewUri.unwrap()}">
                     </audio>
                 ` : (this.copiedWebviewUri ? /*html*/ `
                     <p>Unable to load audio: ${this.copiedWebviewUri?.unwrapErr()}</p>
                 ` : "")}
-				${this.buildChildren()}
-			</div>
+                ${this.buildChildren()}
+            </div>
         `;
-	}
+    }
 
     protected override postInit(): void {
         this.copiedWebviewUri = this.generateTempCopy(this.src);

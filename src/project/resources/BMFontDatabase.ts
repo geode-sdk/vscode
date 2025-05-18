@@ -1,153 +1,132 @@
 import { readFileSync } from "fs";
 import { Char, FontData, parseFnt } from "../../utils/fntData";
 import { dirname, join } from "path";
-import sharp from "sharp";
-import { Err, Future, Ok } from "../../utils/monads";
+import { Jimp, JimpInstance } from "jimp";
 
-function sharpFromClear(width: number, height: number) {
-	return sharp(Buffer.alloc(width * height * 4, 0x00000000), {
-		raw: {
-			width: width,
-			height: height,
-			channels: 4,
-		},
-	});
+export abstract class IFont {
+
+    protected readonly path: string;
+
+    constructor(path: string) {
+        this.path = path;
+    }
+
+    public abstract render(text: string): Promise<Buffer>;
+
+    public getPath(): string {
+        return this.path;
+    }
+
+    protected clearBuffer(width: number, height: number): JimpInstance {
+        return new Jimp({
+            width,
+            height,
+            color: 0x00000000
+        });
+    }
 }
 
-export interface IFont {
-	path: string;
-	render(text: string): Future<Buffer>;
+export class TrueTypeFont extends IFont {
+
+    constructor(path: string) {
+        super(path);
+    }
+
+    public override async render(): Promise<Buffer> {
+        throw "True Type Font rendering isn't supported yet.";
+    }
 }
 
-export class TrueTypeFont implements IFont {
-	path: string;
+export class BMFont extends IFont {
 
-	constructor(path: string) {
-		this.path = path;
-	}
+    public static createFromFntFile(path: string): BMFont | undefined {
+        const font = parseFnt(readFileSync(path).toString());
 
-	async render(_: string): Future<Buffer> {
-		const width = 250;
-		const height = 50;
+        if (font) {
+            return new BMFont(font, path);
+        } else {
+            return undefined;
+        }
+    }
 
-		const svg = `
-            <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                <text
-                    x="50%"
-                    y="100%"
-                    text-anchor="middle"
-                    font-size="50px"
-                    font-family="Comic Sans MS"
-                    fill="#fff"
-                >No Preview</text>
-            </svg>
-        `;
-		return Ok(
-			await sharpFromClear(width, height)
-				.composite([
-					{
-						input: Buffer.from(svg),
-						top: 0,
-						left: 0,
-					},
-				])
-				.png()
-				.toBuffer(),
-		);
-	}
-}
+    private readonly data: FontData;
 
-export class BMFont implements IFont {
-	path: string;
-	data: FontData;
+    constructor(data: FontData, path: string) {
+        super(path);
 
-	constructor(data: FontData, path: string) {
-		this.data = data;
-		this.path = path;
-	}
+        this.data = data;
+    }
 
-	static createFromFntFile(path: string): BMFont | null {
-		const font = parseFnt(readFileSync(path).toString());
-		if (!font) {
-			return null;
-		}
-		return new BMFont(font, path);
-	}
+    public async render(text: string): Promise<Buffer> {
+        let totalWidth = 0;
+        const chars: { data: JimpInstance, c: Char }[] = [];
 
-	async render(text: string): Future<Buffer> {
-		interface RenderedChar {
-			data: Buffer;
-			c: Char;
-		}
+        for (let i = 0; i < text.length; i++) {
+            const charCode = text.charCodeAt(i);
+            // Try to find the character, if it's not present, subtract 0x20 to get the capital version
+            const char = this.data.chars.find((char) => char.id == charCode) ?? this.data.chars.find((char) => char.id == charCode - 0x20);
 
-		let totalWidth = 0;
-		let totalHeight = this.data.common.lineHeight + this.data.common.base;
-		const chars: RenderedChar[] = [];
-		for (let ix = 0; ix < text.length; ix++) {
-			const char = this.data.chars.find(
-				(ch) => ch.id === text.charCodeAt(ix),
-			);
-			if (char) {
-				const file = readFileSync(
-					join(dirname(this.path), this.data.pages[char.page]),
-				);
-				chars.push({
-					data: await sharp(file)
-						.extract({
-							left: char.x,
-							top: char.y,
-							width: char.width,
-							height: char.height,
-						})
-						.toBuffer(),
-					c: char,
-				});
-				totalWidth += char.xadvance;
-			}
-		}
-		let x = 0;
-		return Ok(
-			await sharpFromClear(totalWidth, totalHeight)
-				.composite(
-					chars.map((char) => {
-						const res = {
-							input: char.data,
-							left: x + char.c.xoffset,
-							top: char.c.yoffset + this.data.common.base,
-						};
-						x += char.c.xadvance;
-						return res;
-					}),
-				)
-				.png()
-				.toBuffer()
-		);
-	}
+            if (char) {
+                const file = readFileSync(join(dirname(this.path), this.data.pages[char.page]));
+
+                chars.push({
+                    data: (await Jimp.read(file)).crop({
+                        x: char.x,
+                        y: char.y,
+                        w: char.width,
+                        h: char.height
+                    }) as JimpInstance,
+                    c: char
+                });
+
+                if (i < text.length - 1) {
+                    totalWidth += char.xadvance;
+                } else {
+                    totalWidth += char.width + char.xoffset;
+                }
+            }
+        }
+
+        let x = 0;
+        const buffer = this.clearBuffer(totalWidth, this.data.common.lineHeight);
+
+        for (const char of chars) {
+            buffer.composite(char.data, x + char.c.xoffset, char.c.yoffset);
+
+            x += char.c.xadvance;
+        }
+
+        return buffer.getBuffer("image/png");
+    }
 }
 
 export class BMFontDatabase {
-	#fonts: IFont[] = [];
-	static #sharedInstance: BMFontDatabase = new BMFontDatabase();
 
-	public static get(): BMFontDatabase {
-		return this.#sharedInstance;
-	}
+    private static readonly sharedInstance: BMFontDatabase = new BMFontDatabase();
 
-	public async loadFont(path: string): Future<IFont> {
-		const loaded = this.#fonts.find((font) => font.path === path);
-		if (loaded) {
-			return Ok(loaded);
-		}
-		let font: IFont | null;
-		if (path.endsWith(".fnt")) {
-			font = BMFont.createFromFntFile(path);
-			if (!font) {
-				return Err("Unable to create font");
-			}
-		} else {
-			font = new TrueTypeFont(path);
-		}
-		this.#fonts.push(font);
-		return Ok(font);
-	}
+    public static get(): BMFontDatabase {
+        return this.sharedInstance;
+    }
+
+    private readonly fonts = new Map<string, IFont>();
+
+    public loadFont(path: string): IFont {
+        if (this.fonts.has(path)) {
+            return this.fonts.get(path)!;
+        }
+
+        let font: IFont | undefined;
+
+        if (path.endsWith(".fnt")) {
+            if (!(font = BMFont.createFromFntFile(path))) {
+                throw new Error("Unable to create font");
+            }
+        } else {
+            font = new TrueTypeFont(path);
+        }
+
+        this.fonts.set(path, font);
+
+        return font;
+    }
 }

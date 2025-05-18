@@ -34,10 +34,9 @@ const extensionConfig: Configuration = {
 		filename: "extension.js",
 		libraryTarget: "commonjs2",
 	},
-	externals: {
-		vscode: "commonjs vscode",
-		sharp: "sharp",
-	},
+    externals: {
+        vscode: "commonjs vscode"
+    },
 	resolve: {
 		extensions: [".ts", ".js"],
 	},

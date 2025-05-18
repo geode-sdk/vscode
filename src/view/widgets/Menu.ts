@@ -20,11 +20,11 @@ export class MenuItem extends Button {
         }
     `);
 
-	constructor(properties: GetWidgetProperties<typeof Button>) {
-		super(properties);
+    constructor(properties: GetWidgetProperties<typeof Button>) {
+        super(properties);
 
         this.addClass("menu-item");
-	}
+    }
 }
 
 export class Menu extends Column {
@@ -72,15 +72,15 @@ export class Menu extends Column {
         `
     });
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         items: GetWidgetProperties<typeof MenuItem>[],
     }, GetWidgetProperties<typeof Column>>) {
-		super(Widget.mergeProperties({
+        super(Widget.mergeProperties({
             children: properties.items.map((item) => new MenuItem(item))
         }, properties));
 
         this.addClass("menu");
         this.addRegistrationID("menu");
         this.registerHandler("close-menu-{id}", () => this.getParent()?.removeChild(this));
-	}
+    }
 }

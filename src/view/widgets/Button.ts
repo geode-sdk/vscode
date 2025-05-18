@@ -35,31 +35,31 @@ export class Button extends BaseButton {
 
     protected title: string;
 
-	protected readonly startIcon?: Codicon;
+    protected readonly startIcon?: Codicon;
 
-	protected readonly endIcon?: Codicon;
+    protected readonly endIcon?: Codicon;
 
-	constructor(properties: MergeProperties<{
+    constructor(properties: MergeProperties<{
         title: string,
         startIcon?: Codicon,
         endIcon?: Codicon
     }, GetWidgetProperties<typeof BaseButton>>) {
-		super(properties);
+        super(properties);
 
         this.title = properties.title;
         this.startIcon = properties.startIcon;
         this.endIcon = properties.endIcon;
-	}
+    }
 
     public getTitle(): string {
         return this.title;
     }
 
     public setTitle(title: string): this {
-		return this.rebuild(UpdateType.SET_TEXT, {
+        return this.rebuild(UpdateType.SET_TEXT, {
             text: this.title = title
         });
-	}
+    }
 
     public getStartIcon(): Option<Codicon> {
         return this.startIcon;
