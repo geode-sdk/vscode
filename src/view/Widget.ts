@@ -439,7 +439,7 @@ export abstract class Widget {
     }
 
     protected getTempMediaPath(): Uri {
-		return Uri.joinPath(getExtContext().extensionUri, "temp-media");
+		return ViewProvider.MEDIA_PATH;
 	}
 
     protected generateTempCopy(path: string): Result<Uri> {
