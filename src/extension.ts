@@ -17,6 +17,7 @@ import { ResourceDatabase } from "./project/resources/ResourceDatabase";
 import { ProjectDatabase } from "./project/Project";
 import { DocsBrowser } from "./view/ui/DocsBrowser";
 import { SpriteBrowser } from "./view/ui/SpriteBrowser";
+import { ViewProvider } from "./view/ViewProvider";
 
 async function setState() {
     commands.executeCommand(
@@ -127,11 +128,11 @@ export async function activate(context: ExtensionContext) {
 }
 
 export async function deactivate() {
+    ViewProvider.INSTANCES.forEach((view) => view.dispose());
+
 	// save extension data
 	const res0 = saveData();
 	if (res0.isError()) {
-		window.showErrorMessage(
-			`Geode: Unable to save Geode extension data: ${res0.unwrapErr()}`,
-		);
+		window.showErrorMessage(`Geode: Unable to save Geode extension data: ${res0.unwrapErr()}`);
 	}
 }

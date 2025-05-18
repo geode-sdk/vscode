@@ -136,7 +136,7 @@ export class ResourceWidget extends Element {
         }
     }
 
-    protected override dispose(): this {
+    public override dispose(): this {
         this.clearTimeouts();
 
         this.visible = false;

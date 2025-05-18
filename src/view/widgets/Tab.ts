@@ -103,7 +103,7 @@ export class Tab extends CustomTextElement {
         return this.content;
     }
 
-    protected override dispose(): this {
+    public override dispose(): this {
         this.post("delete-panel-view", { id: this.getWidgetID() });
 
         return super.dispose();

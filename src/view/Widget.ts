@@ -362,6 +362,17 @@ export abstract class Widget {
         return this;
 	}
 
+    public dispose(): this {
+        this.cleanupOwnedFiles().cleanupDisposables().cleanupObservers();
+        this.handlerBackup.forEach((_, id) => this.provider?.unregisterHandler(id));
+        this.children.forEach((child) => child.dispose());
+
+        this.postQueue = [];
+        this.provider = undefined;
+
+        return this;
+    }
+
     protected preInit?(): void;
 
     protected postInit?(): void;
@@ -523,17 +534,6 @@ export abstract class Widget {
                 args
             });
         }
-
-        return this;
-    }
-
-    protected dispose(): this {
-        this.cleanupOwnedFiles().cleanupDisposables().cleanupObservers();
-        this.handlerBackup.forEach((_, id) => this.provider?.unregisterHandler(id));
-        this.children.forEach((child) => child.dispose());
-
-        this.postQueue = [];
-        this.provider = undefined;
 
         return this;
     }

@@ -13,6 +13,8 @@ export type Handler<T> = (provider: ViewProvider, args: T) => any;
 
 export class ViewProvider extends Widget implements WebviewViewProvider {
 
+    public static readonly INSTANCES: ViewProvider[] = [];
+
     public static readonly RESOURCES = Resources.fromResources({
         css: `
             :root {
@@ -260,6 +262,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         this.ready = false;
         this.pagePostQueue = [];
         this.handlers = new Map();
+        ViewProvider.INSTANCES.push(this);
     }
 
     public override post(cmd: string, args: any): this {
@@ -373,7 +376,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         return this.view?.webview;
     }
 
-    protected override dispose(): this {
+    public override dispose(): this {
         this.ready = false;
         this.pagePostQueue = [];
 
