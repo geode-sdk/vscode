@@ -104,8 +104,6 @@ const TYPE_LOOKUPS: Record<string, string> = {
     rgba: "cocos2d::ccColor4B"
 };
 
-let RESOURCE_FILE_EXTENSIONS: string[] = [];
-
 function lint(
     document: MaybeDocument,
     diagnostics: Diagnostic[],
@@ -162,6 +160,10 @@ function lint(
 function lintAlternative(document: MaybeDocument, diagnostics: Diagnostic[]) {
     lint(document, diagnostics, "geode-alternative", /std\s*::\s*cout/g, () => {
         return "Use the logging methods from the \"geode::log\" namespace instead of \"std::cout\"";
+    });
+
+    lint(document, diagnostics, "geode-alternative", /std\s*::\s*sto(?<suffix>d|f|i|l[dl]?|ull?)/g, ({ groups: { suffix } }) => {
+        return `Use the "geode::utils::numFromString" method instead of sto${suffix}`; 
     });
 }
 
@@ -310,14 +312,11 @@ class SuppressDiagnosticProvider implements CodeActionProvider {
 
                 // Copy the same indentation so the diagnostic is on the same line
                 let indent = document.getText(new Range(diagnostic.range.start.line, 0, diagnostic.range.end.line, 999));
+
                 indent = indent.substring(0, indent.search(/[^\s]/));
 
                 // Register the Quick Fix
-                action.edit.insert(
-                    document.uri,
-                    new Position(diagnostic.range.start.line, 0),
-                    `${indent}// @geode-ignore(${diagnostic.code})\n`
-                );
+                action.edit.insert(document.uri, new Position(diagnostic.range.start.line, 0), `${indent}// @geode-ignore(${diagnostic.code})\n`);
                 action.diagnostics = [diagnostic];
                 actions.push(action);
             }
