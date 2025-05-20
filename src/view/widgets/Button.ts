@@ -1,8 +1,7 @@
 import { Option } from "../../utils/monads";
-import { ViewProvider } from "../ViewProvider";
 import { GetWidgetProperties, MergeProperties, UpdateType, Widget } from "../Widget";
 import { Codicon } from "./types/Icon";
-import { EventWidget } from "./Interactive";
+import { EventWidget, PartialEventWidgetProperties } from "./Interactive";
 
 export abstract class BaseButton extends EventWidget {
 
@@ -11,8 +10,8 @@ export abstract class BaseButton extends EventWidget {
     public static readonly RESOURCES = EventWidget.constructResources(BaseButton.EVENT_NAME, "click", "undefined");
 
     constructor(properties: MergeProperties<{
-        onClick?: (provider: ViewProvider) => any
-    }>) {
+        onClick?: () => any
+    }, PartialEventWidgetProperties>) {
         super(Widget.mergeProperties({
             eventName: BaseButton.EVENT_NAME,
             onEvent: properties.onClick
@@ -35,9 +34,9 @@ export class Button extends BaseButton {
 
     protected title: string;
 
-    protected readonly startIcon?: Codicon;
+    protected startIcon?: Codicon;
 
-    protected readonly endIcon?: Codicon;
+    protected endIcon?: Codicon;
 
     constructor(properties: MergeProperties<{
         title: string,
@@ -56,7 +55,7 @@ export class Button extends BaseButton {
     }
 
     public setTitle(title: string): this {
-        return this.rebuild(UpdateType.SET_TEXT, {
+        return this.update(UpdateType.SET_TEXT, {
             text: this.title = title
         });
     }
@@ -65,38 +64,63 @@ export class Button extends BaseButton {
         return this.startIcon;
     }
 
+    public setStartIcon(icon: Codicon): this {
+        return this.update(UpdateType.ADDED_ATTRIBUTE, {
+            attribute: "class",
+            value: `codicon codicon-${this.startIcon = icon}`,
+            forPart: "start-icon"
+        });
+    }
+
     public getEndIcon(): Option<Codicon> {
         return this.endIcon;
+    }
+
+    public setEndIcon(icon: Codicon): this {
+        return this.update(UpdateType.ADDED_ATTRIBUTE, {
+            attribute: "class",
+            value: `codicon codicon-${this.endIcon = icon}`,
+            forPart: "end-icon"
+        });
     }
 
     protected getAddonHTML(): string {
         return /*html*/ `
             ${this.title}
-            ${this.startIcon ? `<span slot="start" class="codicon codicon-${this.startIcon}"></span>` : ""}
-            ${this.endIcon ? `<span slot="end" class="codicon codicon-${this.endIcon}"></span>` : ""}
+            ${this.startIcon ? `<span part="start-icon" slot="start" class="codicon codicon-${this.startIcon}"></span>` : ""}
+            ${this.endIcon ? `<span part="end-icon" class="codicon codicon-${this.endIcon}"></span>` : ""}
         `;
     }
 }
 
 export class IconButton extends BaseButton {
 
-    protected readonly icon: Codicon;
+    protected icon: Codicon;
 
     constructor(properties: MergeProperties<{
         icon: Codicon
+        appearance?: "primary" | "secondary" | "icon"
     }, GetWidgetProperties<typeof BaseButton>>) {
         super(properties);
 
         this.icon = properties.icon;
 
-        this.setAttribute("appearance", "icon");
+        this.setAttribute("appearance", properties.appearance ?? "icon");
     }
 
     public getIcon(): Codicon {
         return this.icon;
     }
 
+    public setIcon(icon: Codicon): this {
+        return this.update(UpdateType.ADDED_ATTRIBUTE, {
+            attribute: "class",
+            value: `codicon codicon-${this.icon = icon}`,
+            forPart: "icon"
+        });
+    }
+
     protected override getAddonHTML(): string {
-        return /*html*/ `<span class="codicon codicon-${this.icon}"></span>`;
+        return /*html*/ `<span part="icon" class="codicon codicon-${this.icon}"></span>`;
     }
 }

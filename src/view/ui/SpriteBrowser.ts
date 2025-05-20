@@ -14,7 +14,7 @@ import Fuse from "fuse.js";
 import { Button } from "../widgets/Button";
 import { Option } from "../../utils/monads";
 import { Resources } from "../Package";
-import { ResourceWidget } from "../widgets/Resource";
+import { ResourceWidget } from "./specific/ResourceWidget";
 
 export class SpriteBrowser extends ViewProvider {
 
@@ -105,27 +105,32 @@ export class SpriteBrowser extends ViewProvider {
                     }
                 }).addChild(
                     new Column().addChild(
-                        new Label({ text: "Source" }),
+                        new Label({ for: "source", text: "Source" }),
                         this.source = new Select({
+                            id: "source",
                             items: SpriteBrowser.getCollectionOptions(),
                             onChange: () => this.updateData()
                         })
                     ),
-                    this.search = new Input({
-                        label: "Search",
-                        placeholder: "Search for resources...",
-                        startIcon: "search",
-                        focus: true,
-                        onChange: () => {
-                            // Don't update immediately to avoid lag
-                            clearTimeout(this.searchTimeout);
-
-                            this.searchTimeout = setTimeout(() => this.updateData(), 200);
-                        }
-                    }),
                     new Column().addChild(
-                        new Label({ text: "Sort" }),
+                        new Label({ for: "search", text: "Search" }),
+                        this.search = new Input({
+                            id: "search",
+                            placeholder: "Search for resources...",
+                            startIcon: "search",
+                            focus: true,
+                            onChange: () => {
+                                // Don't update immediately to avoid lag
+                                clearTimeout(this.searchTimeout);
+
+                                this.searchTimeout = setTimeout(() => this.updateData(), 200);
+                            }
+                        })
+                    ),
+                    new Column().addChild(
+                        new Label({ for: "sorting", text: "Sort" }),
                         this.sorting = new Select({
+                            id: "sorting",
                             items: [
                                 { id: "none", name: "Default" },
                                 { id: "a-z", name: "A-Z" },
@@ -135,8 +140,9 @@ export class SpriteBrowser extends ViewProvider {
                         })
                     ),
                     new Column().addChild(
-                        new Label({ text: "Quality" }),
+                        new Label({ for: "quality", text: "Quality" }),
                         this.quality = new Select({
+                            id: "quality",
                             items: [
                                 { id: "High", name: "High (UHD)" },
                                 { id: "Medium", name: "Medium (HD)" },

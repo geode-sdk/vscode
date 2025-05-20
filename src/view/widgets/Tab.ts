@@ -3,7 +3,7 @@ import { Resources } from "../Package";
 import { GetWidgetProperties, MergeProperties, Widget } from "../Widget";
 import { Badge, Element } from "./Basic";
 import { IconButton } from "./Button";
-import { EventHandler, EventWidget } from "./Interactive";
+import { EventHandler, EventWidget, PartialEventWidgetProperties } from "./Interactive";
 import { CustomTextElement } from "./Text";
 
 export class Tab extends CustomTextElement {
@@ -133,10 +133,10 @@ export class Tabs extends EventWidget {
         tabs: GetWidgetProperties<typeof Tab>[],
         selected?: string,
         onChange?: EventHandler
-    }>) {
+    }, PartialEventWidgetProperties>) {
         super(Widget.mergeProperties({
             eventName: Tabs.EVENT_NAME,
-            onEvent: (_, args) => this.setSelected(args.value)
+            onEvent: (args) => this.setSelected(args.value)
         }, properties));
 
         this.history = [];
@@ -214,7 +214,7 @@ export class Tabs extends EventWidget {
         });
 
         if (provider) {
-            this.onChange?.(provider, { value: id });
+            this.onChange?.({ value: id });
         }
 
         return this;

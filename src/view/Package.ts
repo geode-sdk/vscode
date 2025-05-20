@@ -80,7 +80,8 @@ export class Package extends Map<WidgetClass, Resources[]> {
         this.fullBlacklisted = [];
 
         if (classObject) {
-            this.getHierarchy(classObject).forEach((subClass) => this.set(
+            // Reverse to make sure parent classes are added first
+            this.getHierarchy(classObject).reverse().forEach((subClass) => this.set(
                 subClass,
                 Object.values(subClass).filter((value) => value instanceof Resources)
             ));

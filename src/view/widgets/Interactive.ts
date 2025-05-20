@@ -1,10 +1,11 @@
 import { Codicon } from "./types/Icon";
 import { Option, Result } from "../../utils/monads";
 import { Uri } from "vscode";
-import { MergeProperties, UpdateType, Widget } from "../Widget";
-import { Handler, ViewProvider } from "../ViewProvider";
+import { MergeProperties, Widget } from "../Widget";
+import { Handler } from "../ViewProvider";
 import { Resources } from "../Package";
 import { Element } from "./Basic";
+import { CustomTextElement } from "./Text";
 
 export interface SelectItem {
     id: string;
@@ -16,6 +17,10 @@ export interface EventHandlerObject {
 }
 
 export type EventHandler = Handler<EventHandlerObject>;
+
+export type PartialEventWidgetProperties = MergeProperties<{
+    disabled?: boolean
+}>;
 
 export abstract class EventWidget extends Widget {
 
@@ -36,14 +41,27 @@ export abstract class EventWidget extends Widget {
     constructor(properties: MergeProperties<{
         eventName: string,
         onEvent?: EventHandler
-    }>) {
+    }, PartialEventWidgetProperties>) {
         super(properties);
 
         this.eventName = properties.eventName;
         this.onEvent = properties.onEvent;
 
         this.addRegistrationID(this.eventName);
-        this.registerHandler<EventHandlerObject>(`${this.eventName}-{id}`, (provider, args) => properties.onEvent?.(provider, args));
+        this.registerHandler<EventHandlerObject>(`${this.eventName}-{id}`, (args) => properties.onEvent?.(args));
+        this.setDisabled(properties.disabled ?? false);
+    }
+
+    public isDisabled(): boolean {
+        return this.hasAttribute("disabled");
+    }
+
+    public setDisabled(disabled: boolean): this {
+        if (disabled) {
+            return this.setAttribute("disabled", disabled);
+        } else {
+            return this.removeAttribute("disabled");
+        }
     }
 }
 
@@ -58,14 +76,14 @@ export class Select extends EventWidget {
     constructor(properties: MergeProperties<{
         items: (string | SelectItem)[],
         selected?: string,
-        onChange?: (provider: ViewProvider, value: string) => void
-    }>) {
+        onChange?: (value: string) => any
+    }, PartialEventWidgetProperties>) {
         super(Widget.mergeProperties({
             eventName: Select.EVENT_NAME,
-            onEvent: (provider, args) => {
+            onEvent: (args) => {
                 this.setAttribute("value", args.value);
 
-                properties.onChange?.(provider, args.value);
+                properties.onChange?.(args.value);
             }
         }, properties));
 
@@ -80,10 +98,13 @@ export class Select extends EventWidget {
     }
 
     public setSelected(id?: string): this {
-        id ??= this.items.at(0)?.id;
+        const reserveID = this.items.at(0)?.id;
+        id ??= reserveID;
 
         if (id && this.items.some((item) => item.id == id)) {
             return this.setAttribute("value", id);
+        } else if (reserveID) {
+            return this.setAttribute("value", reserveID);
         } else {
             return this.removeAttribute("value");
         }
@@ -96,13 +117,21 @@ export class Select extends EventWidget {
     public setItems(items: (string | SelectItem)[]): this {
         this.items = items.map((item) => typeof item == "string" ? { id: item, name: item } : item);
 
+        this.clear();
+        this.items.forEach((item) => this.addChild(new CustomTextElement({
+            tag: "vscode-option",
+            text: item.name,
+            attributes: {
+                value: item.id
+            }
+        })));
+
         return this.setSelected(this.getSelected());
     }
 
     public override build(): string {
         return /*html*/ `
             <vscode-dropdown ${this.getFormattedAttributes()}>
-                ${this.items.map((item) => /*html*/ `<vscode-option value="${item.id}">${item.name}</vscode-option>`).join("")}
                 ${this.buildChildren()}
             </vscode-dropdown>
         `;
@@ -115,14 +144,11 @@ export class Input extends EventWidget {
 
     public static readonly RESOURCES = EventWidget.constructResources(Input.EVENT_NAME, "input", "event.target.value");
 
-    protected label?: string;
-
     protected readonly startIcon?: Codicon;
 
     protected readonly endIcon?: Codicon;
 
     constructor(properties?: MergeProperties<{
-        label?: string,
         startIcon?: Codicon,
         endIcon?: Codicon,
         focus?: boolean,
@@ -131,16 +157,15 @@ export class Input extends EventWidget {
         size?: number,
         value?: string,
         onChange?: EventHandler
-    }>) {
+    }, PartialEventWidgetProperties>) {
         super(Widget.mergeProperties({
             eventName: Input.EVENT_NAME,
-            onEvent: (provider, args) => {
+            onEvent: (args) => {
                 this.setAttribute("value", args.value);
-                properties?.onChange?.(provider, args);
+                properties?.onChange?.(args);
             }
         }, properties));
 
-        this.label = properties?.label;
         this.startIcon = properties?.startIcon;
         this.endIcon = properties?.endIcon;
 
@@ -149,18 +174,6 @@ export class Input extends EventWidget {
         this.setAttribute("placeholder", properties?.placeholder);
         this.setAttribute("size", properties?.size);
         this.setAttribute("value", properties?.value);
-    }
-
-    public getLabel(): Option<string> {
-        return this.label;
-    }
-
-    public setLabel(label: string): this {
-        this.label = label;
-
-        return this.rebuild(UpdateType.SET_TEXT, {
-            text: label
-        });
     }
 
     public getStartIcon(): Option<Codicon> {
@@ -218,7 +231,6 @@ export class Input extends EventWidget {
     public override build(): string {
         return /*html*/ `
             <vscode-text-field ${this.getFormattedAttributes()}>
-                ${this.label ?? ""}
                 ${this.startIcon ? `<span slot="start" class="codicon codicon-${this.startIcon}"></span>` : ""}
                 ${this.endIcon ? `<span slot="end" class="codicon codicon-${this.endIcon}"></span>` : ""}
                 ${this.buildChildren()}

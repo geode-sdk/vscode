@@ -127,12 +127,16 @@ export abstract class Widget {
 
     public abstract build(): string;
 
-    public getPackage(): Package {
-        return this.package;
-    }
+    public onShow?(): void;
+
+    public onHide?(): void;
 
     public getAttribute<T extends string>(name: PropertyString<T>): Option<string> {
         return this.attributes.get(name);
+    }
+
+    public hasAttribute<T extends string>(name: PropertyString<T>): boolean {
+        return this.attributes.has(name);
     }
 
     public setAttribute<T1 extends string, T2 extends { toString: () => string }>(name: PropertyString<T1>, value?: T2): this {
@@ -140,7 +144,7 @@ export abstract class Widget {
             const stringValue = value.toString();
             this.attributes.set(name, stringValue);
 
-            this.rebuild(UpdateType.ADDED_ATTRIBUTE, {
+            this.update(UpdateType.ADDED_ATTRIBUTE, {
                 attribute: name,
                 value: stringValue
             });
@@ -153,12 +157,58 @@ export abstract class Widget {
         if (this.attributes.has(name)) {
             this.attributes.delete(name);
 
-            this.rebuild(UpdateType.REMOVED_ATTRIBUTE, {
+            this.update(UpdateType.REMOVED_ATTRIBUTE, {
                 attribute: name
             });
         }
 
         return this;
+    }
+
+    public getWidgetID(): string {
+        return this.widgetID;
+    }
+
+    public getID(): Option<string> {
+        return this.getAttribute("id");
+    }
+
+    public setID<T extends string>(id?: PropertyString<T>): this {
+        if (id) {
+            return this.setAttribute("id", id);
+        } else {
+            return this.removeAttribute("id");
+        }
+    }
+
+    public getClasses(): Option<string[]> {
+        return this.getAttribute("class")
+            ?.split(" ")
+            .filter((part) => part.length);
+    }
+
+    public addClass<T extends string>(className: PropertyString<T>): this {
+        const attribute = this.getAttribute("class");
+
+        if (attribute) {
+            this.setAttribute("class", `${attribute} ${className}`);
+        } else {
+            this.setAttribute("class", className);
+        }
+
+        return this;
+    }
+
+    public getHoverText(): Option<string> {
+        return this.getAttribute("title");
+    }
+
+    public setHoverText(text?: string): this {
+        if (text) {
+            return this.setAttribute("title", text).setAttribute("aria-label", text);
+        } else {
+            return this.removeAttribute("title").removeAttribute("aria-label");
+        }
     }
 
     public getStyleOverride<T extends string>(key: StylePropertyString<T>): Option<string> {
@@ -168,7 +218,7 @@ export abstract class Widget {
     public setStyleOverride<T1 extends string, T2 extends string>(key: StylePropertyString<T1>, value: BlacklistChars<T2, ":;">): this {
         this.styleOverrides.set(key, value);
 
-        return this.rebuild(UpdateType.ADDED_ATTRIBUTE, {
+        return this.update(UpdateType.ADDED_ATTRIBUTE, {
             attribute: "style",
             value: this.getFormattedStyle()
         });
@@ -178,7 +228,7 @@ export abstract class Widget {
         if (this.styleOverrides.has(key)) {
             this.styleOverrides.delete(key);
 
-            this.rebuild(UpdateType.ADDED_ATTRIBUTE, {
+            this.update(UpdateType.ADDED_ATTRIBUTE, {
                 attribute: "style",
                 value: this.getFormattedStyle()
             });
@@ -240,7 +290,7 @@ export abstract class Widget {
             if (this.provider) {
                 this.provider.addPackage(child.getPackage());
 
-                this.rebuild(UpdateType.ADDED_CHILD, {
+                this.update(UpdateType.ADDED_CHILD, {
                     html: child.init(this.provider)
                 });
             }
@@ -263,7 +313,7 @@ export abstract class Widget {
             child.dispose();
         }
 
-        return this.rebuild(UpdateType.REMOVED_CHILD, {
+        return this.update(UpdateType.REMOVED_CHILD, {
             id: child.getWidgetID()
         });
     }
@@ -280,40 +330,6 @@ export abstract class Widget {
 
     public getParent(): Option<Widget> {
         return this.parent;
-    }
-
-    public getWidgetID(): string {
-        return this.widgetID;
-    }
-
-    public getID(): Option<string> {
-        return this.getAttribute("id");
-    }
-
-    public setID<T extends string>(id?: PropertyString<T>): this {
-        if (id) {
-            return this.setAttribute("id", id);
-        } else {
-            return this.removeAttribute("id");
-        }
-    }
-
-    public getClasses(): Option<string[]> {
-        return this.getAttribute("class")
-            ?.split(" ")
-            .filter((part) => part.length);
-    }
-
-    public addClass<T extends string>(className: PropertyString<T>): this {
-        const attribute = this.getAttribute("class");
-
-        if (attribute) {
-            this.setAttribute("class", `${attribute} ${className}`);
-        } else {
-            this.setAttribute("class", className);
-        }
-
-        return this;
     }
 
     public dispatchEvent(id: string, args?: any): this {
@@ -333,7 +349,7 @@ export abstract class Widget {
         this.registerHandler<{ entries: {
             id: string,
             visible: boolean
-        }[] }>(`visibility-changed-${id}`, (_, args) => args.entries.forEach((entry) => {
+        }[] }>(`visibility-changed-${id}`, (args) => args.entries.forEach((entry) => {
             const child = this.getChildByWidgetID(entry.id, true);
 
             if (child) {
@@ -343,6 +359,12 @@ export abstract class Widget {
 
         return id;
     }
+
+    public clear(): this {
+		Array.from(this.children).forEach(this.removeChild, this);
+
+        return this;
+	}
 
     public removeObserver(id: number): this {
         const index = this.observers.indexOf(id);
@@ -356,16 +378,11 @@ export abstract class Widget {
         return this;
     }
 
-    public clear(): this {
-		Array.from(this.children).forEach(this.removeChild, this);
-
-        return this;
-	}
-
     public dispose(): this {
+        this.propegateAction((widget) => widget.onHide?.(), true);
         this.cleanupOwnedFiles().cleanupDisposables().cleanupObservers();
         this.handlerBackup.forEach((_, id) => this.provider?.unregisterHandler(id));
-        this.children.forEach((child) => child.dispose());
+        this.propegateAction((widget) => widget.dispose());
 
         this.postQueue = [];
         this.provider = undefined;
@@ -379,7 +396,8 @@ export abstract class Widget {
 
     protected init(provider: ViewProvider): string {
         this.preInit?.();
-        this.children.forEach((child) => child.init(provider));
+        this.propegateAction((widget) => widget.onShow?.(), true);
+        this.propegateAction((widget) => widget.init(provider));
 
         this.provider = provider;
         this.postQueue.forEach(({ cmd, args }) => this.post(cmd, args));
@@ -390,6 +408,10 @@ export abstract class Widget {
         this.postInit?.();
 
         return this.build();
+    }
+
+    protected getPackage(): Package {
+        return this.package;
     }
 
     protected getProvider(): Option<ViewProvider> {
@@ -505,17 +527,17 @@ export abstract class Widget {
         return this;
     }
 
-    public getDisposables(): Disposable[] {
+    protected getDisposables(): Disposable[] {
         return this.disposables;
     }
 
-    public registerDisposable(disposable: Disposable): this {
+    protected registerDisposable(disposable: Disposable): this {
         this.disposables.push(disposable);
 
         return this;
     }
 
-    public unregisterDisposable(disposable: Disposable): this {
+    protected unregisterDisposable(disposable: Disposable): this {
         const index = this.disposables.indexOf(disposable);
 
         if (index != -1) {
@@ -526,12 +548,28 @@ export abstract class Widget {
         return this;
     }
 
-    protected rebuild<T extends UpdateType>(reason: T, args: UpdateInfoForType[T]): this {
+    protected update<T extends UpdateType>(reason: T, args: UpdateInfoForType[T] & { forPart?: string }): this {
         if (this.provider) {
             this.post("update-widget", {
                 id: this.widgetID,
                 reason,
                 args
+            });
+        }
+
+        return this;
+    }
+
+    protected propegateAction(action: (widget: Widget) => any, self: boolean = false): this {
+        if (self) {
+            action(this);
+
+            this.children.forEach((child) => child.propegateAction(action, self));
+        } else {
+            this.children.forEach((child) => {
+                action(child);
+
+                child.propegateAction(action);
             });
         }
 

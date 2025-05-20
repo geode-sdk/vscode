@@ -9,7 +9,7 @@ export interface Message {
 	args: any;
 }
 
-export type Handler<T> = (provider: ViewProvider, args: T) => any;
+export type Handler<T> = (args: T) => any;
 
 export class ViewProvider extends Widget implements WebviewViewProvider {
 
@@ -63,6 +63,14 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
                 return node.getAttribute("widget-id");
             }
 
+            function getWidgetIDRecursive(node) {
+                if (node.hasAttribute("widget-id")) {
+                    return node.getAttribute("widget-id");
+                } else if (node.parentNode) {
+                    return getWidgetIDRecursive(node.parentNode);
+                }
+            }
+
             // Convert HTML string to an element
             async function htmlToElement(html) {
                 const template = document.createElement("template");
@@ -102,7 +110,11 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
             window.addEventListener("load", () => updateNode(document));
 
             onMessage("update-widget", async ({ id, reason, args }) => {
-                const node = getWidget(id);
+                let node = getWidget(id);
+
+                if (args.forPart) {
+                    node = node.querySelector(\`[part="\${args.forPart}"]\`);
+                }
 
                 if (node) {
                     switch (reason) {
@@ -289,7 +301,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
 
     public invokeHandler(message: Message): ViewProvider {
         if (this.handlers.has(message.cmd)) {
-            this.handlers.get(message.cmd)!(this, message.args);
+            this.handlers.get(message.cmd)!(message.args);
         } else {
             console.warn(`No handler for ${message.cmd}`);
         }
@@ -360,6 +372,13 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         };
 
         webviewView.onDidDispose(this.dispose, this);
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible) {
+                this.propegateAction((widget) => widget.onShow?.(), true);
+            } else {
+                this.propegateAction((widget) => widget.onHide?.(), true);
+            }
+        });
         webviewView.webview.onDidReceiveMessage((message: Message) => {
             // I sure do hope this comes before everything else...
             if (message.cmd == "ready") {

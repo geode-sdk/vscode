@@ -42,7 +42,7 @@ export class Menu extends Column {
             }
         `,
         js: `
-            let widgetListeners = [];
+            let menuListeners = [];
 
             onRegister("menu", (widget) => {
                 let x = lastClickedX;
@@ -50,7 +50,7 @@ export class Menu extends Column {
                 const size = widget.getBoundingClientRect();
                 const winSize = document.body.getBoundingClientRect();
 
-                widgetListeners.push(getWidgetID(widget));
+                menuListeners.push(getWidgetID(widget));
 
                 // make sure menu doesn't go outside window
                 while (x + size.width > winSize.width) {
@@ -65,9 +65,9 @@ export class Menu extends Column {
                 widget.style.left = x.toString() + "px";
             });
 
-            globalClickListeners.push((event) => {
-                widgetListeners.forEach((id) => post(\`close-menu-\${id}\`, undefined));
-                widgetListeners = [];
+            onGlobalClick(() => {
+                menuListeners.forEach((id) => post(\`close-menu-\${id}\`, undefined));
+                menuListeners = [];
             });
         `
     });

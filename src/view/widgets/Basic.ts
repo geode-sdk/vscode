@@ -89,7 +89,7 @@ export class Badge extends Widget {
     }
 
     public setCount(count: number): this {
-        return this.rebuild(UpdateType.SET_TEXT, {
+        return this.update(UpdateType.SET_TEXT, {
             text: (this.count = count).toString()
         });
     }

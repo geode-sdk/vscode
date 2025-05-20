@@ -1,17 +1,16 @@
 import { env, window } from "vscode";
-import { AudioResource, FileResource, Resource, SpriteFrameResource, SpriteSheetResource } from "../../project/resources/Resource";
-import { Resources } from "../Package";
-import { ViewProvider } from "../ViewProvider";
-import { MergeProperties, Widget } from "../Widget";
-import { SpriteBrowser } from "../ui/SpriteBrowser";
-import { Element, Image, LoadingCircle } from "./Basic";
-import { Button, IconButton } from "./Button";
-import { Div } from "./Container";
-import { Menu } from "./Menu";
-import { Text } from "./Text";
-import { AudioPlayback } from "./Interactive";
-import { SourceID } from "../../project/resources/SourceID";
-import { Snippet } from "../../utils/Snippet";
+import { AudioResource, FileResource, Resource, SpriteFrameResource, SpriteSheetResource } from "../../../project/resources/Resource";
+import { Resources } from "../../Package";
+import { MergeProperties, Widget } from "../../Widget";
+import { SpriteBrowser } from "../SpriteBrowser";
+import { Element, Image, LoadingCircle } from "../../widgets/Basic";
+import { Button, IconButton } from "../../widgets/Button";
+import { Div } from "../../widgets/Container";
+import { Menu } from "../../widgets/Menu";
+import { Text } from "../../widgets/Text";
+import { AudioPlayback } from "../../widgets/Interactive";
+import { SourceID } from "../../../project/resources/SourceID";
+import { Snippet } from "../../../utils/Snippet";
 
 export class ResourceWidget extends Element {
 
@@ -159,20 +158,22 @@ export class ResourceWidget extends Element {
                 style: {
                     "color": "yellow"
                 },
-                onClick: (provider) => this.toggleFavorite(provider, false)
+                onClick: () => this.toggleFavorite(false)
             });
         } else {
             this.favoriteButton = new IconButton({
                 icon: "star-add",
                 hoverText: "Add favorite",
-                onClick: (provider) => this.toggleFavorite(provider, true)
+                onClick: () => this.toggleFavorite(true)
             });
         }
 
         this.topButtons?.addChild(this.favoriteButton);
     }
 
-    private toggleFavorite(provider: ViewProvider, state: boolean): void {
+    private toggleFavorite(state: boolean): void {
+        const provider = this.getProvider();
+
         this.resource.setFavorite(state);
         this.updateFavoritesButton();
 
@@ -267,7 +268,9 @@ export class ResourceWidget extends Element {
                 style: {
                     "flex": "1"
                 },
-                onClick: (provider) => {
+                onClick: () => {
+                    const provider = this.getProvider();
+
                     if (provider instanceof SpriteBrowser) {
                         provider.showSheet(this.resource as SpriteSheetResource);
                     }

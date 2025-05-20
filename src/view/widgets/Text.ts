@@ -12,7 +12,7 @@ export type TextProperties = MergeProperties<{
 
 export type HeadRange = 1 | 2 | 3 | 4 | 5 | 6;
 
-export abstract class CustomTextElement extends Element {
+export class CustomTextElement extends Element {
 
     protected text: string;
 
@@ -29,7 +29,7 @@ export abstract class CustomTextElement extends Element {
     public setText(text: string): this {
         this.text = text;
 
-        return this.rebuild(UpdateType.SET_TEXT, { text });
+        return this.update(UpdateType.SET_TEXT, { text });
     }
 
     public override build(): string {
@@ -79,11 +79,14 @@ export class Label extends CustomTextElement {
         }
     `);
 
-    constructor(properties: TextProperties) {
+    constructor(properties: MergeProperties<{
+        for: string
+    }, TextProperties>) {
         super(Widget.mergeProperties({
-            tag: "text"
+            tag: "label"
         }, properties));
 
         this.addClass("label");
+        this.setAttribute("for", properties.for);
     }
 }

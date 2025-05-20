@@ -88,6 +88,13 @@
       "geode-tools": [
         {
           "type": "webview",
+          "id": "geode-tools.client",
+          "name": "Client",
+          "visibility": "visible",
+          "when": "geode-tools:active"
+        },
+        {
+          "type": "webview",
           "id": "geode-tools.docs-browser",
           "name": "Docs Browser",
           "visibility": "collapsed",

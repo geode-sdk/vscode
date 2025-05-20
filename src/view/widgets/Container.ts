@@ -164,15 +164,12 @@ export class Spacer extends Div {
         super(properties);
 
         const defaultSize: Size = {
-            amount: 0,
-            unit: SizeUnit.PX
+            amount: 100,
+            unit: SizeUnit.PERCENT
         };
 
-        this.width = properties.width ?? defaultSize;
-        this.height = properties.width ?? defaultSize;
-
-        this.setStyleOverride("width", getSizeString(this.width));
-        this.setStyleOverride("height", getSizeString(this.height));
+        this.setStyleOverride("width", getSizeString(this.width = properties.width ?? defaultSize));
+        this.setStyleOverride("height", getSizeString(this.height = properties.height ?? defaultSize));
     }
 
     public getWidth(): Size {

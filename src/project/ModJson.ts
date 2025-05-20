@@ -736,18 +736,13 @@ export interface RTModJson extends ModJsonBase {
 }
 
 export class ModJsonSuggestionsProvider implements CodeActionProvider {
-	provideCodeActions(
-		document: TextDocument,
-		range: Range | Selection,
-		context: CodeActionContext,
-		token: CancellationToken
-	): ProviderResult<(CodeAction | Command)[]> {
+	provideCodeActions(document: TextDocument, range: Range | Selection): ProviderResult<(CodeAction | Command)[]> {
 		const modJson = parseTree(document.getText());
 		const actions: CodeAction[] = [];
 
 		function addCorrector<L extends Array<any>, N>(
 			key: string,
-			mapper: (result: N, old: L[0]) => void
+			mapper: (result: N, old: L[0]) => any
 		) {
 			const prop = modJson?.children?.find(c => c.children?.at(0)?.value === key);
 			if (!prop) {
