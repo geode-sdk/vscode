@@ -89,6 +89,7 @@
         {
           "type": "webview",
           "id": "geode-tools.client",
+          "icon": "$(dashboard)",
           "name": "Client",
           "visibility": "visible",
           "when": "geode-tools:active"
@@ -96,6 +97,7 @@
         {
           "type": "webview",
           "id": "geode-tools.docs-browser",
+          "icon": "$(book)",
           "name": "Docs Browser",
           "visibility": "collapsed",
           "when": "geode-tools:active"
@@ -103,6 +105,7 @@
         {
           "type": "webview",
           "id": "geode-tools.sprite-browser",
+          "icon": "$(browser)",
           "name": "Sprite Browser",
           "visibility": "collapsed",
           "when": "geode-tools:active"
