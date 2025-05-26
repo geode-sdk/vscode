@@ -160,7 +160,7 @@ export class GeodeCLI {
         this.terminalEvents = new Map();
         this.eventID = 0;
 
-        const config = this.fetchConfig();
+        const config = this.updateConfig();
 
         if (config.isError()) {
             throw new Error(`Unable to parse Geode CLI config: ${config.unwrapErr()}`);
@@ -284,11 +284,6 @@ export class GeodeCLI {
             // close the terminal if one is already open
             this.destroyTerminal();
 
-            // SAFETY: GeodeCLI must exist for a Profile to exist
-            // The only case in which the null assertion doesn't hold is if 
-            // somehow something is holding a reference to a Profile while the 
-            // user goes an uninstalls CLI, which is extremely unlikely
-            // and solved via restart
             this.gdTerminal = GeodeTerminal.open({
                 name: "Geometry Dash",
                 path: unwrappedProfile.getExecutablePath(),
@@ -296,7 +291,8 @@ export class GeodeCLI {
                 icon: {
                     dark: Uri.file(getAsset("blockman-dark.svg")),
                     light: Uri.file(getAsset("blockman-light.svg"))
-                }
+                },
+                onProcessClose: () => this.destroyTerminal()
             });
 
             this.gdTerminal.show();
@@ -364,32 +360,23 @@ export class GeodeCLI {
         }).show());
     }
 
-    private fetchConfig(): Result<Config> {
+    private updateConfig(): Result<Config> {
         try {
             const configData = JSON.parse(readFileSync(this.configPath, "utf8"));
-
-            return Ok({
+            this.config = {
                 currentProfile: configData["current-profile"],
                 profiles: (configData["profiles"] as any[]).map((profile) => new Profile(profile["name"], profile["gd-path"])),
                 defaultDeveloperName: configData["default-developer"],
                 sdkNightly: configData["sdk-nightly"],
                 indexToken: configData["index-token"],
                 indexUrl: configData["index-url"]
-            });
+            };
+
+            this.updateEvents.forEach((event) => event(this.config));
+
+            return Ok(this.config);
         } catch (error) {
             return Err(`Unable to parse CLI config.json! Try running \`geode config setup\`, or manually fixing your config file (error: ${error})`);
         }
-    }
-
-    private updateConfig(): void {
-        const config = this.fetchConfig();
-
-        // When will you learn, when will you learn, that your actions have consequences?
-        if (config.isError()) {
-            return getOutputChannel().appendLine(`Unable to update Geode CLI config: ${config.unwrapErr()}`);
-        }
-
-        this.config = config.unwrap();
-        this.updateEvents.forEach((event) => event(this.config));
     }
 }

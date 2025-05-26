@@ -1,5 +1,6 @@
 import { ChildProcess, spawn } from "child_process";
-import { Event, EventEmitter, ExtensionTerminalOptions, Pseudoterminal, Terminal, window } from "vscode";
+import { Event, EventEmitter, ExtensionTerminalOptions, Pseudoterminal, Terminal, Uri, window } from "vscode";
+import { getAsset } from "../config";
 
 export interface PtyTerminalOptions {
     name?: string;
@@ -18,7 +19,7 @@ export class GeodeTerminal implements Pseudoterminal {
     public static open(options: PtyTerminalOptions): Terminal {
         return window.createTerminal({
             name: options.name ?? "Geode CLI",
-            iconPath: options.icon,
+            iconPath: options.icon ?? Uri.file(getAsset("geode.svg")),
             pty: new GeodeTerminal(options)
         });
     }
