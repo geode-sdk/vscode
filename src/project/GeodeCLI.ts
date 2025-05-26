@@ -1,10 +1,11 @@
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import { existsSync, readFileSync, unwatchFile, watchFile } from "fs";
 import { join, dirname } from "path";
-import { ConfigurationTarget, Terminal, Uri, window } from "vscode";
+import { ConfigurationTarget, Terminal, Uri } from "vscode";
 import { getAsset, getExtConfig, getOutputChannel } from "../config";
 import { Option, Future, Err, Ok, Result } from "../utils/monads";
 import { clean, gte } from "semver";
+import { GeodeTerminal, PtyTerminalOptions } from "../utils/Terminal";
 
 export interface Config {
     readonly currentProfile: string;
@@ -58,7 +59,9 @@ export class GeodeCLI {
         outputChannel.appendLine("Checking Geode CLI...");
 
         const path = GeodeCLI.getCliPath();
-        const reportedVersion = GeodeCLI.runProgram(path, "--version");
+        const reportedVersion = await new Promise<Result<string>>(
+            (resolve) => exec(`"${path}" --version`, (error, stdout) => error ? resolve(Err(error.message)) : resolve(Ok(stdout.trim())))
+        );
 
         if (reportedVersion.isError()) {
             outputChannel.appendLine(`Unable to check Geode CLI version: ${reportedVersion}`);
@@ -130,14 +133,6 @@ export class GeodeCLI {
             return join(process.env.HOME as string, ".local/share/Geode");
         } else {
             return "/Users/Shared/Geode";
-        }
-    }
-
-    private static runProgram(path: string, cmd: string, cwd?: string): Result<string, string> {
-        try {
-            return Ok(execSync(`"${path}" ${cmd}`, { encoding: "utf-8", cwd }));
-        } catch (error) {
-            return Err((error as Error).message);
         }
     }
 
@@ -230,11 +225,11 @@ export class GeodeCLI {
         return this.getProfileForName(this.config.currentProfile);
     }
 
-    public setCurrentProfile(profile: string): Result<Profile, string> {
+    public setCurrentProfile(profile: string): Result<Profile> {
         const foundProfile = this.getProfileForName(profile);
 
         if (foundProfile) {
-            const result = this.run(`profile switch ${foundProfile.getName()}`);
+            const result = this.runSync(`profile switch ${foundProfile.getName()}`);
 
             this.updateConfig();
 
@@ -244,11 +239,11 @@ export class GeodeCLI {
         }
     }
 
-    public removeProfile(profile: string): Result<Profile, string> {
+    public removeProfile(profile: string): Result<Profile> {
         const foundProfile = this.getProfileForName(profile);
 
         if (foundProfile) {
-            const result = this.run(`profile remove ${foundProfile.getName()}`);
+            const result = this.runSync(`profile remove ${foundProfile.getName()}`);
 
             this.updateConfig();
 
@@ -256,13 +251,33 @@ export class GeodeCLI {
         } else {
             return Err(`Profile '${profile}' not found!`);
         }
+    }
+
+    public getSDKVersion(): Result<string> {
+        const result = this.runSync("sdk version");
+
+        return result.isValue() ? Ok(result.unwrap().split(":")[1].trim()) : Err(result.unwrapErr());
+    }
+
+    public async toggleNightly(): Future<boolean> {
+        const result = await this.run(`sdk update ${this.config.sdkNightly ? "stable" : "nightly"}`);
+
+        this.updateConfig();
+
+        return result.isValue() ? Ok(this.config.sdkNightly!) : Err(result.unwrapErr());
     }
 
     public async launchProfile(profile: string = this.config.currentProfile): Future {
-        const foundProfile = this.setCurrentProfile(profile);
+        const foundProfile = profile == this.config.currentProfile ? Ok(this.getProfileForName(profile)) : this.setCurrentProfile(profile);
 
         if (foundProfile.isError()) {
             return Err(foundProfile.unwrapErr());
+        }
+
+        const unwrappedProfile = foundProfile.unwrap();
+
+        if (!unwrappedProfile) {
+            return Err(`Profile '${profile}' not found!`);
         }
 
         try {
@@ -274,12 +289,11 @@ export class GeodeCLI {
             // somehow something is holding a reference to a Profile while the 
             // user goes an uninstalls CLI, which is extremely unlikely
             // and solved via restart
-            this.gdTerminal = window.createTerminal({
+            this.gdTerminal = GeodeTerminal.open({
                 name: "Geometry Dash",
-                cwd: foundProfile.unwrap().getDirectory(),
-                shellPath: GeodeCLI.get()!.getPath(),
-                shellArgs: [ "run", "--stay" ],
-                iconPath: {
+                path: unwrappedProfile.getExecutablePath(),
+                userClosed: true,
+                icon: {
                     dark: Uri.file(getAsset("blockman-dark.svg")),
                     light: Uri.file(getAsset("blockman-light.svg"))
                 }
@@ -311,13 +325,46 @@ export class GeodeCLI {
         return this.gdTerminal != undefined;
     }
 
-    private run(cmd: string, cwd?: string): Result<string, string> {
+    public run(cmd: string): Future<string> {
         getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
 
-        return GeodeCLI.runProgram(this.installedPath, cmd, cwd);
+        return new Promise((resolve) => {
+            try {
+                resolve(Ok(execSync(`"${this.installedPath}" ${cmd}`, { encoding: "utf8" })));
+            } catch (error) {
+                resolve(Err((error as Error).message));
+            }
+        });
     }
 
-    private fetchConfig(): Result<Config, string> {
+    public runSync(cmd: string): Result<string> {
+        getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
+
+        try {
+            return Ok(execSync(`"${this.installedPath}" ${cmd}`, { encoding: "utf8" }).trim());
+        } catch (error) {
+            return Err((error as Error).message);
+        }
+    }
+
+    public runTerminal(cmd: string[], events?: Pick<PtyTerminalOptions, "onWriteOut" | "onWriteErr">): Future<string> {
+        getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
+
+        return new Promise((resolve) => GeodeTerminal.open({
+            ...events,
+            cmd,
+            path: this.installedPath,
+            onProcessClose: (code, output) => {
+                if (code) {
+                    resolve(Err(`Geode CLI exited with code ${code}: ${output}`));
+                } else {
+                    resolve(Ok(output));
+                }
+            }
+        }).show());
+    }
+
+    private fetchConfig(): Result<Config> {
         try {
             const configData = JSON.parse(readFileSync(this.configPath, "utf8"));
 

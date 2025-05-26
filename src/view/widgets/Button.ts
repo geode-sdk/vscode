@@ -87,8 +87,8 @@ export class Button extends BaseButton {
     protected getAddonHTML(): string {
         return /*html*/ `
             ${this.title}
-            ${this.startIcon ? `<span part="start-icon" slot="start" class="codicon codicon-${this.startIcon}"></span>` : ""}
-            ${this.endIcon ? `<span part="end-icon" class="codicon codicon-${this.endIcon}"></span>` : ""}
+            ${this.startIcon ? `<span slot="start" widget-part="start-icon" class="codicon codicon-${this.startIcon}"></span>` : ""}
+            ${this.endIcon ? `<span slot="end" widget-part="end-icon" class="codicon codicon-${this.endIcon}"></span>` : ""}
         `;
     }
 }
@@ -121,6 +121,6 @@ export class IconButton extends BaseButton {
     }
 
     protected override getAddonHTML(): string {
-        return /*html*/ `<span part="icon" class="codicon codicon-${this.icon}"></span>`;
+        return /*html*/ `<span widget-part="icon" class="codicon codicon-${this.icon}"></span>`;
     }
 }

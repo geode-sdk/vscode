@@ -1,15 +1,4 @@
-import {
-	CancellationToken,
-	Color,
-	ColorInformation,
-	ColorPresentation,
-	DocumentColorProvider,
-	Position,
-	ProviderResult,
-	Range,
-	TextDocument,
-} from "vscode";
-import { getOutputChannel } from "../config";
+import { CancellationToken, Color, ColorInformation, ColorPresentation, DocumentColorProvider, Position, ProviderResult, Range, TextDocument } from "vscode";
 
 const MATCH_COLOR_BYTE =
 	/\b((25[0-5])|(2[0-4][0-9])|([0-1][0-9][0-9])|([0-9][0-9]?)\b|0[xX][0-9a-fA-F]+\b)/g;

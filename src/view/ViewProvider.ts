@@ -113,7 +113,7 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
                 let node = getWidget(id);
 
                 if (args.forPart) {
-                    node = node.querySelector(\`[part="\${args.forPart}"]\`);
+                    node = node.querySelector(\`[widget-part="\${args.forPart}"]\`);
                 }
 
                 if (node) {
@@ -142,7 +142,11 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
                             }
                         } break;
                         case "set-text": {
-                            node.innerText = args.text;
+                            if (node.firstChild instanceof Text) {
+                                node.firstChild.nodeValue = args.text;
+                            } else {
+                                node.prepend(document.createTextNode(args.text));
+                            }
                         } break;
                     }
                 } else {

@@ -112,7 +112,7 @@ export class ProfileWidget extends ClientWidget {
         );
 
         this.resetProfileDeleteButton();
-        this.setLaunchButtonState(cli.hasActiveTerminal());
+        this.updateLaunchButtonState(cli.hasActiveTerminal());
         this.registerHandler<{ widgetID: string }>("reset-clicks", ({ widgetID }) => {
             if (widgetID != this.profileDeleteButton.getWidgetID()) {
                 this.resetProfileDeleteButton();
@@ -121,7 +121,7 @@ export class ProfileWidget extends ClientWidget {
     }
 
     public override onShow(): void {
-        this.terminaleWatchID = GeodeCLI.get()?.onTerminalEvent((terminal) => this.setLaunchButtonState(terminal != undefined));
+        this.terminaleWatchID = GeodeCLI.get()?.onTerminalEvent((terminal) => this.updateLaunchButtonState(terminal != undefined));
 
         super.onShow();
     }
@@ -196,15 +196,18 @@ export class ProfileWidget extends ClientWidget {
         this.profilePath.setHoverText(path);
     }
 
+    private updateLaunchButtonState(state: boolean): void {
+        if (state) {
+            this.profileLaunchButton.setIcon("debug-stop");
+            this.profileLaunchButton.setHoverText("Stop");
+        } else {
+            this.profileLaunchButton.setIcon("debug-start");
+            this.profileLaunchButton.setHoverText("Launch");
+        }
+    }
+
     private resetProfileDeleteButton(): void {
         this.profileDeleteButton.setIcon("trashcan");
         this.profileDeleteButton.setHoverText("Remove");
-    }
-
-    private setLaunchButtonState(state: boolean): this {
-        this.profileLaunchButton.setIcon(state ? "debug-stop" : "debug-start");
-        this.profileLaunchButton.setHoverText(state ? "Stop" : "Launch");
-
-        return this;
     }
 }
