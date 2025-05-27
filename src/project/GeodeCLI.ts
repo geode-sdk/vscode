@@ -260,7 +260,7 @@ export class GeodeCLI {
     }
 
     public async toggleNightly(): Future<boolean> {
-        const result = await this.run(`sdk update ${this.config.sdkNightly ? "stable" : "nightly"}`);
+        const result = await this.runTerminal([ "sdk", "update", this.config.sdkNightly ? "stable" : "nightly" ]);
 
         this.updateConfig();
 

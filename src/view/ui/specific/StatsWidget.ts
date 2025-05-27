@@ -63,10 +63,10 @@ export class StatsWidget extends ClientWidget {
 
     private updateBuildType(): void {
         if (GeodeCLI.get()?.getConfig().sdkNightly) {
-            this.buildTypeButton.setTitle("Switch to Stable SDK");
+            this.buildTypeButton.setTitle("Install Stable");
             this.buildTypeButton.setStartIcon("beaker-stop");
         } else {
-            this.buildTypeButton.setTitle("Switch to Nightly SDK");
+            this.buildTypeButton.setTitle("Install Nightly");
             this.buildTypeButton.setStartIcon("beaker");
         }
     }

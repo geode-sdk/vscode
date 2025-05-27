@@ -5,7 +5,7 @@ import { getAsset } from "../config";
 export interface PtyTerminalOptions {
     name?: string;
     path: string;
-    cmd?: string[];
+    cmd?: string[] | string;
     // If true, the terminal has to be closed through user interaction
     userClosed?: boolean;
     icon?: ExtensionTerminalOptions["iconPath"];
@@ -19,7 +19,10 @@ export class GeodeTerminal implements Pseudoterminal {
     public static open(options: PtyTerminalOptions): Terminal {
         return window.createTerminal({
             name: options.name ?? "Geode CLI",
-            iconPath: options.icon ?? Uri.file(getAsset("geode.svg")),
+            iconPath: options.icon ?? {
+                light: Uri.file(getAsset("geode-light.svg")),
+                dark: Uri.file(getAsset("geode-dark.svg"))
+            },
             pty: new GeodeTerminal(options)
         });
     }
@@ -50,9 +53,12 @@ export class GeodeTerminal implements Pseudoterminal {
     // Technically this can work multiple times but please don't make a singleton out of a class meant for parallel execution
     public open(): void {
         this.output = "";
-        this.process = spawn(this.options.path, this.options.cmd, {
+        this.process = spawn(this.options.path, typeof this.options.cmd == "string" ? this.options.cmd.split(" ") : this.options.cmd, {
             env: {
                 ...process.env,
+                // Child process spawns a terminal which doesn't provide colors by default, so we force them
+                FORCE_COLOR: "1",
+                CLICOLOR_FORCE: "1",
                 GEODE_FORCE_ENABLE_TERMINAL_COLORS: "1"
             }
         });
