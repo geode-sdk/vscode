@@ -264,7 +264,7 @@ export class ResourceWidget extends Element {
         if (this.resource instanceof SpriteSheetResource) {
             bottomBtns.addChild(new Button({
                 title: "View",
-                startIcon: "eye",
+                start: "eye",
                 style: {
                     "flex": "1"
                 },
@@ -279,7 +279,7 @@ export class ResourceWidget extends Element {
         } else {
             bottomBtns.addChild(new Button({
                 title: "Use",
-                startIcon: "tools",
+                start: "tools",
                 style: {
                     "flex": "4"
                 },

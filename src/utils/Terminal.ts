@@ -12,6 +12,7 @@ export interface PtyTerminalOptions {
     onWriteOut?: (data: string) => void;
     onWriteErr?: (data: string) => void;
     onProcessClose?: (code: number, output: string) => void;
+    onTerminalClose?: (code: number, output: string) => void;
 }
 
 export class GeodeTerminal implements Pseudoterminal {
@@ -41,6 +42,8 @@ export class GeodeTerminal implements Pseudoterminal {
 
     private process?: ChildProcess;
 
+    private exitCode?: number;
+
     private constructor(options: PtyTerminalOptions) {
         this.options = options;
         this.messageEmitter = new EventEmitter<string>();
@@ -53,6 +56,7 @@ export class GeodeTerminal implements Pseudoterminal {
     // Technically this can work multiple times but please don't make a singleton out of a class meant for parallel execution
     public open(): void {
         this.output = "";
+        this.exitCode = undefined;
         this.process = spawn(this.options.path, typeof this.options.cmd == "string" ? this.options.cmd.split(" ") : this.options.cmd, {
             env: {
                 ...process.env,
@@ -69,8 +73,9 @@ export class GeodeTerminal implements Pseudoterminal {
     }
 
     public handleInput(data: string): void {
-        if (this.process?.exitCode != null && this.options.userClosed) {
+        if (this.exitCode != undefined && this.options.userClosed) {
             this.closeEmitter.fire(0);
+            this.options.onTerminalClose?.(this.exitCode, this.output);
         } else {
             this.process?.stdin?.write(data);
             this.process?.stdin?.end();
@@ -89,12 +94,14 @@ export class GeodeTerminal implements Pseudoterminal {
     }
 
     private handleClose(code?: number) {
-        this.options.onProcessClose?.(code ?? 0, this.output);
+        this.exitCode = code ?? 0;
+        this.options.onProcessClose?.(this.exitCode, this.output);
 
         if (this.options.userClosed) {
             this.messageEmitter.fire((this.output.endsWith("\n") ? "" : "\r\n") + "\x1b[47m * \x1b[0m Press any key to close the terminal...\r\n");
         } else {
             this.closeEmitter.fire(0);
+            this.options.onTerminalClose?.(this.exitCode, this.output);
         }
     }
 }

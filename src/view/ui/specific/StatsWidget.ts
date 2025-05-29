@@ -1,4 +1,6 @@
 import { Config, GeodeCLI } from "../../../project/GeodeCLI";
+import { Future } from "../../../utils/monads";
+import { LoadingCircle } from "../../widgets/Basic";
 import { Button } from "../../widgets/Button";
 import { Row } from "../../widgets/Container";
 import { Head } from "../../widgets/Text";
@@ -23,16 +25,18 @@ export class StatsWidget extends ClientWidget {
             new Row().addChild(
                 this.buildTypeButton = new Button({
                     title: "",
-                    startIcon: "question",
-                    onClick: () => cli.toggleNightly()
+                    start: "question",
+                    onClick: (button) => this.clickButton(button, () => cli.updateSDK(!cli.getConfig().sdkNightly))
                 }),
                 new Button({
                     title: "Update SDK",
-                    startIcon: "cloud-download"
+                    start: "cloud-download",
+                    onClick: (button) => this.clickButton(button, () => cli.updateSDK(cli.getConfig().sdkNightly))
                 }),
                 new Button({
                     title: "Install Binaries",
-                    startIcon: "cloud-download"
+                    start: "cloud-download",
+                    onClick: (button) => this.clickButton(button, () => cli.installBinaries())
                 })
             )
         );
@@ -64,10 +68,23 @@ export class StatsWidget extends ClientWidget {
     private updateBuildType(): void {
         if (GeodeCLI.get()?.getConfig().sdkNightly) {
             this.buildTypeButton.setTitle("Install Stable");
-            this.buildTypeButton.setStartIcon("beaker-stop");
+            this.buildTypeButton.setStart("beaker-stop");
         } else {
             this.buildTypeButton.setTitle("Install Nightly");
-            this.buildTypeButton.setStartIcon("beaker");
+            this.buildTypeButton.setStart("beaker");
         }
+    }
+
+    private clickButton(button: Button, callback: () => Future): void {
+        button.setEnd(new LoadingCircle({
+            color: "var(--button-primary-foreground)",
+            style: {
+                width: "1rem",
+                height: "1rem",
+                "margin-left": "0.5rem"
+            }
+        }));
+
+        callback().finally(() => button.removeEnd());
     }
 }

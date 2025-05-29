@@ -46,6 +46,8 @@ export interface UpdateInfoForType {
     };
     [UpdateType.REMOVED_CHILD]: {
         id: string
+    } | {
+        forPart: string
     };
     [UpdateType.SET_TEXT]: {
         text: string
@@ -191,12 +193,14 @@ export abstract class Widget {
         const attribute = this.getAttribute("class");
 
         if (attribute) {
-            this.setAttribute("class", `${attribute} ${className}`);
+            return this.setAttribute("class", `${attribute} ${className}`);
         } else {
-            this.setAttribute("class", className);
+            return this.setAttribute("class", className);
         }
+    }
 
-        return this;
+    public clearClasses(): this {
+        return this.removeAttribute("class");
     }
 
     public getHoverText(): Option<string> {
@@ -379,10 +383,10 @@ export abstract class Widget {
     }
 
     public dispose(): this {
-        this.propegateAction((widget) => widget.onHide?.(), true);
+        this.onHide?.();
         this.cleanupOwnedFiles().cleanupDisposables().cleanupObservers();
         this.handlerBackup.forEach((_, id) => this.provider?.unregisterHandler(id));
-        this.propegateAction((widget) => widget.dispose());
+        this.children.forEach((widget) => widget.dispose());
 
         this.postQueue = [];
         this.provider = undefined;
@@ -396,8 +400,8 @@ export abstract class Widget {
 
     protected init(provider: ViewProvider): string {
         this.preInit?.();
-        this.propegateAction((widget) => widget.onShow?.(), true);
-        this.propegateAction((widget) => widget.init(provider));
+        this.onShow?.();
+        this.children.forEach((child) => child.init(provider));
 
         this.provider = provider;
         this.postQueue.forEach(({ cmd, args }) => this.post(cmd, args));
@@ -560,18 +564,14 @@ export abstract class Widget {
         return this;
     }
 
-    protected propegateAction(action: (widget: Widget) => any, self: boolean = false): this {
-        if (self) {
-            action(this);
+    protected propegateAction(action: (widget: Widget) => any): this {
+        action(this);
 
-            this.children.forEach((child) => child.propegateAction(action, self));
-        } else {
-            this.children.forEach((child) => {
-                action(child);
+        this.children.forEach((child) => {
+            action(child);
 
-                child.propegateAction(action);
-            });
-        }
+            child.propegateAction(action);
+        });
 
         return this;
     }

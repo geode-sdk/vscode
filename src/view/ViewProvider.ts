@@ -9,7 +9,7 @@ export interface Message {
 	args: any;
 }
 
-export type Handler<T> = (args: T) => any;
+export type Handler<T> = (...args: T extends Array<any> ? T : [T]) => any;
 
 export class ViewProvider extends Widget implements WebviewViewProvider {
 
@@ -135,11 +135,11 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
                             updateNode(newNode);
                         } break;
                         case "removed-child": {
-                            const target = getWidget(args.id, node);
-
-                            if (target) {
-                                target.parentNode.removeChild(target);
+                            if ("id" in args) {
+                                node = getWidget(args.id, node);
                             }
+
+                            node?.parentNode.removeChild(node);
                         } break;
                         case "set-text": {
                             if (node.firstChild instanceof Text) {
@@ -378,9 +378,9 @@ export class ViewProvider extends Widget implements WebviewViewProvider {
         webviewView.onDidDispose(this.dispose, this);
         webviewView.onDidChangeVisibility(() => {
             if (webviewView.visible) {
-                this.propegateAction((widget) => widget.onShow?.(), true);
+                this.propegateAction((widget) => widget.onShow?.());
             } else {
-                this.propegateAction((widget) => widget.onHide?.(), true);
+                this.propegateAction((widget) => widget.onHide?.());
             }
         });
         webviewView.webview.onDidReceiveMessage((message: Message) => {

@@ -16,7 +16,7 @@ export interface EventHandlerObject {
     value: string;
 }
 
-export type EventHandler = Handler<EventHandlerObject>;
+export type EventHandler<T extends EventWidget> = Handler<[EventHandlerObject, T]>;
 
 export type PartialEventWidgetProperties = MergeProperties<{
     disabled?: boolean
@@ -36,11 +36,11 @@ export abstract class EventWidget extends Widget {
 
     protected readonly eventName: string;
 
-    protected readonly onEvent?: EventHandler;
+    protected readonly onEvent?: EventHandler<EventWidget>;
 
     constructor(properties: MergeProperties<{
         eventName: string,
-        onEvent?: EventHandler
+        onEvent?: EventHandler<EventWidget>
     }, PartialEventWidgetProperties>) {
         super(properties);
 
@@ -48,7 +48,7 @@ export abstract class EventWidget extends Widget {
         this.onEvent = properties.onEvent;
 
         this.addRegistrationID(this.eventName);
-        this.registerHandler<EventHandlerObject>(`${this.eventName}-{id}`, (args) => properties.onEvent?.(args));
+        this.registerHandler<EventHandlerObject>(`${this.eventName}-{id}`, (args) => properties.onEvent?.(args, this));
         this.setDisabled(properties.disabled ?? false);
     }
 
@@ -156,13 +156,13 @@ export class Input extends EventWidget {
         placeholder?: string,
         size?: number,
         value?: string,
-        onChange?: EventHandler
+        onChange?: EventHandler<Input>
     }, PartialEventWidgetProperties>) {
         super(Widget.mergeProperties({
             eventName: Input.EVENT_NAME,
             onEvent: (args) => {
                 this.setAttribute("value", args.value);
-                properties?.onChange?.(args);
+                properties?.onChange?.(args, this);
             }
         }, properties));
 

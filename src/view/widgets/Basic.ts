@@ -1,3 +1,4 @@
+import { Resources } from "../Package";
 import { MergeProperties, UpdateType, Widget, WidgetProperties } from "../Widget";
 
 export type ElementProperties = MergeProperties<{
@@ -56,10 +57,29 @@ export class Image extends Element {
 
 export class LoadingCircle extends Element {
 
-    constructor(properties?: WidgetProperties) {
+    public static readonly RESOURCES = Resources.fromJS(`
+        onRegister("loading-circle", (widget) => {
+            const color = widget.getAttribute("color");
+            const indicator = widget.shadowRoot?.querySelector(".indeterminate-indicator-1");
+
+            if (indicator && color) {
+                indicator.style.stroke = color;
+            }
+        });
+    `);
+
+    constructor(properties?: MergeProperties<{
+        color?: string
+    }>) {
         super(Widget.mergeProperties({
             tag: "vscode-progress-ring"
         }, properties));
+
+        this.addRegistrationID("loading-circle");
+
+        if (properties?.color) {
+            this.setAttribute("color", properties.color);
+        }
     }
 }
 

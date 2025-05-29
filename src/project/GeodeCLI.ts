@@ -60,7 +60,7 @@ export class GeodeCLI {
 
         const path = GeodeCLI.getCliPath();
         const reportedVersion = await new Promise<Result<string>>(
-            (resolve) => exec(`"${path}" --version`, (error, stdout) => error ? resolve(Err(error.message)) : resolve(Ok(stdout.trim())))
+            (resolve) => exec(`"${path}" --version`, (error, stdout) => resolve(error ? Err(error.message) : Ok(stdout.trim())))
         );
 
         if (reportedVersion.isError()) {
@@ -233,7 +233,7 @@ export class GeodeCLI {
 
             this.updateConfig();
 
-            return result.isValue() ? Ok(foundProfile) : Err(result.unwrapErr());
+            return result.replace(foundProfile);
         } else {
             return Err(`Profile '${profile}' not found!`);
         }
@@ -247,24 +247,30 @@ export class GeodeCLI {
 
             this.updateConfig();
 
-            return result.isValue() ? Ok(foundProfile) : Err(result.unwrapErr());
+            return result.replace(foundProfile);
         } else {
             return Err(`Profile '${profile}' not found!`);
         }
     }
 
     public getSDKVersion(): Result<string> {
-        const result = this.runSync("sdk version");
-
-        return result.isValue() ? Ok(result.unwrap().split(":")[1].trim()) : Err(result.unwrapErr());
+        return this.runSync("sdk version").map((version) => version.split(":")[1].trim());
     }
 
-    public async toggleNightly(): Future<boolean> {
-        const result = await this.runTerminal([ "sdk", "update", this.config.sdkNightly ? "stable" : "nightly" ]);
+    public async updateSDK(nightly?: boolean): Future {
+        const result = await this.runTerminal(`sdk update ${nightly ? "nightly" : "stable"}`);
 
         this.updateConfig();
 
-        return result.isValue() ? Ok(this.config.sdkNightly!) : Err(result.unwrapErr());
+        return result.replace(undefined);
+    }
+
+    public async installBinaries(): Future {
+        const result = await this.runTerminal("sdk install-binaries");
+
+        this.updateConfig();
+
+        return result.replace(undefined);
     }
 
     public async launchProfile(profile: string = this.config.currentProfile): Future {
@@ -292,7 +298,8 @@ export class GeodeCLI {
                     dark: Uri.file(getAsset("blockman-dark.svg")),
                     light: Uri.file(getAsset("blockman-light.svg"))
                 },
-                onProcessClose: () => this.destroyTerminal()
+                onProcessClose: () => this.terminalEvents.forEach((event) => event(undefined)),
+                onTerminalClose: () => this.gdTerminal = undefined
             });
 
             this.gdTerminal.show();
@@ -343,20 +350,14 @@ export class GeodeCLI {
         }
     }
 
-    public runTerminal(cmd: string[], events?: Pick<PtyTerminalOptions, "onWriteOut" | "onWriteErr">): Future<string> {
+    public runTerminal(cmd: string[] | string, events?: Pick<PtyTerminalOptions, "onWriteOut" | "onWriteErr">): Future<string> {
         getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
 
         return new Promise((resolve) => GeodeTerminal.open({
             ...events,
             cmd,
             path: this.installedPath,
-            onProcessClose: (code, output) => {
-                if (code) {
-                    resolve(Err(`Geode CLI exited with code ${code}: ${output}`));
-                } else {
-                    resolve(Ok(output));
-                }
-            }
+            onProcessClose: (code, output) => resolve(code ? Err(`Geode CLI exited with code ${code}: ${output}`) : Ok(output))
         }).show());
     }
 

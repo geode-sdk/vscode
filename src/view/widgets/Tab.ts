@@ -127,12 +127,12 @@ export class Tabs extends EventWidget {
 
     protected history: string[];
 
-    protected onChange?: EventHandler;
+    protected onChange?: EventHandler<Tabs>;
 
     constructor(properties: MergeProperties<{
         tabs: GetWidgetProperties<typeof Tab>[],
         selected?: string,
-        onChange?: EventHandler
+        onChange?: EventHandler<Tabs>
     }, PartialEventWidgetProperties>) {
         super(Widget.mergeProperties({
             eventName: Tabs.EVENT_NAME,
@@ -214,7 +214,7 @@ export class Tabs extends EventWidget {
         });
 
         if (provider) {
-            this.onChange?.({ value: id });
+            this.onChange?.({ value: id }, this);
         }
 
         return this;
