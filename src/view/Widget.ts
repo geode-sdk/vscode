@@ -19,7 +19,7 @@ export interface WidgetProperties {
 
 export type GetWidgetProperties<T extends abstract new(properties: any) => Widget> = NonNullable<ConstructorParameters<T>[0]>;
 
-export type MergeProperties<T1, T2 extends WidgetProperties | undefined = WidgetProperties> = T1 & T2;
+export type MergeProperties<T1, T2 extends WidgetProperties | undefined = WidgetProperties> = Omit<T2, keyof T1> & T1;
 
 export type PropertyString<T extends string> = BlacklistChars<T, " \t\n">;
 
@@ -62,7 +62,6 @@ export abstract class Widget {
 
     public static mergeProperties<T1, T2 extends WidgetProperties | undefined>(object: T1, properties: T2): MergeProperties<T1, T2> {
         return { ...object, ...properties };
-
     }
 
     private readonly widgetID: string;
@@ -104,26 +103,14 @@ export abstract class Widget {
         this.postQueue = [];
         this.handlerBackup = new Map();
 
-        this.setAttribute("widget-id", this.widgetID);
+        this.setAttribute("widget-id", this.widgetID)
+            .setAttribute("id", properties?.id)
+            .setAttribute("class", properties?.className)
+            .setAttribute("title", properties?.hoverText)
+            .setAttribute("aria-label", properties?.ariaLabel ?? properties?.hoverText);
 
         if (properties?.children) {
             this.addChild(...properties.children);
-        }
-
-        if (properties?.id) {
-            this.setAttribute("id", properties.id);
-        }
-
-        if (properties?.className) {
-            this.setAttribute("class", properties.className);
-        }
-
-        if (properties?.hoverText) {
-			this.setAttribute("title", properties.hoverText).setAttribute("aria-label", properties.hoverText);
-		}
-
-        if (properties?.ariaLabel) {
-            this.setAttribute("aria-label", properties.ariaLabel);
         }
     }
 
@@ -142,7 +129,7 @@ export abstract class Widget {
     }
 
     public setAttribute<T1 extends string, T2 extends { toString: () => string }>(name: PropertyString<T1>, value?: T2): this {
-        if (typeof value != "undefined") {
+        if (value != undefined) {
             const stringValue = value.toString();
             this.attributes.set(name, stringValue);
 
@@ -197,6 +184,10 @@ export abstract class Widget {
         } else {
             return this.setAttribute("class", className);
         }
+    }
+
+    public removeClass<T extends string>(className: PropertyString<T>): this {
+        return this.setAttribute("class", this.getClasses()?.filter((part) => part != className).join(" "));
     }
 
     public clearClasses(): this {

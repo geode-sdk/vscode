@@ -153,7 +153,7 @@ export class ResourceWidget extends Element {
 
         if (this.resource.isFavorite()) {
             this.favoriteButton = new IconButton({
-                icon: "star-delete",
+                content: "star-full",
                 hoverText: "Remove favorite",
                 style: {
                     "color": "yellow"
@@ -162,7 +162,7 @@ export class ResourceWidget extends Element {
             });
         } else {
             this.favoriteButton = new IconButton({
-                icon: "star-add",
+                content: "star-empty",
                 hoverText: "Add favorite",
                 onClick: () => this.toggleFavorite(true)
             });
@@ -216,7 +216,7 @@ export class ResourceWidget extends Element {
                 }
             }).addChild(
                 new IconButton({
-                    icon: "info",
+                    content: "info",
                     hoverText: "Show info about this item",
                     onClick: () => {
                         let path;
@@ -238,7 +238,7 @@ export class ResourceWidget extends Element {
                     }
                 }),
                 new IconButton({
-                    icon: "copy",
+                    content: "copy",
                     hoverText: "Copy item name",
                     onClick: async () => {
                         try {
@@ -288,7 +288,7 @@ export class ResourceWidget extends Element {
 
             if (this.resource.getSnippetOptions?.().length) {
                 bottomBtns.addChild(new IconButton({
-                    icon: "ellipsis",
+                    content: "ellipsis",
                     hoverText: "More snippet options",
                     onClick: () => this.onMoreUseOptions()
                 }));

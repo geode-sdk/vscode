@@ -3,6 +3,9 @@ import { MergeProperties, UpdateType, Widget } from "../Widget";
 import { Codicon } from "./types/Icon";
 import { EventWidget, PartialEventWidgetProperties } from "./Interactive";
 import { Element } from "./Basic";
+import { Resources } from "../Package";
+
+export type SlotType = Widget | Codicon;
 
 export type Appearence = "primary" | "secondary" | "icon";
 
@@ -12,10 +15,17 @@ export type BaseButtonProperties<T extends BaseButton> = MergeProperties<{
 }, PartialEventWidgetProperties>;
 
 export abstract class BaseButton extends EventWidget {
-                                   
+
     private static readonly EVENT_NAME = "button";
 
-    public static readonly RESOURCES = EventWidget.constructResources(BaseButton.EVENT_NAME, "click", "undefined");
+    public static readonly EVENT_RESOURCES = EventWidget.constructResources(BaseButton.EVENT_NAME, "click", "undefined");
+
+    public static readonly RESOURCES = Resources.fromCSS(`
+        vscode-button > * {
+            width: auto;
+            max-height: 1rem;
+        }
+    `);
 
     protected title?: string;
 
@@ -51,6 +61,14 @@ export abstract class BaseButton extends EventWidget {
         return this.setAttribute("appearance", appearance);
     }
 
+    public click(): this {
+        this.onEvent?.({
+            value: ""
+        }, this);
+
+        return this;
+    }
+
     public override build(): string {
         return /*html*/ `
             <vscode-button ${this.getFormattedAttributes()}>
@@ -59,22 +77,41 @@ export abstract class BaseButton extends EventWidget {
             </vscode-button>
         `;
     }
+
+    protected setSlot(slot: "start" | "end" | undefined, original: Option<Widget>, content: SlotType): Widget {
+        const widget = typeof content == "string" ? new Element({
+            tag: "span",
+            className: `codicon codicon-${content}`,
+            attributes: slot ? { slot } : {}
+        }) : content.setAttribute("slot", slot);
+
+        this.replaceChild(original, widget);
+
+        return widget;
+    }
 }
 
 export class Button extends BaseButton {
 
-    protected start?: Codicon | Widget;
+    public static readonly RESOURCES = Resources.fromCSS(`
+        .end-slot-button::part(end) {
+            margin-inline-start: 8px;
+            display: flex;
+        }
+    `);
+
+    protected start?: SlotType;
 
     protected startWidget?: Widget;
 
-    protected end?: Codicon | Widget;
+    protected end?: SlotType;
 
     protected endWidget?: Widget;
 
     constructor(properties: MergeProperties<{
         title: string,
-        start?: Codicon | Widget,
-        end?: Codicon | Widget,
+        start?: SlotType,
+        end?: SlotType,
         appearance?: Appearence
     }, BaseButtonProperties<Button>>) {
         super({
@@ -91,11 +128,11 @@ export class Button extends BaseButton {
         }
     }
 
-    public getStart(): Option<Codicon | Widget> {
+    public getStart(): Option<SlotType> {
         return this.start;
     }
 
-    public setStart(start: Codicon | Widget): this {
+    public setStart(start: SlotType): this {
         this.startWidget = this.setSlot("start", this.startWidget, this.start = start);
 
         return this;
@@ -115,18 +152,21 @@ export class Button extends BaseButton {
         return this.startWidget;
     }
 
-    public getEnd(): Option<Codicon | Widget> {
+    public getEnd(): Option<SlotType> {
         return this.end;
     }
 
-    public setEnd(end: Codicon | Widget): this {
+    public setEnd(end: SlotType): this {
         this.endWidget = this.setSlot("end", this.endWidget, this.end = end);
+
+        this.addClass("end-slot-button");
 
         return this;
     }
 
     public removeEnd(): this {
         if (this.endWidget) {
+            this.removeClass("end-slot-button");
             this.removeChild(this.endWidget);
             this.endWidget = undefined;
             this.end = undefined;
@@ -138,30 +178,16 @@ export class Button extends BaseButton {
     public getEndWidget(): Option<Widget> {
         return this.endWidget;
     }
-
-    protected setSlot(slot: "start" | "end", original: Option<Widget>, content: Codicon | Widget): Widget {
-        const widget = typeof content == "string" ? new Element({
-            tag: "span",
-            className: `codicon codicon-${content}`,
-            attributes: {
-                slot
-            }
-        }) : content.setAttribute("slot", slot);
-
-        this.replaceChild(original, widget);
-
-        return widget;
-    }
 }
 
 export class IconButton extends BaseButton {
 
-    protected readonly iconElement: Element;
+    protected contentWidget?: Widget;
 
-    protected icon: Codicon;
+    protected content: SlotType;
 
     constructor(properties: MergeProperties<{
-        icon: Codicon
+        content: SlotType,
         appearance?: Appearence
     }, BaseButtonProperties<IconButton>>) {
         super({
@@ -169,25 +195,20 @@ export class IconButton extends BaseButton {
             appearance: properties.appearance ?? "icon"
         });
 
-        this.addChild(this.iconElement = new Element({
-            tag: "span"
-        }));
-        this.setIcon(this.icon = properties.icon);
+        this.setContent(this.content = properties.content);
     }
 
-    public getIcon(): Codicon {
-        return this.icon;
+    public getContent(): SlotType {
+        return this.content;
     }
 
-    public setIcon(icon: Codicon): this {
-        this.iconElement.clearClasses();
-        this.iconElement.addClass("codicon");
-        this.iconElement.addClass(`codicon-${this.icon = icon}`);
+    public setContent(content: SlotType): this {
+        this.contentWidget = this.setSlot(undefined, this.contentWidget, this.content = content);
 
         return this;
     }
 
-    public getIconElement(): Element {
-        return this.iconElement;
+    public getContentWidget(): Option<Widget> {
+        return this.contentWidget;
     }
 }

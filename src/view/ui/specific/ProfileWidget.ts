@@ -43,15 +43,7 @@ export class ProfileWidget extends ClientWidget {
         super();
 
         this.addChild(
-            new Row().addChild(
-                new Head({ size: 3, text: "Profiles" }),
-                new IconButton({
-                    icon: "plus",
-                    hoverText: "Add",
-                    appearance: "primary",
-                    onClick: () => 0
-                })
-            ),
+            new Head({ size: 3, text: "Profiles" }),
             new Row().addChild(
                 new Column().addChild(
                     new Label({ for: "profiles", text: "Select a profile" }),
@@ -82,11 +74,11 @@ export class ProfileWidget extends ClientWidget {
                     }),
                     new Row().addChild(
                         this.profileDeleteButton = new IconButton({
-                            icon: "question",
+                            content: "question",
                             appearance: "secondary",
                             onClick: () => {
-                                if (this.profileDeleteButton.getIcon() == "trashcan") {
-                                    this.profileDeleteButton.setIcon("error");
+                                if (this.profileDeleteButton.getContent() == "trash") {
+                                    this.profileDeleteButton.setContent("error");
                                     this.profileDeleteButton.setHoverText("Confirm removal");
                                 } else {
                                     this.executeIfSelected((profile) => cli.removeProfile(profile));
@@ -95,11 +87,11 @@ export class ProfileWidget extends ClientWidget {
                             }
                         }),
                         this.profileLaunchButton = new IconButton({
-                            icon: "question",
+                            content: "question",
                             hoverText: "Launch",
                             appearance: "secondary",
                             onClick: () => {
-                                if (this.profileLaunchButton.getIcon() == "debug-stop") {
+                                if (this.profileLaunchButton.getContent() == "debug-stop") {
                                     cli.destroyTerminal();
                                 } else {
                                     this.executeIfSelected((profile) => cli.launchProfile(profile));
@@ -198,16 +190,16 @@ export class ProfileWidget extends ClientWidget {
 
     private updateLaunchButtonState(state: boolean): void {
         if (state) {
-            this.profileLaunchButton.setIcon("debug-stop");
+            this.profileLaunchButton.setContent("debug-stop");
             this.profileLaunchButton.setHoverText("Stop");
         } else {
-            this.profileLaunchButton.setIcon("debug-start");
+            this.profileLaunchButton.setContent("debug-start");
             this.profileLaunchButton.setHoverText("Launch");
         }
     }
 
     private resetProfileDeleteButton(): void {
-        this.profileDeleteButton.setIcon("trashcan");
+        this.profileDeleteButton.setContent("trash");
         this.profileDeleteButton.setHoverText("Remove");
     }
 }

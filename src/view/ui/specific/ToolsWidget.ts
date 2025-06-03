@@ -1,12 +1,10 @@
 import { Config, GeodeCLI } from "../../../project/GeodeCLI";
-import { Future } from "../../../utils/monads";
-import { LoadingCircle } from "../../widgets/Basic";
 import { Button } from "../../widgets/Button";
 import { Row } from "../../widgets/Container";
 import { Head } from "../../widgets/Text";
 import { ClientWidget } from "./ClientWidget";
 
-export class StatsWidget extends ClientWidget {
+export class ToolsWidget extends ClientWidget {
 
     private readonly title: Head;
 
@@ -73,18 +71,5 @@ export class StatsWidget extends ClientWidget {
             this.buildTypeButton.setTitle("Install Nightly");
             this.buildTypeButton.setStart("beaker");
         }
-    }
-
-    private clickButton(button: Button, callback: () => Future): void {
-        button.setEnd(new LoadingCircle({
-            color: "var(--button-primary-foreground)",
-            style: {
-                width: "1rem",
-                height: "1rem",
-                "margin-left": "0.5rem"
-            }
-        }));
-
-        callback().finally(() => button.removeEnd());
     }
 }

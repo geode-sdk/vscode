@@ -81,7 +81,7 @@ export class Tab extends CustomTextElement {
     }
 
     public addCloseButton(): this {
-        return this.addChild(this.closeButton = new IconButton({ icon: "close", onClick: () => {
+        return this.addChild(this.closeButton = new IconButton({ content: "close", onClick: () => {
             const parent = this.getParent();
 
             parent?.removeChild(this);

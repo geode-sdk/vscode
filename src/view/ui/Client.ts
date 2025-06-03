@@ -2,7 +2,8 @@ import { ViewProvider } from "../ViewProvider";
 import { Column } from "../widgets/Container";
 import { SizeUnit } from "../widgets/types/Size";
 import { ProfileWidget } from "./specific/ProfileWidget";
-import { StatsWidget } from "./specific/StatsWidget";
+import { ProjectWidget } from "./specific/ProjectWidget";
+import { ToolsWidget } from "./specific/ToolsWidget";
 
 export class Client extends ViewProvider {
 
@@ -11,12 +12,13 @@ export class Client extends ViewProvider {
 
         this.addChild(new Column({
             spacing: {
-                amount: 2,
+                amount: 1,
                 unit: SizeUnit.REM
             }
         }).addChild(
-            new StatsWidget(),
-            new ProfileWidget()
+            new ToolsWidget(),
+            new ProfileWidget(),
+            new ProjectWidget()
         ));
     }
 }
