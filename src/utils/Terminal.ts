@@ -59,6 +59,7 @@ export class GeodeTerminal implements Pseudoterminal {
         this.output = "";
         this.exitCode = undefined;
         this.process = spawn(this.options.path, typeof this.options.cmd == "string" ? this.options.cmd.split(" ") : this.options.cmd, {
+            cwd: this.options.cwd,
             env: {
                 ...process.env,
                 // Child process spawns a terminal which doesn't provide colors by default, so we force them
