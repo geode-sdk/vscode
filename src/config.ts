@@ -1,15 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
-import {
-	ColorThemeKind,
-	ExtensionContext,
-	OutputChannel,
-	window,
-	workspace,
-	WorkspaceConfiguration,
-} from "vscode";
-import { Err, Ok, Result } from "./utils/monads";
+import { ColorThemeKind, ExtensionContext, OutputChannel, window, workspace, WorkspaceConfiguration } from "vscode";
+import { Err, Ok, Option, Result } from "./utils/monads";
 import { ResourceDatabase, UserSaveData } from "./project/resources/ResourceDatabase";
+import { ProjectDatabase } from "./project/Project";
 
 let EXTENSION: ExtensionContext;
 let CHANNEL: OutputChannel;
@@ -83,4 +77,8 @@ export function getAsset(name?: string): string {
 	} else {
 		return "";
 	}
+}
+
+export function getWorkspaceDir(): Option<string> {
+    return ProjectDatabase.get().getActive()?.getPath();
 }
