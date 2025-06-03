@@ -328,37 +328,37 @@ export class GeodeCLI {
         return this.gdTerminal != undefined;
     }
 
-    public run(cmd: string): Future<string> {
-        getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
-
-        return new Promise((resolve) => {
-            try {
-                resolve(Ok(execSync(`"${this.installedPath}" ${cmd}`, { encoding: "utf8" })));
-            } catch (error) {
-                resolve(Err((error as Error).message));
-            }
-        });
+    public run(cmd: string, cwd?: string): Future<string> {
+        return new Promise((resolve) => resolve(this.runSync(cmd, cwd)));
     }
 
-    public runSync(cmd: string): Result<string> {
+    public runSync(cmd: string, cwd?: string): Result<string> {
         getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
 
         try {
-            return Ok(execSync(`"${this.installedPath}" ${cmd}`, { encoding: "utf8" }).trim());
+            return Ok(execSync(`"${this.installedPath}" ${cmd}`, {
+                encoding: "utf8",
+                cwd
+            }).trim());
         } catch (error) {
             return Err((error as Error).message);
         }
     }
 
-    public runTerminal(cmd: string[] | string, events?: Pick<PtyTerminalOptions, "onWriteOut" | "onWriteErr">): Future<string> {
+    public runTerminal(cmd: string[] | string, events?: Pick<PtyTerminalOptions, "onWriteOut" | "onWriteErr">, cwd?: string): Future<string> {
         getOutputChannel().appendLine(`Running command \`geode ${cmd}\``);
 
         return new Promise((resolve) => GeodeTerminal.open({
             ...events,
             cmd,
             path: this.installedPath,
+            cwd,
             onProcessClose: (code, output) => resolve(code ? Err(`Geode CLI exited with code ${code}: ${output}`) : Ok(output))
         }).show());
+    }
+
+    public getActiveCWD(): Option<string> {
+        return this.getCurrentProfile()?.getDirectory();
     }
 
     private updateConfig(): Result<Config> {

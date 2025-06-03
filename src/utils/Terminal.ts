@@ -6,6 +6,7 @@ export interface PtyTerminalOptions {
     name?: string;
     path: string;
     cmd?: string[] | string;
+    cwd?: string,
     // If true, the terminal has to be closed through user interaction
     userClosed?: boolean;
     icon?: ExtensionTerminalOptions["iconPath"];
