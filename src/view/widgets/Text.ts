@@ -1,6 +1,7 @@
 import { Resources } from "../Package";
 import { MergeProperties, UpdateType, Widget } from "../Widget";
 import { Element, ElementProperties } from "./Basic";
+import { Codicon } from "./types/Icon";
 
 export type CustomTextElementProperties = MergeProperties<{
     text: string
@@ -88,5 +89,95 @@ export class Label extends CustomTextElement {
 
         this.addClass("label");
         this.setAttribute("for", properties.for);
+    }
+}
+
+export class IconText extends Widget {
+
+    public static readonly RESOURCES = Resources.fromCSS(`
+        .icon-text > * {
+            display: inline-block;
+        }
+
+        .icon-text .codicon {
+            vertical-align: text-top;
+        }
+    `);
+
+    private readonly prefixWidget: Text;
+
+    private readonly suffixWidget: Text;
+
+    public readonly iconWidget: Element;
+
+    private icon: Codicon;
+
+    constructor(properties: MergeProperties<{
+        prefixText?: string,
+        suffixText?: string,
+        icon: Codicon
+    }>) {
+        super(properties);
+
+        this.prefixWidget = new Text({ text: properties.prefixText ?? "" });
+        this.suffixWidget = new Text({ text: properties.suffixText ?? "" });
+        this.iconWidget = new Element({
+            tag: "span",
+            className: "codicon"
+        });
+
+        this.addClass("icon-text")
+            .addChild(this.prefixWidget, this.iconWidget, this.suffixWidget)
+            .setIcon(this.icon = properties.icon);
+    }
+
+    public getPrefixText(): string {
+        return this.prefixWidget.getText();
+    }
+
+    public setPrefixText(text: string): this {
+        this.prefixWidget.setText(text);
+
+        return this;
+    }
+
+    public getPrefixWidget(): Text {
+        return this.prefixWidget;
+    }
+
+    public getSuffixText(): string {
+        return this.suffixWidget.getText();
+    }
+
+    public setSuffixText(text: string): this {
+        this.suffixWidget.setText(text);
+
+        return this;
+    }
+
+    public getSuffixWidget(): Text {
+        return this.suffixWidget;
+    }
+
+    public getIcon(): Codicon {
+        return this.icon;
+    }
+
+    public setIcon(icon: Codicon): this {
+        this.iconWidget.removeClass(`codicon-${this.icon}`).addClass(`codicon-${this.icon = icon}`);
+
+        return this;
+    }
+
+    public getIconWidget(): Element {
+        return this.iconWidget;
+    }
+
+    public override build(): string {
+        return /*html*/ `
+            <span ${this.getFormattedAttributes()}>
+                ${this.buildChildren()}
+            </span>
+        `;
     }
 }
