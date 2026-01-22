@@ -547,6 +547,7 @@ export type Tag =
 	"cheat" |
 	"paid" |
 	"joke" |
+	"api" |
 	"modtober24";
 
 /**
