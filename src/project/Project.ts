@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { basename, join } from "path";
 import { ExtensionContext, Uri, window, workspace } from "vscode";
 import { Future, None, Ok, Option } from "../utils/monads";
 import { getDependencies, ModJson } from "./ModJson";
@@ -176,7 +176,7 @@ export class ProjectDatabase {
 		// a filesystem check every call
 		context.subscriptions.push(
 			workspace.onDidSaveTextDocument(async e => {
-				if (e.fileName === "mod.json") {
+				if (basename(e.fileName) === "mod.json") {
 					try {
 						const project = this.getByID(JSON.parse(e.getText())["id"]);
 						if (project) {

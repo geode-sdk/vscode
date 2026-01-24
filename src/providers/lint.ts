@@ -187,6 +187,13 @@ function lintSettings(document: MaybeDocument, diagnostics: Diagnostic[]) {
             } else if (setting.type === "title") {
                 return "Titles can't be used as a setting value";
             } else if (!setting.type.startsWith("custom:") && !type.split("::").reverse().every((part, i) => part.trim() === types?.[i])) {
+                const last = type.split("::").at(-1) ?? "";
+                if (setting.type === "int" && ["int64_t", "int", "uint64_t", "unsigned", "unsigned int"].includes(last)) {
+                    return;
+                } else if (setting.type === "float" && ["float", "double"].includes(last)) {
+                    return;
+                }
+
                 return `Setting ${name} is of type ${setting.type}, not ${type}`;
             }
 
