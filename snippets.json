@@ -3,7 +3,7 @@
         "prefix": ["btn", "button"],
         "body": [
             "auto ${1:btn} = CCMenuItemSpriteExtra::create(",
-            "   ButtonSprite::create(\"${2:}\"), ${3:this}, ${4:nullptr}",
+            "   ButtonSprite::create(\"$1\"), ${3:this}, ${4:nullptr}",
             ");"
         ],
         "description": "Simple CCMenuItemSpriteExtra button."
@@ -11,14 +11,14 @@
     "Info Log": {
         "prefix": ["info"],
         "body": [
-            "log::info(\"${1:}\");"
+            "log::info(\"$1\");"
         ],
         "description": "Logs an info message."
     },
     "Debug Log": {
         "prefix": ["debug"],
         "body": [
-            "log::debug(\"${1:}\");"
+            "log::debug(\"$1\");"
         ],
         "description": "Logs a debug message."
     },
@@ -35,9 +35,9 @@
         "prefix": ["flalert", "flalertlayer"],
         "body": [
             "FLAlertLayer::create(",
-            "   \"${1:}\",",
-            "   \"${2:}\",",
-            "   \"${3:}\"",
+            "   \"$1\",",
+            "   \"$2\",",
+            "   \"$3\"",
             ")->show();"
         ],
         "description": "Creates and shows a basic FLAlertLayer popup."
@@ -46,11 +46,11 @@
         "prefix": ["createQuickPopup", "quickPopup"],
         "body": [
             "geode::createQuickPopup(",
-            "   \"${1:}\",",
-            "   \"${2:}\",",
-            "   \"${3:}\", ${4:},",
+            "   \"$1\",",
+            "   \"$2\",",
+            "   \"$3\", $4,",
             "   [](auto, bool btn2) {",
-            "       ${5:}",
+            "       $5",
             "   }",
             ");"
         ],
@@ -62,7 +62,7 @@
             "class ${1:MyPopup} : public geode::Popup<${2:std::string} const&> {",
             "protected:",
             "   bool setup(${2:std::string} const& value) override {",
-            "       this->setTitle(\"${3:}\");",
+            "       this->setTitle(\"$3\");",
             "       return true;",
             "   }",
             "public:",
@@ -83,7 +83,7 @@
     "Color": {
         "prefix": ["<c", "color"],
         "body": [
-            "<c${1:b}>${2:}</c>"
+            "<c${1:b}>$2</c>"
         ],
         "description": "Creates a color tag."
     },
@@ -100,8 +100,8 @@
     "Modify": {
         "prefix": ["modify"],
         "body": [
-            "class $modify(${1:MyMenuLayer}, ${2:MenuLayer}) {",
-            "   ${3:}",
+            "class \\$modify(${1:MyMenuLayer}, ${2:MenuLayer}) {",
+            "   $3",
             "};"
         ],
         "description": "Creates a modify macro."
@@ -111,11 +111,11 @@
         "body": [
             "${1:m_listener}.bind([] (web::WebTask::Event* e) {",
             "   if (web::WebResponse* value = e->getValue()) {",
-            "       ${2:}",
+            "       $2",
             "   } else if (web::WebProgress* progress = e->getProgress()) {",
-            "       ${3:}",
+            "       $3",
             "   } else if (e->isCancelled()) {",
-            "       ${4:}",
+            "       $4",
             "   }",
             "});"
         ],
