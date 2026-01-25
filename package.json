@@ -13,6 +13,7 @@
   },
   "publisher": "GeodeSDK",
   "categories": [
+    "Snippets",
     "Other"
   ],
   "repository": {
@@ -308,6 +309,12 @@
       {
         "fileMatch": "mod.json",
         "url": "./dist/validation/mod.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "cpp",
+        "path": "./snippets.json"
       }
     ]
   },

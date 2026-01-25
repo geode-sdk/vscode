@@ -1,0 +1,131 @@
+{
+    "Button": {
+        "prefix": ["btn", "button"],
+        "body": [
+            "auto ${1:btn} = CCMenuItemSpriteExtra::create(",
+            "   ButtonSprite::create(\"${2:}\"), ${3:this}, ${4:nullptr}",
+            ");"
+        ],
+        "description": "Simple CCMenuItemSpriteExtra button."
+    },
+    "Info Log": {
+        "prefix": ["info"],
+        "body": [
+            "log::info(\"${1:}\");"
+        ],
+        "description": "Logs an info message."
+    },
+    "Debug Log": {
+        "prefix": ["debug"],
+        "body": [
+            "log::debug(\"${1:}\");"
+        ],
+        "description": "Logs a debug message."
+    },
+    "Coroutine": {
+        "prefix": ["coro", "coroutine"],
+        "body": [
+            "coro::Generator<${1:void}> ${2:coroutine}() {",
+            "   ",
+            "}"
+        ],
+        "description": "Creates a coroutine."
+    },
+    "FL Alert": {
+        "prefix": ["flalert", "flalertlayer"],
+        "body": [
+            "FLAlertLayer::create(",
+            "   \"${1:}\",",
+            "   \"${2:}\",",
+            "   \"${3:}\"",
+            ")->show();"
+        ],
+        "description": "Creates and shows a basic FLAlertLayer popup."
+    },
+    "Quick popup": {
+        "prefix": ["createQuickPopup", "quickPopup"],
+        "body": [
+            "geode::createQuickPopup(",
+            "   \"${1:}\",",
+            "   \"${2:}\",",
+            "   \"${3:}\", ${4:},",
+            "   [](auto, bool btn2) {",
+            "       ${5:}",
+            "   }",
+            ");"
+        ],
+        "description": "Creates a Geode quick popup."
+    },
+    "Complex popup": {
+        "prefix": ["popup"],
+        "body": [
+            "class ${1:MyPopup} : public geode::Popup<${2:std::string} const&> {",
+            "protected:",
+            "   bool setup(${2:std::string} const& value) override {",
+            "       this->setTitle(\"${3:}\");",
+            "       return true;",
+            "   }",
+            "public:",
+            "   static ${1:MyPopup}* create(${2:std::string} const& text) {",
+            "       auto ret = new ${1:MyPopup}();",
+            "       if (ret->initAnchored(240.f, 160.f, text)) {",
+            "           ret->autorelease();",
+            "           return ret",
+            "       }",
+            "       ",
+            "       delete ret;",
+            "       return nullptr;",
+            "   }",
+            "}"
+        ],
+        "description": "Creates a complex popup class."
+    },
+    "Color": {
+        "prefix": ["<c", "color"],
+        "body": [
+            "<c${1:b}>${2:}</c>"
+        ],
+        "description": "Creates a color tag."
+    },
+    "Event": {
+        "prefix": ["event"],
+        "body": [
+            "class ${1:MyEvent} : public Event {",
+            "public:",
+            "   ${1:MyEvent}();",
+            "}"
+        ],
+        "description": "Creates a basic event class."
+    },
+    "Modify": {
+        "prefix": ["modify"],
+        "body": [
+            "class $modify(${1:MyMenuLayer}, ${2:MenuLayer}) {",
+            "   ${3:}",
+            "};"
+        ],
+        "description": "Creates a modify macro."
+    },
+    "Web Response": {
+        "prefix": ["bind"],
+        "body": [
+            "${1:m_listener}.bind([] (web::WebTask::Event* e) {",
+            "   if (web::WebResponse* value = e->getValue()) {",
+            "       ${2:}",
+            "   } else if (web::WebProgress* progress = e->getProgress()) {",
+            "       ${3:}",
+            "   } else if (e->isCancelled()) {",
+            "       ${4:}",
+            "   }",
+            "});"
+        ],
+        "description": "Creates a basic web response for an event listener."
+    },
+    "Get Window Size": {
+        "prefix": ["winSize", "getWinSize"],
+        "body": [
+            "auto ${1:screenSize} = CCDirector::sharedDirector()->getWinSize();"
+        ],
+        "description": "Creates a variable that gets the current window size."
+    }
+}
