@@ -749,10 +749,10 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 					document.positionAt(prop.offset + prop.length)
 				).intersection(range) !== undefined
 			) {
-				const isTab = document.getText(new Range(
+				const tabs = document.getText(new Range(
 					document.positionAt(prop.offset - indentation),
 					document.positionAt(prop.offset)
-				)) === "\t";
+				)) === "\t" ? "\t" : " ".repeat(indentation);
 				const action = new CodeAction(`Convert to new \`${key}\` syntax`, CodeActionKind.QuickFix);
 				action.isPreferred = true;
 				action.edit = new WorkspaceEdit();
@@ -765,7 +765,7 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 					JSON.stringify((getNodeValue(propValue) as L[]).reduce((result, dep) => {
 						mapper(result, dep);
 						return result;
-					}, {} as N), undefined, indentation).replace(/\n/g, `\n${isTab ? "\t" : " ".repeat(indentation)}`)
+					}, {} as N), undefined, tabs).replace(/\n/g, `\n${tabs}`)
 				);
 				actions.push(action);
 			}
