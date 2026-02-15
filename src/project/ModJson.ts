@@ -357,6 +357,10 @@ export interface ColorAlphaSetting extends ValueSetting {
 	type: "rgba",
 	default: SettingDefaultValue<ColorRGBA>,
 }
+export interface KeybindSetting extends ValueSetting {
+	type: "keybind",
+	default: SettingDefaultValue<string | string[]>,
+}
 /**
  * @additionalProperties true
  */
@@ -390,6 +394,7 @@ export type Setting =
 	| FolderSetting
 	| ColorSetting
 	| ColorAlphaSetting
+	| KeybindSetting
 	| LegacyCustomSetting
 	| CustomTypeSetting;
 
