@@ -1,5 +1,12 @@
 # Geode for VS Code Changelog
 
+## [1.22.0]
+ - Add linter for `numFromString`
+ - Add API and modtober tag
+ - Allow float and int in `getSettingValue`
+ - New dependency and importance format
+ - Support for new keybind setting type
+
 ## [1.21.2]
  - Upgraded the VSCode engine to 1.85.0
  - Added a reload button to the docs browser
