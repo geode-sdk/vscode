@@ -357,6 +357,10 @@ export interface ColorAlphaSetting extends ValueSetting {
 	type: "rgba",
 	default: SettingDefaultValue<ColorRGBA>,
 }
+export interface KeybindSetting extends ValueSetting {
+	type: "keybind",
+	default: SettingDefaultValue<string | string[]>,
+}
 /**
  * @additionalProperties true
  */
@@ -390,6 +394,7 @@ export type Setting =
 	| FolderSetting
 	| ColorSetting
 	| ColorAlphaSetting
+	| KeybindSetting
 	| LegacyCustomSetting
 	| CustomTypeSetting;
 
@@ -401,10 +406,9 @@ export interface Dependency {
 	 */
 	version: Version,
 	/**
-	 * Whether this dependency is required for the mod to work, or only 
-	 * recommended for users
+	 * Whether this dependency is required for the mod to work
 	 */
-	importance: "required" | "recommended" | "suggested",
+	required?: boolean,
 	/**
 	 * If this dependency should only be on certain platforms, specify this 
 	 * property; by default, Geode assumes dependencies are used on all 
@@ -456,23 +460,9 @@ export interface Incompatibility {
 	 */
 	version: Version,
 	/**
-	 * How kind of an incompatibility this is
+	 * Whether the mod does not work with the incompatible mod
 	 */
-	importance:
-		/**
-		 * This mod does not work with the incompatible mod
-		 */
-		"breaking" |
-		/**
-		 * This mod might work with the incompatible mod, but there will be bugs
-		 */
-		"conflicting" | 
-		/**
-		 * This mod is a newer version/alternative for the incompatible mod. 
-		 * Geode will present this to the user and allow them to automatically 
-		 * migrate from the old mod to this one
-		 */
-		"superseded",
+	breaking?: boolean,
 	/**
 	 * If this incompatibility should only be on certain platforms, specify 
 	 * this property; by default, Geode assumes incompatibilities are used on 
@@ -480,7 +470,7 @@ export interface Incompatibility {
 	 */
 	platforms?: ShortPlatformIDOrGeneric[],
 }
-export type Incompatibilities = { [id: string]: Incompatibility };
+export type Incompatibilities = { [id: string]: Version | Incompatibility };
 
 export interface LegacyIncompatibility {
 	/**
@@ -548,6 +538,7 @@ export type Tag =
 	"paid" |
 	"joke" |
 	"modtober24" |
+	"modtober25" |
 	"api";
 
 /**
@@ -692,7 +683,7 @@ export function getDependencies(json: ModJson): Dependencies {
 		const res: Dependencies = {};
 		for (const dep of json.dependencies) {
 			res[dep.id] = {
-				importance: dep.importance,
+				required: dep.importance === "required",
 				version: dep.version,
 				platforms: dep.platforms,
 			};
@@ -763,6 +754,10 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 					document.positionAt(prop.offset + prop.length)
 				).intersection(range) !== undefined
 			) {
+				const tabs = document.getText(new Range(
+					document.positionAt(prop.offset - indentation),
+					document.positionAt(prop.offset)
+				)) === "\t" ? "\t" : " ".repeat(indentation);
 				const action = new CodeAction(`Convert to new \`${key}\` syntax`, CodeActionKind.QuickFix);
 				action.isPreferred = true;
 				action.edit = new WorkspaceEdit();
@@ -775,7 +770,7 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 					JSON.stringify((getNodeValue(propValue) as L[]).reduce((result, dep) => {
 						mapper(result, dep);
 						return result;
-					}, {} as N), undefined, indentation).replace(/\n/g, `\n${" ".repeat(indentation)}`)
+					}, {} as N), undefined, tabs).replace(/\n/g, `\n${tabs}`)
 				);
 				actions.push(action);
 			}
@@ -789,18 +784,25 @@ export class ModJsonSuggestionsProvider implements CodeActionProvider {
 			// Longhand
 			else {
 				result[dep.id] = {
-					importance: dep.importance,
+					required: dep.importance === "required",
 					version: dep.version,
 					platforms: dep.platforms,
 				};
 			}
 		});
 		addCorrector<LegacyIncompatibilities, Incompatibilities>("incompatibilities", (result, inc) => {
-			result[inc.id] = {
-				importance: inc.importance,
-				version: inc.version,
-				platforms: inc.platforms,
-			};
+			// Shorthand
+			if (inc.importance === "breaking" && inc.platforms === undefined) {
+				result[inc.id] = inc.version;
+			}
+			// Longhand
+			else {
+				result[inc.id] = {
+					breaking: inc.importance === "breaking",
+					version: inc.version,
+					platforms: inc.platforms,
+				};
+			}
 		});
 
 		return actions;
