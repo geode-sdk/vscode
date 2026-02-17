@@ -359,6 +359,14 @@ export interface ColorAlphaSetting extends ValueSetting {
 }
 export interface KeybindSetting extends ValueSetting {
 	type: "keybind",
+	/**
+	 * The category of the keybind, which controls where it appears in the keybind editor.
+	 */
+	category?: "universal" | "gameplay" | "editor",
+	/**
+	 * The original Custom Keybinds ID this keybind is migrating from.
+	 */
+	"migrate-from"?: string,
 	default: SettingDefaultValue<string | string[]>,
 }
 /**
