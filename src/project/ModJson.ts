@@ -367,6 +367,10 @@ export interface KeybindSetting extends ValueSetting {
 	 * The original Custom Keybinds ID this keybind is migrating from.
 	 */
 	"migrate-from"?: string,
+	/**
+	 * The priority of this keybind compared to other keybinds with the same input. Lower number means higher priority.
+	 */
+	priority?: number,
 	default: SettingDefaultValue<string | string[]>,
 }
 /**
