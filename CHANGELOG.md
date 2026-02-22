@@ -1,5 +1,8 @@
 # Geode for VS Code Changelog
 
+## [1.22.1]
+ - New fields in keybind setting
+
 ## [1.22.0]
  - Add linter for `numFromString`
  - Add API and modtober tag
