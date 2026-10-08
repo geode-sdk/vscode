@@ -546,6 +546,7 @@ export type Tag =
 	"customization" |
 	"content" |
 	"developer" |
+	"gdps" |
 	"cheat" |
 	"paid" |
 	"joke" |
