@@ -13,7 +13,7 @@ export interface CodegenClass {
 	functions: CodegenFunction[];
 }
 
-type CodegenBindingType = number | "link" | "inline" | null;
+type CodegenBindingType = number | "link" | "inline" | "rebind" | "missing" | null;
 
 export interface CodegenFunction {
 	name: string;
